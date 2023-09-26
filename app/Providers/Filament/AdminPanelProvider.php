@@ -28,6 +28,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandLogo(asset('img/logo.svg'))
+            ->favicon(asset('img/logo.svg'))
+            ->spa()
             ->colors([
                 'primary' => Color::Sky,
             ])
