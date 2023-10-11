@@ -5,11 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Models\Dealership;
-use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -17,8 +16,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DealershipResource extends Resource
 {
@@ -30,168 +27,116 @@ class DealershipResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make(3)
-                    ->schema([
-                        TextInput::make('name')
-                            ->columnSpan(2)
-                            ->autofocus()
-                            ->required(),
-                    ]),
-                Section::make('Address')
-                    ->schema([
-                        Grid::make(3)
+                Tabs::make('Label')
+                    ->tabs([
+                        Tabs\Tab::make('General')
                             ->schema([
-                                TextInput::make('address')
-                                    ->columnSpanFull(),
-                                TextInput::make('city')
-                                    ->columns(1),
-                                Select::make('state')
-                                    ->options([
-                                        'AL' => 'Alabama',
-                                        'AK' => 'Alaska',
-                                        'AZ' => 'Arizona',
-                                        'AR' => 'Arkansas',
-                                        'CA' => 'California',
-                                        'CO' => 'Colorado',
-                                        'CT' => 'Connecticut',
-                                        'DE' => 'Delaware',
-                                        'DC' => 'District of Columbia',
-                                        'FL' => 'Florida',
-                                        'GA' => 'Georgia',
-                                        'HI' => 'Hawaii',
-                                        'ID' => 'Idaho',
-                                        'IL' => 'Illinois',
-                                        'IN' => 'Indiana',
-                                        'IA' => 'Iowa',
-                                        'KS' => 'Kansas',
-                                        'KY' => 'Kentucky',
-                                        'LA' => 'Louisiana',
-                                        'ME' => 'Maine',
-                                        'MD' => 'Maryland',
-                                        'MA' => 'Massachusetts',
-                                        'MI' => 'Michigan',
-                                        'MN' => 'Minnesota',
-                                        'MS' => 'Mississippi',
-                                        'MO' => 'Missouri',
-                                        'MT' => 'Montana',
-                                        'NE' => 'Nebraska',
-                                        'NV' => 'Nevada',
-                                        'NH' => 'New Hampshire',
-                                        'NJ' => 'New Jersey',
-                                        'NM' => 'New Mexico',
-                                        'NY' => 'New York',
-                                        'NC' => 'North Carolina',
-                                        'ND' => 'North Dakota',
-                                        'OH' => 'Ohio',
-                                        'OK' => 'Oklahoma',
-                                        'OR' => 'Oregon',
-                                        'PA' => 'Pennsylvania',
-                                        'RI' => 'Rhode Island',
-                                        'SC' => 'South Carolina',
-                                        'SD' => 'South Dakota',
-                                        'TN' => 'Tennessee',
-                                        'TX' => 'Texas',
-                                        'UT' => 'Utah',
-                                        'VT' => 'Vermont',
-                                        'VA' => 'Virginia',
-                                        'WA' => 'Washington',
-                                        'WV' => 'West Virginia',
-                                        'WI' => 'Wisconsin',
-                                        'WY' => 'Wyoming',
-                                    ]),
-                                TextInput::make('zip_code')
-                                    ->columns(1),
-                                TextInput::make('phone')
-                                    ->label('Phone Number')
-                                    ->mask('(999) 999-9999')
-                                    ->placeholder('(123) 456-7890')
-                                    ->columnSpanFull(),
+                                TextInput::make('name')
+                                ->columnSpanFull()
+                                ->autofocus()
+                                ->required(),
+                            Grid::make(3)
+                                ->schema([
+                                    TextInput::make('address')
+                                        ->columnSpanFull(),
+                                    TextInput::make('city')
+                                        ->columns(1),
+                                    Select::make('state')
+                                        ->options([
+                                            'AL' => 'Alabama',
+                                            'AK' => 'Alaska',
+                                            'AZ' => 'Arizona',
+                                            'AR' => 'Arkansas',
+                                            'CA' => 'California',
+                                            'CO' => 'Colorado',
+                                            'CT' => 'Connecticut',
+                                            'DE' => 'Delaware',
+                                            'DC' => 'District of Columbia',
+                                            'FL' => 'Florida',
+                                            'GA' => 'Georgia',
+                                            'HI' => 'Hawaii',
+                                            'ID' => 'Idaho',
+                                            'IL' => 'Illinois',
+                                            'IN' => 'Indiana',
+                                            'IA' => 'Iowa',
+                                            'KS' => 'Kansas',
+                                            'KY' => 'Kentucky',
+                                            'LA' => 'Louisiana',
+                                            'ME' => 'Maine',
+                                            'MD' => 'Maryland',
+                                            'MA' => 'Massachusetts',
+                                            'MI' => 'Michigan',
+                                            'MN' => 'Minnesota',
+                                            'MS' => 'Mississippi',
+                                            'MO' => 'Missouri',
+                                            'MT' => 'Montana',
+                                            'NE' => 'Nebraska',
+                                            'NV' => 'Nevada',
+                                            'NH' => 'New Hampshire',
+                                            'NJ' => 'New Jersey',
+                                            'NM' => 'New Mexico',
+                                            'NY' => 'New York',
+                                            'NC' => 'North Carolina',
+                                            'ND' => 'North Dakota',
+                                            'OH' => 'Ohio',
+                                            'OK' => 'Oklahoma',
+                                            'OR' => 'Oregon',
+                                            'PA' => 'Pennsylvania',
+                                            'RI' => 'Rhode Island',
+                                            'SC' => 'South Carolina',
+                                            'SD' => 'South Dakota',
+                                            'TN' => 'Tennessee',
+                                            'TX' => 'Texas',
+                                            'UT' => 'Utah',
+                                            'VT' => 'Vermont',
+                                            'VA' => 'Virginia',
+                                            'WA' => 'Washington',
+                                            'WV' => 'West Virginia',
+                                            'WI' => 'Wisconsin',
+                                            'WY' => 'Wyoming',
+                                        ]),
+                                    TextInput::make('zip_code')
+                                        ->columns(1),
+                                ]),
+                            Grid::make()
+                                ->schema([
+                                    TextInput::make('phone')
+                                        ->label('Phone Number')
+                                        ->mask('(999) 999-9999')
+                                        ->placeholder('(123) 456-7890')
+                                        ->columnSpanFull(),
+                                    TextInput::make('email')
+                                        ->label('Email Address')
+                                        ->email()
+                                        ->columnSpanFull(),
+                                ]),
+                            Select::make('status')
+                                ->options([
+                                    'active' => 'Active',
+                                    'inactive' => 'Inactive',
+                                    'pending' => 'Pending',
+                                ])
+                                ->required()
+                                ->columnSpanFull(),
                             ]),
-                    ])->columns(2),
-                Grid::make(3)
-                    ->schema([
-                       TextInput::make('corporate_name')
-                            ->label('Corporate Office Name'),
-                       TextInput::make('corporate_city')
-                            ->label('Corporate Office City'),
-                       Select::make('corporate_state')
-                            ->label('Corporate Office State')
-                            ->options([
-                                'AL' => 'Alabama',
-                                'AK' => 'Alaska',
-                                'AZ' => 'Arizona',
-                                'AR' => 'Arkansas',
-                                'CA' => 'California',
-                                'CO' => 'Colorado',
-                                'CT' => 'Connecticut',
-                                'DE' => 'Delaware',
-                                'DC' => 'District of Columbia',
-                                'FL' => 'Florida',
-                                'GA' => 'Georgia',
-                                'HI' => 'Hawaii',
-                                'ID' => 'Idaho',
-                                'IL' => 'Illinois',
-                                'IN' => 'Indiana',
-                                'IA' => 'Iowa',
-                                'KS' => 'Kansas',
-                                'KY' => 'Kentucky',
-                                'LA' => 'Louisiana',
-                                'ME' => 'Maine',
-                                'MD' => 'Maryland',
-                                'MA' => 'Massachusetts',
-                                'MI' => 'Michigan',
-                                'MN' => 'Minnesota',
-                                'MS' => 'Mississippi',
-                                'MO' => 'Missouri',
-                                'MT' => 'Montana',
-                                'NE' => 'Nebraska',
-                                'NV' => 'Nevada',
-                                'NH' => 'New Hampshire',
-                                'NJ' => 'New Jersey',
-                                'NM' => 'New Mexico',
-                                'NY' => 'New York',
-                                'NC' => 'North Carolina',
-                                'ND' => 'North Dakota',
-                                'OH' => 'Ohio',
-                                'OK' => 'Oklahoma',
-                                'OR' => 'Oregon',
-                                'PA' => 'Pennsylvania',
-                                'RI' => 'Rhode Island',
-                                'SC' => 'South Carolina',
-                                'SD' => 'South Dakota',
-                                'TN' => 'Tennessee',
-                                'TX' => 'Texas',
-                                'UT' => 'Utah',
-                                'VT' => 'Vermont',
-                                'VA' => 'Virginia',
-                                'WA' => 'Washington',
-                                'WV' => 'West Virginia',
-                                'WI' => 'Wisconsin',
-                                'WY' => 'Wyoming',
+                        Tabs\Tab::make('Current Solution')
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('current_solution_name')
+                                            ->label('Current Solution Name'),
+                                        TextInput::make('current_solution_use')
+                                            ->label('Current Solution Use'),
+                                    ])
                             ]),
-                    ]),
-                TextInput::make('number_of_stores')
-                    ->numeric()
-                    ->columnSpanFull(),
-                Select::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                        'pending' => 'Pending',
-                    ])
-                    ->required()
-                    ->columnSpanFull(),
-                Grid::make(2)
-                    ->schema([
-                        TextInput::make('current_solution_name')
-                            ->label('Current Solution Name'),
-                        TextInput::make('current_solution_use')
-                            ->label('Current Solution Use'),
-                    ]),
-                Textarea::make('notes')
-                    ->rows(10)
-                    ->autosize()
-                    ->columnSpanFull(),
+                        Tabs\Tab::make('Notes')
+                            ->schema([
+                                Textarea::make('notes')
+                                ->rows(10)
+                                ->autosize()
+                                ->columnSpanFull(),
+                            ]),
+                    ])->columnSpanFull()
             ]);
     }
 
@@ -288,7 +233,8 @@ class DealershipResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\StoresRelationManager::class,
+            RelationManagers\ContactsRelationManager::class,
         ];
     }
 
