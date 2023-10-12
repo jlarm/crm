@@ -20,6 +20,7 @@ class Dealership extends Model
         'current_solution_use',
         'notes',
         'status',
+        'rating',
     ];
 
     public function stores(): HasMany
@@ -30,5 +31,10 @@ class Dealership extends Model
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class);
+    }
+
+    public function progresses(): HasMany
+    {
+        return $this->hasMany(Progress::class);
     }
 }

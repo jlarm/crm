@@ -19,7 +19,8 @@ class PendingDealerships extends BaseWidget
                     ->where('status', 'pending')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('name')
+                    ->description(fn (Dealership $dealership): string => $dealership->progresses()->latest()->first()->details ?? ''),
                 Tables\Columns\TextColumn::make('phone'),
                 Tables\Columns\TextColumn::make('state'),
             ])

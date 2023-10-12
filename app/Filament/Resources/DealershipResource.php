@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Models\Dealership;
+use App\Models\Progress;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -109,15 +110,21 @@ class DealershipResource extends Resource
                                         ->label('Email Address')
                                         ->email()
                                         ->columnSpanFull(),
+                                    Select::make('status')
+                                        ->options([
+                                            'active' => 'Active',
+                                            'inactive' => 'Inactive',
+                                            'pending' => 'Pending',
+                                        ])
+                                        ->required(),
+                                    Select::make('rating')
+                                        ->options([
+                                            'hot' => 'Hot',
+                                            'warm' => 'Warm',
+                                            'cold' => 'Cold',
+                                        ])
+                                        ->required(),
                                 ]),
-                            Select::make('status')
-                                ->options([
-                                    'active' => 'Active',
-                                    'inactive' => 'Inactive',
-                                    'pending' => 'Pending',
-                                ])
-                                ->required()
-                                ->columnSpanFull(),
                             ]),
                         Tabs\Tab::make('Current Solution')
                             ->schema([
@@ -145,6 +152,8 @@ class DealershipResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->description(fn (Dealership $dealership): string => $dealership->progresses()->latest()->first()->details ?? '')
+                    ->wrap()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('phone'),
@@ -157,6 +166,13 @@ class DealershipResource extends Resource
                         'active' => 'success',
                         'inactive' => 'danger',
                         'pending' => 'warning',
+                    }),
+                TextColumn::make('rating')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'hot' => 'success',
+                        'warm' => 'warning',
+                        'cold' => 'primary',
                     })
             ])
             ->filters([
@@ -164,6 +180,12 @@ class DealershipResource extends Resource
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
+                    ]),
+                Tables\Filters\SelectFilter::make('rating')
+                    ->options([
+                        'hot' => 'Hot',
+                        'warm' => 'Warm',
+                        'cold' => 'Cold',
                     ]),
                 Tables\Filters\SelectFilter::make('state')
                     ->options([
@@ -235,6 +257,7 @@ class DealershipResource extends Resource
         return [
             RelationManagers\StoresRelationManager::class,
             RelationManagers\ContactsRelationManager::class,
+            RelationManagers\ProgressesRelationManager::class,
         ];
     }
 

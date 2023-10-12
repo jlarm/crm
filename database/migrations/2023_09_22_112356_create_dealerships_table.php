@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('current_solution_use')->nullable();
             $table->text('notes')->nullable();
             $table->string('status');
+            $table->string('rating');
             $table->timestamps();
         });
     }

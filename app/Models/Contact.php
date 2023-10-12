@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contact extends Model
 {
@@ -18,5 +19,10 @@ class Contact extends Model
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
+    }
+
+    public function progresses(): HasMany
+    {
+        return $this->hasMany(Progress::class);
     }
 }
