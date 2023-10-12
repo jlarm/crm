@@ -17,12 +17,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DealershipResource extends Resource
 {
     protected static ?string $model = Dealership::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     public static function form(Form $form): Form
     {
@@ -152,14 +153,16 @@ class DealershipResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (Dealership $dealership): string => $dealership->progresses()->latest()->first()->details ?? '')
+                    ->description(fn (Dealership $dealership): string => $dealership->city . ', ' . $dealership->state)
                     ->wrap()
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('progresses.date')
+                    ->description(fn (Dealership $dealership): string => $dealership->progresses()->latest()->first()->details ?? '-')
+                    ->wrap()
+                    ->words(5)
+                    ->label('Progress'),
                 TextColumn::make('phone'),
-                TextColumn::make('state')
-                    ->sortable()
-                    ->searchable(),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -173,7 +176,10 @@ class DealershipResource extends Resource
                         'hot' => 'success',
                         'warm' => 'warning',
                         'cold' => 'primary',
-                    })
+                    }),
+                TextColumn::make('stores_count')
+                    ->counts('stores')
+                    ->label('Stores'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
