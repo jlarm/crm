@@ -195,6 +195,9 @@ class DealershipResource extends Resource
                         'warm' => 'Warm',
                         'cold' => 'Cold',
                     ]),
+                Tables\Filters\SelectFilter::make('user')
+                    ->label('Consultant')
+                    ->relationship('user', 'name'),
                 Tables\Filters\SelectFilter::make('state')
                     ->options([
                         'AL' => 'Alabama',
