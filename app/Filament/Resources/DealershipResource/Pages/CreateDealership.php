@@ -16,4 +16,9 @@ class CreateDealership extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        $this->record->users()->attach(auth()->user()->id);
+    }
 }

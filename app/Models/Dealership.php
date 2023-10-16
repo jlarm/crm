@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Dealership extends Model
 {
@@ -24,9 +26,9 @@ class Dealership extends Model
         'rating',
     ];
 
-    public function user(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class);
     }
 
     public function stores(): HasMany
@@ -42,5 +44,15 @@ class Dealership extends Model
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::created(function ($dealership) {
+            $dealership->user_id = auth()->user()->id;
+        });
+
     }
 }

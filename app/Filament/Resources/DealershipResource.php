@@ -13,6 +13,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -129,6 +130,14 @@ class DealershipResource extends Resource
                                         ->required(),
                                 ]),
                             ]),
+                        Tabs\Tab::make('Consultants')
+                            ->schema([
+                                Select::make('users')
+                                    ->columnSpanFull()
+                                    ->multiple()
+                                    ->relationship('users', 'name')
+                                    ->label('Consultants'),
+                            ]),
                         Tabs\Tab::make('Current Solution')
                             ->schema([
                                 Grid::make(2)
@@ -182,6 +191,10 @@ class DealershipResource extends Resource
                 TextColumn::make('stores_count')
                     ->counts('stores')
                     ->label('Stores'),
+                TextColumn::make('users.name')
+                    ->label('Consultants')
+                    ->limitList(3)
+                    ->listWithLineBreaks(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -197,7 +210,7 @@ class DealershipResource extends Resource
                     ]),
                 Tables\Filters\SelectFilter::make('user')
                     ->label('Consultant')
-                    ->relationship('user', 'name'),
+                    ->relationship('users', 'name'),
                 Tables\Filters\SelectFilter::make('state')
                     ->options([
                         'AL' => 'Alabama',

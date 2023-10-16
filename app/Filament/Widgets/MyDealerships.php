@@ -8,16 +8,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class PendingDealerships extends BaseWidget
+class MyDealerships extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
+            ->description('A list of all of your dealerships.')
             ->query(
                 Dealership::query()
-                    ->where('user_id', auth()->id())
+                    ->whereHas('users', fn ($query) => $query->where('id', auth()->user()->id))
             )
             ->columns([
                 TextColumn::make('name')
@@ -40,6 +41,19 @@ class PendingDealerships extends BaseWidget
                 TextColumn::make('stores_count')
                     ->counts('stores')
                     ->label('Stores'),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                    ]),
+                Tables\Filters\SelectFilter::make('rating')
+                    ->options([
+                        'hot' => 'Hot',
+                        'warm' => 'Warm',
+                        'cold' => 'Cold',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('view')
