@@ -200,6 +200,7 @@ class DealershipResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
+                        'pending' => 'Pending',
                         'inactive' => 'Inactive',
                     ]),
                 Tables\Filters\SelectFilter::make('rating')
