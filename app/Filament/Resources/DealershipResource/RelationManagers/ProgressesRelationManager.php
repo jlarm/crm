@@ -31,8 +31,7 @@ class ProgressesRelationManager extends RelationManager
                         Contact::all()->pluck('name', 'id')
                     )
                     ->searchable(),
-                Forms\Components\DatePicker::make('date')
-                    ->format('m-d-Y'),
+                Forms\Components\DatePicker::make('date'),
                 Forms\Components\Textarea::make('details')
                     ->columnSpanFull()
                     ->required()
