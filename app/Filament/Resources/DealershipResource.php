@@ -7,6 +7,7 @@ use App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Models\Dealership;
 use App\Models\Progress;
 use App\Tables\Columns\LatestProgress;
+use Doctrine\DBAL\Schema\Column;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -22,6 +23,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Konnco\FilamentImport\Actions\ImportField;
 use Konnco\FilamentImport\Import;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class DealershipResource extends Resource
 {
@@ -269,6 +272,15 @@ class DealershipResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
+                ExportBulkAction::make()->exports([
+                    ExcelExport::make()->withColumns([
+                        \pxlrbt\FilamentExcel\Columns\Column::make('name'),
+                        \pxlrbt\FilamentExcel\Columns\Column::make('phone'),
+                        \pxlrbt\FilamentExcel\Columns\Column::make('email'),
+                        \pxlrbt\FilamentExcel\Columns\Column::make('status'),
+                        \pxlrbt\FilamentExcel\Columns\Column::make('rating'),
+                    ]),
+                ]),
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
