@@ -39,7 +39,7 @@
         </div>
 
         @stack('modals')
-
+        @livewire('database-notifications')
         @livewireScripts
     </body>
 </html>
