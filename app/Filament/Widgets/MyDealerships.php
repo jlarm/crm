@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Dealership;
+use App\Tables\Columns\LatestProgress;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -23,6 +24,8 @@ class MyDealerships extends BaseWidget
             ->columns([
                 TextColumn::make('name')
                     ->description(fn (Dealership $dealership): string => $dealership->city . ', ' . $dealership->state),
+                LatestProgress::make('progresses')
+                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()

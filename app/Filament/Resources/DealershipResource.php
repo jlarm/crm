@@ -6,6 +6,7 @@ use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Models\Dealership;
 use App\Models\Progress;
+use App\Tables\Columns\LatestProgress;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -168,11 +169,8 @@ class DealershipResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('progresses.date')
-                    ->description(fn (Dealership $dealership): string => $dealership->progresses()->latest()->first()->details ?? '-')
-                    ->wrap()
-                    ->words(5)
-                    ->label('Progress'),
+                LatestProgress::make('progresses')
+                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()
