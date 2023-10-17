@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
+use App\Filament\Resources\DealershipResource\Widgets\DealershipOverview;
 use App\Models\Dealership;
 use App\Models\Progress;
 use App\Tables\Columns\LatestProgress;

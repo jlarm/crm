@@ -28,4 +28,11 @@ class ListDealerships extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            DealershipResource\Widgets\DealerOverview::class,
+        ];
+    }
 }
