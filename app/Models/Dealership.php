@@ -55,4 +55,9 @@ class Dealership extends Model
         });
 
     }
+
+    public function getTotalStoreCountAttribute(): int
+    {
+        return $this->stores()->count() + 1;
+    }
 }
