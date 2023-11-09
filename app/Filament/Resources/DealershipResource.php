@@ -33,6 +33,8 @@ class DealershipResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -123,7 +125,6 @@ class DealershipResource extends Resource
                                         ->options([
                                             'active' => 'Active',
                                             'inactive' => 'Inactive',
-                                            'pending' => 'Pending',
                                         ])
                                         ->required(),
                                     Select::make('rating')
@@ -300,6 +301,7 @@ class DealershipResource extends Resource
     public static function getPages(): array
     {
         return [
+//            'view' => Pages\ViewDealership::route('/{record}'),
             'index' => Pages\ListDealerships::route('/'),
             'create' => Pages\CreateDealership::route('/create'),
             'edit' => Pages\EditDealership::route('/{record}/edit'),
