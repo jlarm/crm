@@ -182,7 +182,6 @@ class DealershipResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'inactive' => 'danger',
-                        'pending' => 'warning',
                     }),
                 TextColumn::make('rating')
                     ->badge()
@@ -203,7 +202,6 @@ class DealershipResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
-                        'pending' => 'Pending',
                         'inactive' => 'Inactive',
                     ]),
                 Tables\Filters\SelectFilter::make('rating')
