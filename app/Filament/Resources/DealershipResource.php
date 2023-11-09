@@ -190,8 +190,7 @@ class DealershipResource extends Resource
                         'warm' => 'warning',
                         'cold' => 'primary',
                     }),
-                TextColumn::make('stores_count')
-                    ->counts('stores')
+                TextColumn::make('total_store_count')
                     ->label('Stores'),
                 TextColumn::make('users.name')
                     ->label('Consultants')
