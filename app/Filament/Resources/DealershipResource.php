@@ -204,6 +204,7 @@ class DealershipResource extends Resource
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
+                        'imported' => 'Imported',
                     ]),
                 Tables\Filters\SelectFilter::make('rating')
                     ->options([
