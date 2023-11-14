@@ -13,6 +13,7 @@ class DealerOverview extends BaseWidget
         return [
             Stat::make('Active', Dealership::where('status', 'active')->count()),
             Stat::make('Inactive', Dealership::where('status', 'inactive')->count()),
+            Stat::make('Inactive', Dealership::where('status', 'imported')->count()),
         ];
     }
 }
