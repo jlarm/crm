@@ -12,7 +12,7 @@
         "bezhansalleh/filament-shield": "^3.0",
         "filament/filament": "^3.0-stable",
         "guzzlehttp/guzzle": "^7.2",
-        "konnco/filament-import": "^1.6",
+        "konnco/filament-import": "^2.0.0-beta",
         "laravel/framework": "^10.10",
         "laravel/jetstream": "^4.0",
         "laravel/sanctum": "^3.2",
@@ -79,6 +79,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

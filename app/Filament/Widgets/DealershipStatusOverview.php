@@ -16,6 +16,7 @@ class DealershipStatusOverview extends BaseWidget
         return [
             Stat::make('Active', $this->user->dealerships()->where('status', 'active')->count()),
             Stat::make('Inactive', $this->user->dealerships()->where('status', 'inactive')->count()),
+            Stat::make('Imported', $this->user->dealerships()->where('status', 'imported')->count()),
         ];
     }
 }

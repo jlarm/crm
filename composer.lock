@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a19233f8eadc6ea0784efeea77380752",
+    "content-hash": "a42f12b4a8d570b468b3129460316226",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2587,16 +2587,16 @@
         },
         {
             "name": "konnco/filament-import",
-            "version": "1.6.1",
+            "version": "2.0.2-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/konnco/filament-import.git",
-                "reference": "809eb090761b9722d859d3164d329d0937ef8442"
+                "reference": "e8d07dd30ad2b4bb7931870fde6a6bc7c119303e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konnco/filament-import/zipball/809eb090761b9722d859d3164d329d0937ef8442",
-                "reference": "809eb090761b9722d859d3164d329d0937ef8442",
+                "url": "https://api.github.com/repos/konnco/filament-import/zipball/e8d07dd30ad2b4bb7931870fde6a6bc7c119303e",
+                "reference": "e8d07dd30ad2b4bb7931870fde6a6bc7c119303e",
                 "shasum": ""
             },
             "require": {
@@ -2653,9 +2653,9 @@
             ],
             "support": {
                 "issues": "https://github.com/konnco/filament-import/issues",
-                "source": "https://github.com/konnco/filament-import/tree/1.6.1"
+                "source": "https://github.com/konnco/filament-import/tree/2.0.2-beta"
             },
-            "time": "2023-08-28T13:56:51+00:00"
+            "time": "2023-09-14T03:29:16+00:00"
         },
         {
             "name": "laravel/fortify",
@@ -12844,8 +12844,10 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
-    "stability-flags": [],
+    "minimum-stability": "beta",
+    "stability-flags": {
+        "konnco/filament-import": 10
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

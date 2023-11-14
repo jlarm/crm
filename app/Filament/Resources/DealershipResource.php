@@ -125,6 +125,7 @@ class DealershipResource extends Resource
                                         ->options([
                                             'active' => 'Active',
                                             'inactive' => 'Inactive',
+                                            'imported' => 'Imported',
                                         ])
                                         ->required(),
                                     Select::make('rating')
@@ -182,6 +183,7 @@ class DealershipResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'inactive' => 'danger',
+                        'imported' => 'primary',
                     }),
                 TextColumn::make('rating')
                     ->badge()

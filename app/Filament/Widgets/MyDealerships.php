@@ -32,7 +32,7 @@ class MyDealerships extends BaseWidget
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'inactive' => 'danger',
-                        'pending' => 'warning',
+                        'imported' => 'primary',
                     }),
                 TextColumn::make('rating')
                     ->badge()

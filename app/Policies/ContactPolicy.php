@@ -41,7 +41,7 @@ class ContactPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_contact');
+        return $user->cannot('create_contact');
     }
 
     /**
