@@ -68,6 +68,8 @@ class ListContacts extends ListRecords
                                 ]);
 
                                 $newDealer->users()->attach(User::where('id', 1)->first());
+                                $newDealer->users()->attach(User::where('id', 2)->first());
+                                $newDealer->users()->attach(User::where('id', 4)->first());
 
                                 return Contact::create([
                                     'name' => $data['name'],
