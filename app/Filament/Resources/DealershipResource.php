@@ -175,8 +175,8 @@ class DealershipResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->sortable(),
-                LatestProgress::make('progresses')
-                    ->label('Last Progress'),
+//                LatestProgress::make('progresses')
+//                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()
