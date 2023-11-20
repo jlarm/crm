@@ -46,10 +46,11 @@ class ListContacts extends ListRecords
                                 ->label('Dealership Phone'),
                         ], columns: 2)
                         ->handleRecordCreation(function (array $data) {
+                            ray($data);
                             if ($dealer = DealershipResource::getEloquentQuery()->where('name', $data['dealership']['name'])->first()) {
                                 return Contact::create([
                                     'name' => $data['name'],
-                                    'phone' => $data['phone'],
+                                    'phone' => preg_replace('/^\+1-/', '', $data['phone']),
                                     'email' => $data['email'],
                                     'position' => $data['position'],
                                     'dealership_id' => $dealer->id,
@@ -62,7 +63,7 @@ class ListContacts extends ListRecords
                                     'city' => $data['dealership']['city'],
                                     'state' => $data['dealership']['state'],
                                     'zip_code' => $data['dealership']['zip'],
-                                    'phone' => $data['dealership']['phone'],
+                                    'phone' => preg_replace('/^\+1-/', '', $data['dealership']['phone']),
                                     'status' => 'imported',
                                     'rating' => 'cold',
                                 ]);
@@ -72,7 +73,7 @@ class ListContacts extends ListRecords
 
                                 return Contact::create([
                                     'name' => $data['name'],
-                                    'phone' => $data['phone'],
+                                    'phone' => preg_replace('/^\+1-/', '', $data['phone']),
                                     'email' => $data['email'],
                                     'position' => $data['position'],
                                     'dealership_id' => $newDealer->id,
