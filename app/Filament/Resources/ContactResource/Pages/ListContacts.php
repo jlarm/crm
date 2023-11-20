@@ -46,7 +46,6 @@ class ListContacts extends ListRecords
                                 ->label('Dealership Phone'),
                         ], columns: 2)
                         ->handleRecordCreation(function (array $data) {
-                            ray($data);
                             if ($dealer = DealershipResource::getEloquentQuery()->where('name', $data['dealership']['name'])->first()) {
                                 return Contact::create([
                                     'name' => $data['name'],
