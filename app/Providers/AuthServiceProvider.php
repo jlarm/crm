@@ -9,6 +9,7 @@ use App\Policies\ActivityPolicy;
 use App\Policies\ContactPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Activitylog\Models\Activity;
 
 class AuthServiceProvider extends ServiceProvider
@@ -30,6 +31,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('viewPulse', function (User $user) {
+            return $user->hasRole('super_admin');
+        });
     }
 }
