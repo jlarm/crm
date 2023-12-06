@@ -24,6 +24,7 @@ class Dealership extends Model
         'notes',
         'status',
         'rating',
+        'type',
     ];
 
     public function users(): BelongsToMany
