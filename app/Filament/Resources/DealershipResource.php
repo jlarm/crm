@@ -110,32 +110,41 @@ class DealershipResource extends Resource
                                     TextInput::make('zip_code')
                                         ->columns(1),
                                 ]),
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('phone')
-                                        ->label('Phone Number')
-                                        ->mask('(999) 999-9999')
-                                        ->placeholder('(123) 456-7890')
-                                        ->columnSpanFull(),
-                                    TextInput::make('email')
-                                        ->label('Email Address')
-                                        ->email()
-                                        ->columnSpanFull(),
-                                    Select::make('status')
-                                        ->options([
-                                            'active' => 'Active',
-                                            'inactive' => 'Inactive',
-                                            'imported' => 'Imported',
-                                        ])
-                                        ->required(),
-                                    Select::make('rating')
-                                        ->options([
-                                            'hot' => 'Hot',
-                                            'warm' => 'Warm',
-                                            'cold' => 'Cold',
-                                        ])
-                                        ->required(),
-                                ]),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('phone')
+                                            ->label('Phone Number')
+                                            ->mask('(999) 999-9999')
+                                            ->placeholder('(123) 456-7890'),
+                                        TextInput::make('email')
+                                            ->label('Email Address')
+                                            ->email(),
+                                    ]),
+                                Grid::make(3)
+                                    ->schema([
+                                        Select::make('status')
+                                            ->options([
+                                                'active' => 'Active',
+                                                'inactive' => 'Inactive',
+                                                'imported' => 'Imported',
+                                            ])
+                                            ->required(),
+                                        Select::make('rating')
+                                            ->options([
+                                                'hot' => 'Hot',
+                                                'warm' => 'Warm',
+                                                'cold' => 'Cold',
+                                            ])
+                                            ->required(),
+                                        Select::make('type')
+                                            ->options([
+                                                'Automotive' => 'Automotive',
+                                                'RV' => 'RV',
+                                                'Motorsports' => 'Motorsports',
+                                                'Maritime' => 'Maritime',
+                                            ])
+                                            ->required(),
+                                    ]),
                             ]),
                         Tabs\Tab::make('Consultants')
                             ->schema([
@@ -175,8 +184,6 @@ class DealershipResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->sortable(),
-//                LatestProgress::make('progresses')
-//                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()
@@ -211,6 +218,13 @@ class DealershipResource extends Resource
                         'hot' => 'Hot',
                         'warm' => 'Warm',
                         'cold' => 'Cold',
+                    ]),
+                Tables\Filters\SelectFilter::make('type')
+                    ->options([
+                        'Automotive' => 'Automotive',
+                        'RV' => 'RV',
+                        'Motorsports' => 'Motorsports',
+                        'Maritime' => 'Maritime',
                     ]),
                 Tables\Filters\SelectFilter::make('user')
                     ->label('Consultant')
