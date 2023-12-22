@@ -51,6 +51,8 @@ class Contact extends Model
             $tags[] = $this->dealership->name;
         }
 
+        $tags[] = auth()->user()->name;
+
         $sub = Mailcoach::createSubscriber(
             emailListUuid: $this->dealership->getListType(),
             attributes: [
