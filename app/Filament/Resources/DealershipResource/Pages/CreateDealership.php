@@ -32,17 +32,20 @@ class CreateDealership extends CreateRecord
     protected function afterCreate(): void
     {
         $this->record->users()->attach(auth()->user()->id);
-        $tags = [];
-        $tags[] = 'Dealership';
-        $tags[] = auth()->user()->name;
 
-        $sub = Mailcoach::createSubscriber(
-            emailListUuid: $this->getListType(),
-            attributes: [
-                'first_name' => $this->record->name,
-                'email' => $this->record->email,
-                'tags' => $tags,
-            ]
-        );
+        if ($this->record->email) {
+            $tags = [];
+            $tags[] = 'Dealership';
+            $tags[] = auth()->user()->name;
+
+            $sub = Mailcoach::createSubscriber(
+                emailListUuid: $this->getListType(),
+                attributes: [
+                    'first_name' => $this->record->name,
+                    'email' => $this->record->email,
+                    'tags' => $tags,
+                ]
+            );
+        }
     }
 }
