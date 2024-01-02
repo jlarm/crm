@@ -38,29 +38,31 @@ class Contact extends Model
 
     protected function handleSavedEvent(): void
     {
-        $name = explode(' ', $this->name);
-        $first_name = $name[0];
-        $last_name = $name[1];
+        if ($this->email) {
+            $name = explode(' ', $this->name);
+            $first_name = $name[0];
+            $last_name = $name[1];
 
-        $tags = [];
-        if ($this->position) {
-            $tags[] = $this->position;
+            $tags = [];
+            if ($this->position) {
+                $tags[] = $this->position;
+            }
+
+            if ($this->dealership->name) {
+                $tags[] = $this->dealership->name;
+            }
+
+            $tags[] = auth()->user()->name;
+
+            $sub = Mailcoach::createSubscriber(
+                emailListUuid: $this->dealership->getListType(),
+                attributes: [
+                    'first_name' => $first_name,
+                    'last_name' => $last_name,
+                    'email' => $this->email,
+                    'tags' => $tags,
+                ]
+            );
         }
-
-        if ($this->dealership->name) {
-            $tags[] = $this->dealership->name;
-        }
-
-        $tags[] = auth()->user()->name;
-
-        $sub = Mailcoach::createSubscriber(
-            emailListUuid: $this->dealership->getListType(),
-            attributes: [
-                'first_name' => $first_name,
-                'last_name' => $last_name,
-                'email' => $this->email,
-                'tags' => $tags,
-            ]
-        );
     }
 }
