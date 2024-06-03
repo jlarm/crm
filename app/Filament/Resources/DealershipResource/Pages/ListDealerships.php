@@ -8,6 +8,7 @@ use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListDealerships extends ListRecords
 {
@@ -33,6 +34,19 @@ class ListDealerships extends ListRecords
     {
         return [
             DealershipResource\Widgets\DealerOverview::class,
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('All'),
+            'active' => Tab::make('Active')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'active')),
+            'inactive' => Tab::make('Inactive')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'inactive')),
+            'imported' => Tab::make('Imported')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'imported')),
         ];
     }
 }

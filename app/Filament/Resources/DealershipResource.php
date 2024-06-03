@@ -207,12 +207,6 @@ class DealershipResource extends Resource
                     ->listWithLineBreaks(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                        'imported' => 'Imported',
-                    ]),
                 Tables\Filters\SelectFilter::make('rating')
                     ->options([
                         'hot' => 'Hot',
