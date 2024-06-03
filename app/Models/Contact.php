@@ -46,7 +46,7 @@ class Contact extends Model
         static::deleted(function ($model) {
             $list = Mailcoach::emailList($model->dealership->getListType());
             $sub = $list->subscriber($model->email);
-            if($sub) {
+            if ($sub) {
                 $sub->delete();
             }
         });
@@ -56,7 +56,7 @@ class Contact extends Model
     {
         $list = Mailcoach::emailList($this->dealership->getListType());
 
-        if($list->subscriber($this->email)) {
+        if ($list->subscriber($this->email)) {
             return;
         }
 

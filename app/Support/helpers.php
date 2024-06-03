@@ -1,6 +1,6 @@
 <?php
 
-function format_phone (string $state): string
+function format_phone(string $state): string
 {
     $state = preg_replace('/[^0-9]/', '', $state);
 

@@ -18,37 +18,29 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class DevelopmentPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->breadcrumbs(false)
-            ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('development')
+            ->path('development')
             ->login()
-            ->brandLogo(asset('img/logo.svg'))
-            ->favicon(asset('img/logo.svg'))
-            ->spa()
+            ->breadcrumbs(false)
+            ->brandName('Development')
             ->colors([
-                'primary' => Color::Sky,
+                'primary' => Color::Amber,
             ])
-            ->resources([
-                config('filament-logger.activity_resource'),
-            ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->topNavigation()
+            ->discoverResources(in: app_path('Filament/Development/Resources'), for: 'App\\Filament\\Development\\Resources')
+            ->discoverPages(in: app_path('Filament/Development/Pages'), for: 'App\\Filament\\Development\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                //                Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Development/Widgets'), for: 'App\\Filament\\Development\\Widgets')
             ->widgets([
                 //                Widgets\AccountWidget::class,
                 //                Widgets\FilamentInfoWidget::class,
-            ])
-            ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,

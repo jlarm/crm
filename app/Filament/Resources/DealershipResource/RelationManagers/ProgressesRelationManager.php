@@ -8,15 +8,17 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProgressesRelationManager extends RelationManager
 {
     protected static string $relationship = 'progresses';
+
     protected static ?string $recordTitleAttribute = 'Progress';
+
     protected static ?string $modelLabel = 'Progress';
+
     protected static ?string $pluralModelLabel = 'Progress';
+
     protected static ?string $pluralLabel = 'Progress';
 
     public function form(Form $form): Form

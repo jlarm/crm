@@ -4,12 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
-use App\Filament\Resources\DealershipResource\Widgets\DealershipOverview;
 use App\Models\Dealership;
-use App\Models\Progress;
-use App\Tables\Columns\LatestProgress;
-use Doctrine\DBAL\Schema\Column;
-use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -17,15 +12,10 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Konnco\FilamentImport\Actions\ImportField;
-use Konnco\FilamentImport\Import;
-use PHPUnit\Metadata\Group;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -141,7 +131,7 @@ class DealershipResource extends Resource
                                                     ->label('Current Solution Name'),
                                                 TextInput::make('current_solution_use')
                                                     ->label('Current Solution Use'),
-                                            ])
+                                            ]),
                                     ]),
                                 Tabs\Tab::make('Notes')
                                     ->schema([
@@ -150,36 +140,38 @@ class DealershipResource extends Resource
                                             ->autosize()
                                             ->columnSpanFull(),
                                     ]),
-                            ])->columnSpanFull()
+                            ])->columnSpanFull(),
                     ])->columnSpan(2),
                 Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Section::make('Consultant')
                     ->schema([
-                        Select::make('users')
-                            ->columnSpanFull()
-                            ->multiple()
-                            ->relationship('users', 'name')
-                            ->hiddenLabel(),
-                    ]),
-                    Forms\Components\Section::make('Status')
-                        ->schema([
-                            Select::make('status')
-                                ->options([
-                                    'active' => 'Active',
-                                    'inactive' => 'Inactive',
-                                    'imported' => 'Imported',
-                                ])
-                                ->required(),
-                            Select::make('rating')
-                                ->options([
-                                    'hot' => 'Hot',
-                                    'warm' => 'Warm',
-                                    'cold' => 'Cold',
-                                ])
-                                ->required(),
-                        ])
-                    ])->columnSpan(1)
+                        Forms\Components\Section::make('Consultant')
+                            ->schema([
+                                Select::make('users')
+                                    ->columnSpanFull()
+                                    ->multiple()
+                                    ->relationship('users', 'name')
+                                    ->hiddenLabel(),
+                            ]),
+                        Forms\Components\Section::make('Status')
+                            ->schema([
+                                Forms\Components\Toggle::make('in_development')
+                                    ->label('In Development'),
+                                Select::make('status')
+                                    ->options([
+                                        'active' => 'Active',
+                                        'inactive' => 'Inactive',
+                                        'imported' => 'Imported',
+                                    ])
+                                    ->required(),
+                                Select::make('rating')
+                                    ->options([
+                                        'hot' => 'Hot',
+                                        'warm' => 'Warm',
+                                        'cold' => 'Cold',
+                                    ])
+                                    ->required(),
+                            ]),
+                    ])->columnSpan(1),
             ])->columns(3);
     }
 
@@ -188,7 +180,7 @@ class DealershipResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (Dealership $dealership): string => $dealership->city . ', ' . $dealership->state)
+                    ->description(fn (Dealership $dealership): string => $dealership->city.', '.$dealership->state)
                     ->wrap()
                     ->searchable()
                     ->sortable(),
@@ -317,7 +309,7 @@ class DealershipResource extends Resource
     public static function getPages(): array
     {
         return [
-//            'view' => Pages\ViewDealership::route('/{record}'),
+            //            'view' => Pages\ViewDealership::route('/{record}'),
             'index' => Pages\ListDealerships::route('/'),
             'create' => Pages\CreateDealership::route('/create'),
             'edit' => Pages\EditDealership::route('/{record}/edit'),

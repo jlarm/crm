@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -59,7 +57,7 @@ class ContactsRelationManager extends RelationManager
                                 ->where('id', '!=', $record->id)
                                 ->update(['primary_contact' => false]);
                         }
-                    })
+                    }),
             ])
             ->filters([
                 //

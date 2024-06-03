@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
 
@@ -14,6 +13,7 @@ class CreateDealership extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = auth()->user()->id;
+
         return $data;
     }
 

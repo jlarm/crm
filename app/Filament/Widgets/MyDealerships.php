@@ -11,7 +11,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class MyDealerships extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -23,9 +23,9 @@ class MyDealerships extends BaseWidget
             )
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (Dealership $dealership): string => $dealership->city . ', ' . $dealership->state),
-//                LatestProgress::make('progresses')
-//                    ->label('Last Progress'),
+                    ->description(fn (Dealership $dealership): string => $dealership->city.', '.$dealership->state),
+                //                LatestProgress::make('progresses')
+                //                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()

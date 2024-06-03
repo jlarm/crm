@@ -3,17 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContactResource\Pages;
-use App\Filament\Resources\ContactResource\RelationManagers;
 use App\Models\Contact;
-use App\Models\Dealership;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
@@ -53,7 +47,7 @@ class ContactResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('position'),
                 Tables\Columns\TextColumn::make('dealership.name')
-                    ->description(fn (Contact $contact): string => $contact->dealership->city . ', ' . $contact->dealership->state)
+                    ->description(fn (Contact $contact): string => $contact->dealership->city.', '.$contact->dealership->state)
                     ->searchable()
                     ->sortable(),
             ])
@@ -87,8 +81,8 @@ class ContactResource extends Resource
     {
         return [
             'index' => Pages\ListContacts::route('/'),
-//            'create' => Pages\CreateContact::route('/create'),
-//            'edit' => Pages\EditContact::route('/{record}/edit'),
+            //            'create' => Pages\CreateContact::route('/create'),
+            //            'edit' => Pages\EditContact::route('/{record}/edit'),
         ];
     }
 }

@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Dealership extends Model
 {
@@ -25,6 +23,11 @@ class Dealership extends Model
         'status',
         'rating',
         'type',
+        'in_development',
+    ];
+
+    protected $casts = [
+        'in_development' => 'boolean',
     ];
 
     public function users(): BelongsToMany
