@@ -38,6 +38,7 @@ class ContactsRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->nullable()
                     ->maxLength(255),
+                Forms\Components\Toggle::make('primary_contact'),
             ]);
     }
 
@@ -50,6 +51,15 @@ class ContactsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('phone'),
                 Tables\Columns\TextColumn::make('position'),
+                Tables\Columns\ToggleColumn::make('primary_contact')
+                    ->afterStateUpdated(function ($record, $state) {
+                        // turn off anyone else as primary contact
+                        if ($state) {
+                            $record->dealership->contacts()
+                                ->where('id', '!=', $record->id)
+                                ->update(['primary_contact' => false]);
+                        }
+                    })
             ])
             ->filters([
                 //

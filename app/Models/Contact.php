@@ -15,6 +15,11 @@ class Contact extends Model
         'email',
         'phone',
         'position',
+        'primary_contact',
+    ];
+
+    protected $casts = [
+        'primary_contact' => 'boolean',
     ];
 
     public function dealership(): BelongsTo
@@ -31,13 +36,30 @@ class Contact extends Model
     {
         parent::boot();
 
-        static::saved(function ($model) {
+        static::created(function ($model) {
+            $dealer = Dealership::where('id', $model->dealership_id)->first();
+            $dealer->contacts()->where('id', '!=', $model->id)->update(['primary_contact' => false]);
+
             $model->handleSavedEvent();
+        });
+
+        static::deleted(function ($model) {
+            $list = Mailcoach::emailList($model->dealership->getListType());
+            $sub = $list->subscriber($model->email);
+            if($sub) {
+                $sub->delete();
+            }
         });
     }
 
     protected function handleSavedEvent(): void
     {
+        $list = Mailcoach::emailList($this->dealership->getListType());
+
+        if($list->subscriber($this->email)) {
+            return;
+        }
+
         if ($this->email) {
             $name = explode(' ', $this->name);
             $first_name = $name[0];
