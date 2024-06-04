@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 class UserResource extends Resource
 {
@@ -27,6 +28,7 @@ class UserResource extends Resource
                     ->multiple()
                     ->preload()
                     ->searchable(),
+                TimezoneSelect::make('timezone')->byCountry('US')->columnSpanFull(),
             ]);
     }
 
