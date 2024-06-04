@@ -37,7 +37,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('permissions'),
+                Tables\Columns\TextColumn::make('timezone'),
             ])
             ->filters([
                 //
