@@ -3,6 +3,9 @@
 namespace App\Filament\Development\Resources;
 
 use App\Filament\Development\Resources\DealershipResource\Pages;
+use App\Filament\Resources\DealershipResource\RelationManagers\ContactsRelationManager;
+use App\Filament\Resources\DealershipResource\RelationManagers\ProgressesRelationManager;
+use App\Filament\Resources\DealershipResource\RelationManagers\StoresRelationManager;
 use App\Models\Dealership;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
@@ -128,24 +131,25 @@ class DealershipResource extends Resource
                                             ])
                                             ->required(),
                                     ]),
-                                Tabs\Tab::make('Current Solution')
-                                    ->schema([
-                                        Grid::make(2)
-                                            ->schema([
-                                                TextInput::make('current_solution_name')
-                                                    ->label('Current Solution Name'),
-                                                TextInput::make('current_solution_use')
-                                                    ->label('Current Solution Use'),
-                                            ]),
-                                    ]),
-                                Tabs\Tab::make('Notes')
-                                    ->schema([
-                                        Textarea::make('notes')
-                                            ->rows(10)
-                                            ->autosize()
-                                            ->columnSpanFull(),
-                                    ]),
                             ])->columnSpanFull(),
+                        Forms\Components\Section::make('Notes')
+                            ->schema([
+                                Textarea::make('notes')
+                                    ->rows(10)
+                                    ->autosize()
+                                    ->hiddenLabel()
+                                    ->columnSpanFull(),
+                            ])->collapsible(),
+                        Forms\Components\Section::make('Current Solution')
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('current_solution_name')
+                                            ->label('Name'),
+                                        TextInput::make('current_solution_use')
+                                            ->label('Use'),
+                                    ]),
+                            ])->collapsed()
                     ])->columnSpan(2),
                 Forms\Components\Group::make()
                     ->schema([
@@ -160,6 +164,9 @@ class DealershipResource extends Resource
                         Forms\Components\Section::make('Status')
                             ->schema([
                                 Forms\Components\Toggle::make('in_development')
+                                    ->onColor('success')
+                                    ->offColor('primary')
+                                    ->helperText('*Turn on "In Development" when actively working on this dealership with the Sales Dev Rep.')
                                     ->label('In Development'),
                                 Select::make('status')
                                     ->options([
@@ -213,7 +220,9 @@ class DealershipResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            StoresRelationManager::class,
+            ContactsRelationManager::class,
+            ProgressesRelationManager::class,
         ];
     }
 

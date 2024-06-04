@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
+use App\Models\Dealership;
+use App\Models\Store;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -106,10 +108,9 @@ class StoresRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('name')
+                    ->description(fn (Store $record): string => $record->city. ', ' . $record->state),
                 Tables\Columns\TextColumn::make('phone'),
-                Tables\Columns\TextColumn::make('city'),
-                Tables\Columns\TextColumn::make('state'),
             ])
             ->filters([
                 //
