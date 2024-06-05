@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
+use App\Mail\ClientMail;
 use App\Mail\MessageMail;
 use App\Models\Dealership;
 use App\Models\Progress;
@@ -198,6 +199,30 @@ class DealershipResource extends Resource
                                            Mail::to($data['user'])
                                                ->send(new MessageMail(
                                                    $form->model,
+                                                   auth()->user(),
+                                                   $data['subject'],
+                                                   $data['body']
+                                               ));
+                                           Progress::create([
+                                               'dealership_id' => $form->model->id,
+                                               'user_id' => auth()->id(),
+                                               'date' => now(),
+                                               'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
+                                           ]);
+                                       }),
+                                   Forms\Components\Actions\Action::make('Send Email to client')
+                                       ->form([
+                                           Select::make('user')
+                                               ->required()
+                                               ->label('Dealership Contact')
+                                               ->helperText('Select the dealership contact to send the email to.')
+                                               ->options($form->model->contacts()->pluck('name', 'email')),
+                                           TextInput::make('subject')->required(),
+                                           RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
+                                       ])
+                                       ->action(function (array $data, Form $form) {
+                                           Mail::to($data['user'])
+                                               ->send(new ClientMail(
                                                    auth()->user(),
                                                    $data['subject'],
                                                    $data['body']
