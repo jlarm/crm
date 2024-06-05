@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Models\Contact;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -47,9 +48,10 @@ class ProgressesRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('details')->words(30)->wrap(),
-                Tables\Columns\TextColumn::make('date')->since(),
+                Tables\Columns\TextColumn::make('created_at')->label('Date')->date(),
                 Tables\Columns\TextColumn::make('contact.name')->label('Contact'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
@@ -57,8 +59,8 @@ class ProgressesRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+//                Tables\Actions\EditAction::make(),
+//                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -6,9 +6,13 @@ use App\Filament\Development\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\DealershipResource\RelationManagers\ProgressesRelationManager;
 use App\Filament\Resources\DealershipResource\RelationManagers\StoresRelationManager;
+use App\Mail\MessageMail;
 use App\Models\Dealership;
+use App\Models\Progress;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
@@ -18,6 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
 
 class DealershipResource extends Resource
 {
@@ -183,6 +188,36 @@ class DealershipResource extends Resource
                                     ])
                                     ->required(),
                             ]),
+                        Forms\Components\Section::make()
+                            ->schema([
+                                Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('Send Email to Consultant')
+                                        ->form([
+                                            Select::make('user')
+                                                ->required()
+                                                ->label('Consultant')
+                                                ->helperText('Select the Consultant to send the email to.')
+                                                ->options($form->model->users->pluck('name', 'email')),
+                                            TextInput::make('subject')->required(),
+                                            RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
+                                        ])
+                                        ->action(function (array $data, Form $form) {
+                                            Mail::to($data['user'])
+                                                ->send(new MessageMail(
+                                                    $form->model,
+                                                    auth()->user(),
+                                                    $data['subject'],
+                                                    $data['body']
+                                                ));
+                                            Progress::create([
+                                                'dealership_id' => $form->model->id,
+                                                'user_id' => auth()->id(),
+                                                'date' => now(),
+                                                'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
+                                            ]);
+                                        })
+                                ])
+                            ])
                     ])->columnSpan(1),
             ])->columns(3);
     }

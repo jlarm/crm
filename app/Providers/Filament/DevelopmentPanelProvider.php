@@ -29,7 +29,7 @@ class DevelopmentPanelProvider extends PanelProvider
             ->breadcrumbs(false)
             ->brandName('Development')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Emerald,
             ])
             ->topNavigation()
             ->discoverResources(in: app_path('Filament/Development/Resources'), for: 'App\\Filament\\Development\\Resources')
