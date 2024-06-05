@@ -55,6 +55,10 @@ class EditProfile extends Page
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
+                        TextInput::make('phone')
+                            ->tel()
+                            ->mask('(999) 999-9999')
+                            ->required(),
                         TimezoneSelect::make('timezone')->byCountry('US'),
                     ]),
             ])
