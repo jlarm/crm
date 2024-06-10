@@ -22,6 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -186,6 +187,7 @@ class DealershipResource extends Resource
                             ->schema([
                                Forms\Components\Actions::make([
                                    Forms\Components\Actions\Action::make('Send Email to Sales Development Rep')
+                                       ->hidden(fn (string $operation): bool => $operation === 'create')
                                        ->form([
                                            Select::make('user')
                                                ->required()
@@ -211,12 +213,13 @@ class DealershipResource extends Resource
                                            ]);
                                        }),
                                    Forms\Components\Actions\Action::make('Send Email to client')
+                                       ->hidden(fn (string $operation): bool => $operation === 'create')
                                        ->form([
-                                           Select::make('user')
+                                           Select::make('contact_id')
+                                               ->relationship('contacts', 'name', fn (Builder $query) => $query->where('dealership_id', $form->model->id))
                                                ->required()
                                                ->label('Dealership Contact')
-                                               ->helperText('Select the dealership contact to send the email to.')
-                                               ->options($form->model->contacts()->pluck('name', 'email')),
+                                               ->helperText('Select the dealership contact to send the email to.'),
                                            TextInput::make('subject')->required(),
                                            RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                        ])
