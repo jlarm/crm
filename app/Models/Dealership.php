@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\DevStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,10 +25,12 @@ class Dealership extends Model
         'rating',
         'type',
         'in_development',
+        'dev_status'
     ];
 
     protected $casts = [
         'in_development' => 'boolean',
+        'dev_status' => DevStatus::class,
     ];
 
     public function users(): BelongsToMany

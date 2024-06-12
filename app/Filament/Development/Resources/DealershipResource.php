@@ -2,6 +2,7 @@
 
 namespace App\Filament\Development\Resources;
 
+use App\Enum\DevStatus;
 use App\Filament\Development\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\DealershipResource\RelationManagers\ProgressesRelationManager;
@@ -174,6 +175,8 @@ class DealershipResource extends Resource
                                     ->offColor('primary')
                                     ->helperText('*Turn on "In Development" when actively working on this dealership with the Sales Dev Rep.')
                                     ->label('In Development'),
+                                Select::make('dev_status')
+                                    ->options(DevStatus::class),
                                 Select::make('status')
                                     ->options([
                                         'active' => 'Active',
@@ -254,18 +257,17 @@ class DealershipResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('address')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('state')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('zip_code')
+                    ->description(fn (Dealership $record) => $record->city.', '.$record->state.' '.$record->zip_code)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('dev_status')
+                    ->badge(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('dev_status')
+                    ->label('Status')
+                    ->options(DevStatus::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
