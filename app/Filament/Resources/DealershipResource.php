@@ -6,6 +6,7 @@ use App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Mail\ClientMail;
 use App\Mail\MessageMail;
+use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Progress;
 use App\Models\User;
@@ -224,7 +225,8 @@ class DealershipResource extends Resource
                                            RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                        ])
                                        ->action(function (array $data, Form $form) {
-                                           Mail::to($data['user'])
+                                             $contact = Contact::where('id', $data['contact_id'])->first();
+                                           Mail::to($contact)
                                                ->send(new ClientMail(
                                                    auth()->user(),
                                                    $data['subject'],
@@ -234,7 +236,7 @@ class DealershipResource extends Resource
                                                'dealership_id' => $form->model->id,
                                                'user_id' => auth()->id(),
                                                'date' => now(),
-                                               'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
+                                               'details' => 'Sent email to '.$contact->name. ' - ' . $data['subject'],
                                            ]);
                                        })
                                ])

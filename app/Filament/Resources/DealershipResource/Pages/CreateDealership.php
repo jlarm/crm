@@ -33,6 +33,12 @@ class CreateDealership extends CreateRecord
     {
         $this->record->users()->attach(auth()->user()->id);
 
+        $list = Mailcoach::emailList($this->getListType());
+
+        if ($list->subscriber($this->record->email)) {
+            return;
+        }
+
         if ($this->record->email) {
             $tags = [];
             $tags[] = 'Dealership';
