@@ -22,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
@@ -259,6 +260,9 @@ class DealershipResource extends Resource
                 Tables\Columns\TextColumn::make('address')
                     ->description(fn (Dealership $record) => $record->city.', '.$record->state.' '.$record->zip_code)
                     ->searchable(),
+                TextColumn::make('stores_count')
+                    ->counts('stores')
+                    ->label('Stores'),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('dev_status')
