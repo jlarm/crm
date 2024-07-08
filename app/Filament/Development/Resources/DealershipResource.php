@@ -265,6 +265,9 @@ class DealershipResource extends Resource
                     ->badge(),
             ])
             ->filters([
+                Tables\Filters\Filter::make('dealer_group')
+                    ->label('Dealer Groups')
+                    ->query(fn (Builder $query): Builder => $query->has('stores')),
                 Tables\Filters\SelectFilter::make('dev_status')
                     ->label('Status')
                     ->options(DevStatus::class),

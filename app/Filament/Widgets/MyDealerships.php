@@ -8,6 +8,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class MyDealerships extends BaseWidget
 {
@@ -24,8 +25,6 @@ class MyDealerships extends BaseWidget
             ->columns([
                 TextColumn::make('name')
                     ->description(fn (Dealership $dealership): string => $dealership->city.', '.$dealership->state),
-                //                LatestProgress::make('progresses')
-                //                    ->label('Last Progress'),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
                     ->badge()
@@ -46,6 +45,9 @@ class MyDealerships extends BaseWidget
                     ->label('Stores'),
             ])
             ->filters([
+                Tables\Filters\Filter::make('dealer_group')
+                    ->label('Dealer Groups')
+                    ->query(fn (Builder $query): Builder => $query->has('stores')),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',

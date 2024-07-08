@@ -225,7 +225,7 @@ class DealershipResource extends Resource
                                            RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                        ])
                                        ->action(function (array $data, Form $form) {
-                                             $contact = Contact::where('id', $data['contact_id'])->first();
+                                           $contact = Contact::where('id', $data['contact_id'])->first();
                                            Mail::to($contact)
                                                ->send(new ClientMail(
                                                    auth()->user(),
@@ -269,7 +269,8 @@ class DealershipResource extends Resource
                         'warm' => 'warning',
                         'cold' => 'primary',
                     }),
-                TextColumn::make('total_store_count')
+                TextColumn::make('stores_count')
+                    ->counts('stores')
                     ->label('Stores'),
                 TextColumn::make('users.name')
                     ->label('Consultants')
@@ -277,6 +278,9 @@ class DealershipResource extends Resource
                     ->listWithLineBreaks(),
             ])
             ->filters([
+                Tables\Filters\Filter::make('dealer_group')
+                    ->label('Dealer Groups')
+                    ->query(fn (Builder $query): Builder => $query->has('stores')),
                 Tables\Filters\SelectFilter::make('rating')
                     ->options([
                         'hot' => 'Hot',
