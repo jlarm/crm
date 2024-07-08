@@ -4,9 +4,11 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use App\Models\Contact;
+use App\Models\Reminder;
 use App\Models\User;
 use App\Policies\ActivityPolicy;
 use App\Policies\ContactPolicy;
+use App\Policies\ReminderPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +26,7 @@ class AuthServiceProvider extends ServiceProvider
         'Spatie\Permission\Models\Role' => 'App\Policies\RolePolicy',
         User::class => UserPolicy::class,
         Contact::class => ContactPolicy::class,
+        Reminder::class => ReminderPolicy::class,
     ];
 
     /**
