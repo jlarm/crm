@@ -50,6 +50,7 @@ class ReminderResource extends Resource
                 Tables\Columns\TextColumn::make('start_date')->date(),
                 Tables\Columns\TextColumn::make('last_sent')->date(),
                 Tables\Columns\ToggleColumn::make('pause')
+                    ->label('Status')
                     ->offIcon('heroicon-o-play')
                     ->onIcon('heroicon-s-pause')
                     ->offColor('success')
