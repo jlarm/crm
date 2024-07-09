@@ -10,6 +10,7 @@ class Reminder extends Model
 {
     protected $fillable = [
         'user_id',
+        'dev_rel',
         'title',
         'message',
         'start_date',
@@ -19,6 +20,7 @@ class Reminder extends Model
     ];
 
     protected $casts = [
+        'dev_rel' => 'boolean',
         'last_sent' => 'date',
         'sending_frequency' => ReminderFrequency::class,
     ];

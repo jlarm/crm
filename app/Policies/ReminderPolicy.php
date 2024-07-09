@@ -22,7 +22,7 @@ class ReminderPolicy
 
     public function update(User $user, Reminder $reminder): bool
     {
-        return $reminder->user_id === $user->id;
+        return $reminder->user_id === $user->id || $user->hasRole('Sales Development Rep');
     }
 
     public function delete(User $user, Reminder $reminder): bool

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Development\Resources;
 
 use App\Enum\ReminderFrequency;
-use App\Filament\Resources\ReminderResource\Pages;
-use App\Filament\Resources\ReminderResource\RelationManagers;
+use App\Filament\Development\Resources\ReminderResource\Pages;
+use App\Filament\Development\Resources\ReminderResource\RelationManagers;
 use App\Models\Reminder;
-use Faker\Provider\Text;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,12 +17,17 @@ class ReminderResource extends Resource
 {
     protected static ?string $model = Reminder::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Hidden::make('dev_rel')->default(true),
+                Forms\Components\Select::make('user_id')
+                    ->label('Consultant')
+                    ->columnSpanFull()
+                    ->options(User::all()->pluck('name', 'id')),
                 Forms\Components\TextInput::make('title')
                     ->helperText('A short description for the reminder')
                     ->columnSpanFull()
@@ -42,13 +47,11 @@ class ReminderResource extends Resource
     {
         return $table
             ->query(
-                Reminder::whereBelongsTo(auth()->user())->where('dev_rel', null)
+                Reminder::where('dev_rel', true)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('title'),
-                Tables\Columns\TextColumn::make('sending_frequency'),
-                Tables\Columns\TextColumn::make('start_date')->date(),
-                Tables\Columns\TextColumn::make('last_sent')->date(),
+                Tables\Columns\TextColumn::make('user.name')->label('Consultant'),
                 Tables\Columns\ToggleColumn::make('pause')
                     ->label('Status')
                     ->offIcon('heroicon-o-play')
