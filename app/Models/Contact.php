@@ -56,6 +56,10 @@ class Contact extends Model
     {
         $list = Mailcoach::emailList($this->dealership->getListType());
 
+        if ($list->subscriber($this->email) === null) {
+            return;
+        }
+
         if ($list->subscriber($this->email)) {
             return;
         }
