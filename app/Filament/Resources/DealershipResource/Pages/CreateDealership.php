@@ -33,25 +33,28 @@ class CreateDealership extends CreateRecord
     {
         $this->record->users()->attach(auth()->user()->id);
 
-        $list = Mailcoach::emailList($this->getListType());
-
-        if ($list->subscriber($this->record->email) != null) {
-            return;
-        }
-
         if ($this->record->email) {
-            $tags = [];
-            $tags[] = 'Dealership';
-            $tags[] = auth()->user()->name;
 
-            $sub = Mailcoach::createSubscriber(
-                emailListUuid: $this->getListType(),
-                attributes: [
-                    'first_name' => $this->record->name,
-                    'email' => $this->record->email,
-                    'tags' => $tags,
-                ]
-            );
+            $list = Mailcoach::emailList($this->getListType());
+
+            if ($list->subscriber($this->record->email) != null) {
+                return;
+            }
+
+            if ($this->record->email) {
+                $tags = [];
+                $tags[] = 'Dealership';
+                $tags[] = auth()->user()->name;
+
+                $sub = Mailcoach::createSubscriber(
+                    emailListUuid: $this->getListType(),
+                    attributes: [
+                        'first_name' => $this->record->name,
+                        'email' => $this->record->email,
+                        'tags' => $tags,
+                    ]
+                );
+            }
         }
     }
 }
