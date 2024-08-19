@@ -35,7 +35,7 @@ class CreateDealership extends CreateRecord
 
         $list = Mailcoach::emailList($this->getListType());
 
-        if ($list->subscriber($this->record->email)) {
+        if ($list->subscriber($this->record->email) != null) {
             return;
         }
 
