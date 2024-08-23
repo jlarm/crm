@@ -116,12 +116,10 @@ class DealershipResource extends Resource
                                         Grid::make(2)
                                             ->schema([
                                                 TextInput::make('phone')
+                                                    ->columnSpanFull()
                                                     ->label('Phone Number')
                                                     ->mask('(999) 999-9999')
                                                     ->placeholder('(123) 456-7890'),
-                                                TextInput::make('email')
-                                                    ->label('Email Address')
-                                                    ->email(),
                                             ]),
                                         Select::make('type')
                                             ->options([
