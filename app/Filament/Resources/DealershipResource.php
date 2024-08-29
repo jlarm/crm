@@ -375,6 +375,7 @@ class DealershipResource extends Resource
             RelationManagers\StoresRelationManager::class,
             RelationManagers\ContactsRelationManager::class,
             RelationManagers\ProgressesRelationManager::class,
+            RelationManagers\DealerEmailRelationManager::class,
         ];
     }
 
