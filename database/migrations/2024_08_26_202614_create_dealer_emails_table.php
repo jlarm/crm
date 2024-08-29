@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->foreignId('user_id');
             $table->foreignId('dealership_id');
             $table->json('recipients');
+            $table->string('attachment')->nullable();
             $table->string('subject');
             $table->text('message');
             $table->date('start_date');

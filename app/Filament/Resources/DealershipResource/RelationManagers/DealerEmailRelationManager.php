@@ -5,6 +5,7 @@ namespace App\Filament\Resources\DealershipResource\RelationManagers;
 use App\Enum\ReminderFrequency;
 use App\Models\Contact;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -22,21 +23,21 @@ class DealerEmailRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Select::make('contact_ids')
+                Select::make('recipients')
                     ->label('Recipients')
                     ->multiple()
                     ->options(function (RelationManager $livewire): array {
                         return $livewire->getOwnerRecord()->contacts()
-                            ->pluck('name', 'id')
+                            ->pluck('email', 'id')
                             ->toArray();
-                    })
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        $emailAddresses = Contact::whereIn('id', $state)->pluck('email')->toArray();
-                        $set('recipients', $emailAddresses);
                     })
                     ->columnSpanFull(),
                 Hidden::make('recipients'),
+                FileUpload::make('attachment')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->preserveFilenames()
+                    ->columnSpanFull()
+                    ->directory('form-attachments'),
                 TextInput::make('subject')
                     ->columnSpanFull()
                     ->required()
@@ -45,6 +46,8 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->required(),
                 DatePicker::make('start_date')
+                    ->closeOnDateSelection()
+                    ->minDate(now()->format('Y-m-d'))
                     ->format('Y-m-d')
                     ->required(),
                 Select::make('frequency')

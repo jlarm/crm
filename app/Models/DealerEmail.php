@@ -12,6 +12,7 @@ class DealerEmail extends Model
         'user_id',
         'dealership_id',
         'recipients',
+        'attachment',
         'subject',
         'message',
         'start_date',
