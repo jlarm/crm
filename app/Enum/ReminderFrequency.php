@@ -6,6 +6,7 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ReminderFrequency: int implements HasLabel
 {
+    case Once = 0;
     case Daily = 1;
     case Weekly = 7;
     case Monthly = 30;
@@ -15,11 +16,23 @@ enum ReminderFrequency: int implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
+            self::Once => 'Once',
             self::Daily => 'Daily',
             self::Weekly => 'Weekly',
             self::Monthly => 'Monthly',
             self::Quarterly => 'Quarterly',
             self::Yearly => 'Yearly',
+        };
+    }
+
+    public function toCarbonMethod(): string
+    {
+        return match($this) {
+            self::Daily => 'subDay',
+            self::Weekly => 'subWeek',
+            self::Monthly => 'subMonth',
+            self::Quarterly => 'subQuarter',
+            self::Yearly => 'subYear',
         };
     }
 }

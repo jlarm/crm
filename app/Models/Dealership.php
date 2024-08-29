@@ -53,6 +53,11 @@ class Dealership extends Model
         return $this->hasMany(Progress::class);
     }
 
+    public function dealerEmails(): HasMany
+    {
+        return $this->hasMany(DealerEmail::class);
+    }
+
     protected static function boot(): void
     {
         parent::boot();

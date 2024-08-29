@@ -4,10 +4,12 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use App\Models\Contact;
+use App\Models\DealerEmail;
 use App\Models\Reminder;
 use App\Models\User;
 use App\Policies\ActivityPolicy;
 use App\Policies\ContactPolicy;
+use App\Policies\DealerEmailPolicy;
 use App\Policies\ReminderPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -27,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Contact::class => ContactPolicy::class,
         Reminder::class => ReminderPolicy::class,
+        DealerEmail::class => DealerEmailPolicy::class,
     ];
 
     /**
