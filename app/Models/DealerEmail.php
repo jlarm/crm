@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enum\ReminderFrequency;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,8 +24,8 @@ class DealerEmail extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'last_sent' => 'date',
+        'start_date' => 'date:Y-m-d',
+        'last_sent' => 'date:Y-m-d',
         'paused' => 'boolean',
         'recipients' => 'array',
         'frequency' => ReminderFrequency::class,

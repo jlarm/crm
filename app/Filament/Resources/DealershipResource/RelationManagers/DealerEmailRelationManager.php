@@ -28,7 +28,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->multiple()
                     ->options(function (RelationManager $livewire): array {
                         return $livewire->getOwnerRecord()->contacts()
-                            ->pluck('email', 'id')
+                            ->pluck('email', 'email')
                             ->toArray();
                     })
                     ->columnSpanFull(),
