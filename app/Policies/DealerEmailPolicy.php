@@ -12,22 +12,22 @@ class DealerEmailPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->can('viewAny');
+        return $user->hasRole('super_admin');
     }
 
     public function view(User $user, DealerEmail $dealerEmail): bool
     {
-        return $user->can('view');
+        return $user->hasRole('super_admin');
     }
 
     public function create(User $user): bool
     {
-        return $user->can('create');
+        return $user->hasRole('super_admin');
     }
 
     public function update(User $user, DealerEmail $dealerEmail): bool
     {
-        return $user->can('update');
+        return $user->hasRole('super_admin');
     }
 
     public function delete(User $user, DealerEmail $dealerEmail): bool
