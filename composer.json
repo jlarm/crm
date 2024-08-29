@@ -18,6 +18,7 @@
         "laravel/jetstream": "^4.0",
         "laravel/pulse": "^1.0@beta",
         "laravel/sanctum": "^3.2",
+        "laravel/telescope": "^5.2",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.0",
         "psr/simple-cache": "^2.0",

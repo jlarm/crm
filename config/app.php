@@ -172,6 +172,7 @@ return [
         App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\Filament\DevelopmentPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\TelescopeServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
         App\Providers\JetstreamServiceProvider::class,
     ])->toArray(),
