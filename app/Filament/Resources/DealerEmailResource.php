@@ -54,7 +54,7 @@ class DealerEmailResource extends Resource
                 Tables\Columns\TextColumn::make('dealership.name')->sortable(),
                 Tables\Columns\TextColumn::make('subject'),
                 Tables\Columns\TextColumn::make('frequency'),
-                Tables\Columns\ToggleColumn::make('paused')
+                Tables\Columns\TextColumn::make('last_sent')->date()
             ])
             ->filters([
                 //

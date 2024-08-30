@@ -32,7 +32,6 @@ class DealerEmailRelationManager extends RelationManager
                             ->toArray();
                     })
                     ->columnSpanFull(),
-                Hidden::make('recipients'),
                 FileUpload::make('attachment')
                     ->acceptedFileTypes(['application/pdf'])
                     ->preserveFilenames()
@@ -62,7 +61,6 @@ class DealerEmailRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('subject'),
                 Tables\Columns\TextColumn::make('frequency'),
-                Tables\Columns\ToggleColumn::make('paused'),
                 Tables\Columns\TextColumn::make('last_sent')->date(),
             ])
             ->filters([
