@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\DealerEmail;
+use App\Models\DealerEmailTemplate;
 use App\Observers\DealerEmailObserver;
+use App\Observers\DealerEmailTemplateObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -28,6 +30,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         DealerEmail::observe(DealerEmailObserver::class);
+        DealerEmailTemplate::observe(DealerEmailTemplateObserver::class);
     }
 
     /**
