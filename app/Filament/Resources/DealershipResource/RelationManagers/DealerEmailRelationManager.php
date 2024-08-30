@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
+use App\Models\DealerEmailTemplate;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -24,12 +25,34 @@ class DealerEmailRelationManager extends RelationManager
                 Select::make('recipients')
                     ->label('Recipients')
                     ->multiple()
+                    ->required()
                     ->options(function (RelationManager $livewire): array {
                         return $livewire->getOwnerRecord()->contacts()
                             ->pluck('email', 'email')
                             ->toArray();
                     })
                     ->columnSpanFull(),
+                Select::make('template_choice')
+                    ->required()
+                    ->options(function () {
+                        $templateOptions = DealerEmailTemplate::pluck('name', 'id')->toArray();
+                        return ['' => 'Blank Form'] + $templateOptions;
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state === '') {
+                            $set('subject', '');
+                            $set('message', '');
+                            $set('attachment', null);
+                        } else {
+                            $template = DealerEmailTemplate::find($state);
+                            $set('subject', $template->subject);
+                            $set('attachment', $template->attachment);
+                            $set('message', $template->body);
+                        }
+                    })
+                    ->columnSpanFull()
+                    ->label('Select a template'),
                 FileUpload::make('attachment')
                     ->acceptedFileTypes(['application/pdf'])
                     ->storeFileNamesIn('attachment_name')
