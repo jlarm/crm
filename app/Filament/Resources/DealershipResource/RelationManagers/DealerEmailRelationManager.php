@@ -4,6 +4,7 @@ namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
 use App\Models\DealerEmailTemplate;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -65,7 +66,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->required(),
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
-                    ->minDate(now()->format('Y-m-d'))
+                    ->minDate(Carbon::now()->addDay()->format('Y-m-d'))
                     ->format('Y-m-d')
                     ->required(),
                 Select::make('frequency')
