@@ -3,10 +3,8 @@
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
-use App\Models\Contact;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -34,7 +32,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull(),
                 FileUpload::make('attachment')
                     ->acceptedFileTypes(['application/pdf'])
-                    ->preserveFilenames()
+                    ->storeFileNamesIn('attachment_name')
                     ->columnSpanFull()
                     ->directory('form-attachments'),
                 TextInput::make('subject')

@@ -21,6 +21,7 @@ class DealerEmail extends Model
         'last_sent',
         'frequency',
         'paused',
+        'attachment_name'
     ];
 
     protected $casts = [
