@@ -21,20 +21,18 @@ class DealerEmailMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('no-reply@crm-armp.com'),
+            from: new Address($this->dealerEmail->user->email),
             subject: $this->dealerEmail->subject,
         );
     }
 
     public function content(): Content
     {
-        $user = $this->dealerEmail->user;
-
         return new Content(
             markdown: 'emails.dealer-email',
             with: [
                 'message' => $this->dealerEmail->message,
-                'user' => $user->name,
+                'user' => $this->dealerEmail->user->name,
             ],
         );
     }
