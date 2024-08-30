@@ -35,8 +35,7 @@ class DealerEmailRelationManager extends RelationManager
                 Select::make('template_choice')
                     ->required()
                     ->options(function () {
-                        $templateOptions = DealerEmailTemplate::pluck('name', 'id')->toArray();
-                        return ['' => 'Blank Form'] + $templateOptions;
+                        return DealerEmailTemplate::pluck('name', 'id')->toArray();
                     })
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
