@@ -40,7 +40,7 @@ class DealerEmailMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         return [
-            Attachment::fromStorageDisk('public', $this->dealerEmail->attachment),
+            Attachment::fromStorageDisk('public', $this->dealerEmail->attachment)->as($this->dealerEmail->attachment_name),
         ];
     }
 }
