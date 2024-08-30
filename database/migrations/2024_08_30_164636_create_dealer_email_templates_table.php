@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('subject');
-            $table->string('body');
+            $table->text('body');
             $table->string('attachment_path')->nullable();
             $table->string('attachment_name')->nullable();
             $table->timestamps();

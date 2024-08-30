@@ -38,6 +38,7 @@ class DealerEmailTemplateResource extends Resource
                     ->columnSpanFull()
                     ->required(),
                 FileUpload::make('attachment_path')
+                    ->label('Attachment')
                     ->acceptedFileTypes(['application/pdf'])
                     ->storeFileNamesIn('attachment_name')
                     ->columnSpanFull()
@@ -50,7 +51,7 @@ class DealerEmailTemplateResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('subject'),
+                TextColumn::make('name'),
             ])
             ->filters([
                 //
