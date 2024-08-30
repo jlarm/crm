@@ -22,16 +22,16 @@ class DealerEmailPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->can('create_dealer::email',);
     }
 
     public function update(User $user, DealerEmail $dealerEmail): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->id === $dealerEmail->user_id;
     }
 
     public function delete(User $user, DealerEmail $dealerEmail): bool
     {
-        return $user->can('delete');
+        return $user->id === $dealerEmail->user_id;
     }
 }
