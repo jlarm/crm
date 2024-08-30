@@ -33,7 +33,6 @@ class DealerEmailRelationManager extends RelationManager
                     })
                     ->columnSpanFull(),
                 Select::make('template_choice')
-                    ->required()
                     ->options(function () {
                         return DealerEmailTemplate::pluck('name', 'id')->toArray();
                     })
