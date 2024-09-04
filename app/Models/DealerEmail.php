@@ -13,6 +13,9 @@ class DealerEmail extends Model
     protected $fillable = [
         'user_id',
         'dealership_id',
+        'dealer_email_template_id',
+        'customize_email',
+        'customize_attachment',
         'recipients',
         'attachment',
         'subject',
@@ -30,6 +33,8 @@ class DealerEmail extends Model
         'paused' => 'boolean',
         'recipients' => 'array',
         'frequency' => ReminderFrequency::class,
+        'customize_email' => 'boolean',
+        'customize_attachment' => 'boolean'
     ];
 
     public function user(): BelongsTo
@@ -40,6 +45,11 @@ class DealerEmail extends Model
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
+    }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(DealerEmailTemplate::class, 'dealer_email_template_id');
     }
 
     protected static function boot()
