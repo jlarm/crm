@@ -22,7 +22,16 @@ class SendDealerEmailCommand extends Command
             ->get();
 
         foreach ($emails as $email) {
-            if ($email->start_date->isToday() || $email->last_sent->addDays($email->frequency->value)->isToday()) {
+            if ($email->frequency == 0 && $email->last_sent) {
+                continue;
+            }
+
+            $shouldSendEmail = $email->start_date->isToday();
+            if ($email->last_sent) {
+                $shouldSendEmail = $shouldSendEmail || $email->last_sent->addDays($email->frequency->value)->isToday();
+            }
+
+            if ($shouldSendEmail) {
                 foreach ($email->recipients as $recipient) {
                     Mail::to($recipient)->send(new DealerEmailMail($email));
                     $email->update(['last_sent' => now()->format('Y-m-d')]);

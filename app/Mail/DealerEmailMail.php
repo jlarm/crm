@@ -16,13 +16,40 @@ class DealerEmailMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(private readonly DealerEmail $dealerEmail) {}
+    public $subject;
+    public mixed $body;
+    public $attachment;
+    public $attachmentName;
+    public function __construct(private readonly DealerEmail $dealerEmail) {
+        if ($dealerEmail->template) {
+            if ($this->dealerEmail->customize_email) {
+                $this->subject = $dealerEmail->subject;
+                $this->body = $dealerEmail->message;
+            } else {
+                $this->subject = $dealerEmail->template->subject;
+                $this->body = $dealerEmail->template->body;
+            }
+
+            if ($this->dealerEmail->customize_attachment) {
+                $this->attachment = $dealerEmail->attachment;
+                $this->attachmentName = $dealerEmail->attachment_name;
+            } else {
+                $this->attachment = $dealerEmail->template->attachment_path;
+                $this->attachmentName = $dealerEmail->template->attachment_name;
+            }
+        } else {
+            $this->subject = $dealerEmail->subject;
+            $this->body = $dealerEmail->message;
+            $this->attachment = $dealerEmail->attachment;
+            $this->attachmentName = $dealerEmail->attachment_name;
+        }
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
             from: new Address($this->dealerEmail->user->email),
-            subject: $this->dealerEmail->subject,
+            subject: $this->subject,
         );
     }
 
@@ -31,7 +58,7 @@ class DealerEmailMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.dealer-email',
             with: [
-                'message' => $this->dealerEmail->message,
+                'message' => $this->body,
                 'user' => $this->dealerEmail->user->name,
             ],
         );
@@ -39,8 +66,12 @@ class DealerEmailMail extends Mailable implements ShouldQueue
 
     public function attachments(): array
     {
-        return [
-            Attachment::fromStorageDisk('public', $this->dealerEmail->attachment)->as($this->dealerEmail->attachment_name),
-        ];
+        if ($this->attachment) {
+            return [
+                Attachment::fromStorageDisk('public', $this->attachment)->as($this->attachmentName),
+            ];
+        }
+
+        return [];
     }
 }
