@@ -21,9 +21,13 @@ class DealerEmailTemplateResource extends Resource
 {
     protected static ?string $model = DealerEmailTemplate::class;
 
+    protected static ?string $navigationLabel = 'Templates';
+
     protected static ?string $slug = 'dealer-email-templates';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+
+    protected static ?string $navigationGroup = 'Email';
 
     public static function form(Form $form): Form
     {

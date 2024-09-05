@@ -19,6 +19,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Actions\Action;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -35,6 +37,8 @@ class DealershipResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -372,14 +376,15 @@ class DealershipResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return [
-            RelationManagers\StoresRelationManager::class,
-            RelationManagers\ContactsRelationManager::class,
-            RelationManagers\ProgressesRelationManager::class,
-            RelationManagers\DealerEmailRelationManager::class,
-        ];
+        return $page->generateNavigationItems([
+            Pages\EditDealership::class,
+            Pages\ManageDealershipStores::class,
+            Pages\ManageDealershipContacts::class,
+            Pages\ManageDealershipProgresses::class,
+            Pages\ManageDealershipDealerEmails::class,
+        ]);
     }
 
     public static function getPages(): array
@@ -389,6 +394,10 @@ class DealershipResource extends Resource
             'index' => Pages\ListDealerships::route('/'),
             'create' => Pages\CreateDealership::route('/create'),
             'edit' => Pages\EditDealership::route('/{record}/edit'),
+            'stores' => Pages\ManageDealershipStores::route('/{record}/stores'),
+            'contacts' => Pages\ManageDealershipContacts::route('/{record}/contacts'),
+            'progresses' => Pages\ManageDealershipProgresses::route('/{record}/progresses'),
+            'emails' => Pages\ManageDealershipDealerEmails::route('/{record}/emails'),
         ];
     }
 }

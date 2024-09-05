@@ -40,6 +40,11 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->navigationGroups([
+                'Email',
+                'Settings',
+                'Filament Shield',
+            ])
             ->resources([
                 config('filament-logger.activity_resource'),
             ])
