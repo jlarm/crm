@@ -20,8 +20,9 @@ class DealerEmailMail extends Mailable implements ShouldQueue
     public mixed $body;
     public $attachment;
     public $attachmentName;
-    public function __construct(private readonly DealerEmail $dealerEmail) {
+    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name) {
         if ($dealerEmail->template) {
+
             if ($this->dealerEmail->customize_email) {
                 $this->subject = $dealerEmail->subject;
                 $this->body = $dealerEmail->message;
@@ -37,12 +38,16 @@ class DealerEmailMail extends Mailable implements ShouldQueue
                 $this->attachment = $dealerEmail->template->attachment_path;
                 $this->attachmentName = $dealerEmail->template->attachment_name;
             }
+
+            $this->body = str_replace('{{contact_name}}', $this->name, $this->body);
+
         } else {
             $this->subject = $dealerEmail->subject;
             $this->body = $dealerEmail->message;
             $this->attachment = $dealerEmail->attachment;
             $this->attachmentName = $dealerEmail->attachment_name;
         }
+
     }
 
     public function envelope(): Envelope

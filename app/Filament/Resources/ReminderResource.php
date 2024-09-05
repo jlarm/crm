@@ -28,6 +28,7 @@ class ReminderResource extends Resource
                     ->columnSpanFull()
                     ->required(),
                 Forms\Components\RichEditor::make('message')
+                    ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->required(),
                 Forms\Components\DatePicker::make('start_date')
