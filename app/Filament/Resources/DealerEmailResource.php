@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enum\ReminderFrequency;
 use App\Filament\Resources\DealerEmailResource\Pages;
-use App\Filament\Resources\DealerEmailResource\RelationManagers;
 use App\Models\DealerEmail;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,6 +15,12 @@ class DealerEmailResource extends Resource
 {
     protected static ?string $model = DealerEmail::class;
 
+    protected static ?string $navigationLabel = 'Current Emails';
+
+    protected static ?string $navigationIcon = 'heroicon-o-envelope';
+
+    protected static ?string $navigationGroup = 'Email';
+
     public static function canCreate(): bool
     {
         return false;
@@ -25,8 +30,6 @@ class DealerEmailResource extends Resource
     {
         return false;
     }
-
-    protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
 
     public static function form(Form $form): Form
     {
