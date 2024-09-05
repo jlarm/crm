@@ -43,7 +43,12 @@ class DealerEmailTemplateResource extends Resource
                     ->storeFileNamesIn('attachment_name')
                     ->columnSpanFull()
                     ->directory('form-attachments'),
-                RichEditor::make('body')->required()->columnSpanFull(),
+                RichEditor::make('body')
+                    ->hint('Use the {{contact_name}} placeholder to insert the contact\'s name.')
+                    ->hintColor('primary')
+                    ->required()
+                    ->disableToolbarButtons(['attachFiles', 'codeBlock'])
+                    ->columnSpanFull(),
             ]);
     }
 

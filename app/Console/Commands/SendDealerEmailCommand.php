@@ -3,10 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Mail\DealerEmailMail;
+use App\Models\Contact;
 use App\Models\DealerEmail;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class SendDealerEmailCommand extends Command
@@ -33,7 +32,8 @@ class SendDealerEmailCommand extends Command
 
             if ($shouldSendEmail) {
                 foreach ($email->recipients as $recipient) {
-                    Mail::to($recipient)->send(new DealerEmailMail($email));
+                    $name = Contact::where('email', $recipient)->first()->name;
+                    Mail::to($recipient)->send(new DealerEmailMail($email, $name));
                     $email->update(['last_sent' => now()->format('Y-m-d')]);
                 }
             }

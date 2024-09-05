@@ -138,7 +138,7 @@ class DealershipResource extends Resource
                                     ->autosize()
                                     ->hiddenLabel()
                                     ->columnSpanFull(),
-                            ])->collapsible(),
+                            ])->collapsed(),
                         Forms\Components\Section::make('Current Solution')
                             ->schema([
                                 Grid::make(2)
@@ -185,7 +185,10 @@ class DealershipResource extends Resource
                         Forms\Components\Section::make()
                             ->schema([
                                Forms\Components\Actions::make([
-                                   Forms\Components\Actions\Action::make('Send Email to Sales Development Rep')
+                                   Forms\Components\Actions\Action::make('Email Sales Development Rep')
+                                       ->link()
+                                       ->icon('heroicon-o-envelope')
+//                                       ->color('gray')
                                        ->hidden(fn (string $operation): bool => $operation === 'create')
                                        ->form([
                                            Select::make('user')
@@ -211,32 +214,32 @@ class DealershipResource extends Resource
                                                'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
                                            ]);
                                        }),
-                                   Forms\Components\Actions\Action::make('Send Email to client')
-                                       ->hidden(fn (string $operation): bool => $operation === 'create')
-                                       ->form([
-                                           Select::make('contact_id')
-                                               ->relationship('contacts', 'name', fn (Builder $query) => $query->where('dealership_id', $form->model->id))
-                                               ->required()
-                                               ->label('Dealership Contact')
-                                               ->helperText('Select the dealership contact to send the email to.'),
-                                           TextInput::make('subject')->required(),
-                                           RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
-                                       ])
-                                       ->action(function (array $data, Form $form) {
-                                           $contact = Contact::where('id', $data['contact_id'])->first();
-                                           Mail::to($contact)
-                                               ->send(new ClientMail(
-                                                   auth()->user(),
-                                                   $data['subject'],
-                                                   $data['body']
-                                               ));
-                                           Progress::create([
-                                               'dealership_id' => $form->model->id,
-                                               'user_id' => auth()->id(),
-                                               'date' => now(),
-                                               'details' => 'Sent email to '.$contact->name. ' - ' . $data['subject'],
-                                           ]);
-                                       })
+//                                   Forms\Components\Actions\Action::make('Send Email to client')
+//                                       ->hidden(fn (string $operation): bool => $operation === 'create')
+//                                       ->form([
+//                                           Select::make('contact_id')
+//                                               ->relationship('contacts', 'name', fn (Builder $query) => $query->where('dealership_id', $form->model->id))
+//                                               ->required()
+//                                               ->label('Dealership Contact')
+//                                               ->helperText('Select the dealership contact to send the email to.'),
+//                                           TextInput::make('subject')->required(),
+//                                           RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
+//                                       ])
+//                                       ->action(function (array $data, Form $form) {
+//                                           $contact = Contact::where('id', $data['contact_id'])->first();
+//                                           Mail::to($contact)
+//                                               ->send(new ClientMail(
+//                                                   auth()->user(),
+//                                                   $data['subject'],
+//                                                   $data['body']
+//                                               ));
+//                                           Progress::create([
+//                                               'dealership_id' => $form->model->id,
+//                                               'user_id' => auth()->id(),
+//                                               'date' => now(),
+//                                               'details' => 'Sent email to '.$contact->name. ' - ' . $data['subject'],
+//                                           ]);
+//                                       })
                                ])
                             ])
                     ])->columnSpan(1),

@@ -59,7 +59,8 @@ class DealerEmailRelationManager extends RelationManager
                         }
                     })
                     ->columnSpanFull()
-                    ->label('Select a template'),
+                    ->helperText('Optional: Select a template to use for the email')
+                    ->label('Template'),
                 Checkbox::make('customize_email')
                     ->columnSpanFull()
                     ->label('Customize email')
@@ -104,6 +105,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
                     ->maxLength(255),
                 RichEditor::make('message')
+                    ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
                     ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
