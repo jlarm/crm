@@ -22,6 +22,7 @@ class DealerEmail extends Model
         'message',
         'start_date',
         'last_sent',
+        'next_send_date',
         'frequency',
         'paused',
         'attachment_name'
