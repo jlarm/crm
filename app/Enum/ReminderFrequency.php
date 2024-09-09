@@ -10,6 +10,8 @@ enum ReminderFrequency: int implements HasLabel
     case Daily = 1;
     case Weekly = 7;
     case Monthly = 30;
+
+    case BiMonthly = 60;
     case Quarterly = 90;
     case Yearly = 365;
 
@@ -20,6 +22,7 @@ enum ReminderFrequency: int implements HasLabel
             self::Daily => 'Daily',
             self::Weekly => 'Weekly',
             self::Monthly => 'Monthly',
+            self::BiMonthly => 'Bi-Monthly',
             self::Quarterly => 'Quarterly',
             self::Yearly => 'Yearly',
         };
@@ -31,6 +34,7 @@ enum ReminderFrequency: int implements HasLabel
             self::Daily => 'subDay',
             self::Weekly => 'subWeek',
             self::Monthly => 'subMonth',
+            self::BiMonthly => 'subBiMonth',
             self::Quarterly => 'subQuarter',
             self::Yearly => 'subYear',
         };
