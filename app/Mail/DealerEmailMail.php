@@ -53,7 +53,7 @@ class DealerEmailMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address($this->dealerEmail->user->email),
+            from: new Address($this->dealerEmail->user->email, $this->dealerEmail->user->name . ' from ARMP'),
             subject: $this->subject,
         );
     }
