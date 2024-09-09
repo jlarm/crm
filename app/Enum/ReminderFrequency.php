@@ -27,16 +27,4 @@ enum ReminderFrequency: int implements HasLabel
             self::Yearly => 'Yearly',
         };
     }
-
-    public function toCarbonMethod(): string
-    {
-        return match($this) {
-            self::Daily => 'subDay',
-            self::Weekly => 'subWeek',
-            self::Monthly => 'subMonth',
-            self::BiMonthly => 'subBiMonth',
-            self::Quarterly => 'subQuarter',
-            self::Yearly => 'subYear',
-        };
-    }
 }

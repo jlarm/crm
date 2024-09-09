@@ -23,7 +23,7 @@ class DealerEmailObserver
         } else {
             Log::info('Conditions not met for immediate sending', [
                 'id' => $dealerEmail->id,
-                'frequency' => $dealerEmail->frequency,
+                'frequency' => $dealerEmail->frequency->value,
                 'start_date' => $dealerEmail->start_date,
                 'current_date' => now()->toDateString()
             ]);
