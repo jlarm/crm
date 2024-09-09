@@ -55,7 +55,7 @@ class DealerEmailResource extends Resource
             )
             ->columns([
                 Tables\Columns\TextColumn::make('dealership.name')->sortable(),
-                Tables\Columns\TextColumn::make('subject'),
+                Tables\Columns\TextColumn::make('recipients'),
                 Tables\Columns\TextColumn::make('frequency'),
                 Tables\Columns\TextColumn::make('last_sent')->date()
             ])
@@ -63,7 +63,11 @@ class DealerEmailResource extends Resource
                 //
             ])
             ->actions([
-//                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('view_dealership_emails')
+                    ->label('View')
+                    ->url(fn (DealerEmail $record): string => 
+                        DealershipResource::getUrl('emails', ['record' => $record->dealership])
+                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
