@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class DealerEmail extends Model
 {
@@ -51,6 +52,11 @@ class DealerEmail extends Model
     public function template(): BelongsTo
     {
         return $this->belongsTo(DealerEmailTemplate::class, 'dealer_email_template_id');
+    }
+
+    public function pdfAttachments(): MorphToMany
+    {
+        return $this->morphToMany(PdfAttachment::class, 'attachable');
     }
 
     protected static function boot()

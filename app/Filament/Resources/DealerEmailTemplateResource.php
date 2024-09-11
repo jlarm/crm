@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -41,12 +42,18 @@ class DealerEmailTemplateResource extends Resource
                     ->required()
                     ->columnSpanFull()
                     ->required(),
-                FileUpload::make('attachment_path')
-                    ->label('Attachment')
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->storeFileNamesIn('attachment_name')
+                Select::make('pdf_attachments')
+                    ->multiple()
+                    ->relationship('pdfAttachments', 'file_name')
+                    ->preload()
                     ->columnSpanFull()
-                    ->directory('form-attachments'),
+                    ->createOptionForm([
+                        FileUpload::make('file_path')
+                            ->required()
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->storeFileNamesIn('file_name')
+                            ->directory('pdfs'),
+                    ]),
                 RichEditor::make('body')
                     ->hint('Use the {{contact_name}} placeholder to insert the contact\'s name.')
                     ->hintColor('primary')
