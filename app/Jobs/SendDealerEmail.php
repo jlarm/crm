@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Jobs;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DealerEmailMail;
+use Illuminate\Support\Facades\Log;
+use App\Models\Contact;
+use App\Models\DealerEmail;
+
+class SendDealerEmail implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $dealerEmail;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(DealerEmail $dealerEmail)
+    {
+        $this->dealerEmail = $dealerEmail;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $this->dealerEmail->load('pdfAttachments');
+
+        Log::info(['pdfs' => $this->dealerEmail->pdfAttachments]);
+
+        $this->sendDealerEmails($this->dealerEmail);
+    }
+
+    private function sendDealerEmails(DealerEmail $dealerEmail): void
+    {
+        try {
+            if (empty($dealerEmail->recipients)) {
+                return;
+            }
+
+            foreach ($dealerEmail->recipients as $recipient) {
+                $contact = Contact::where('email', $recipient)->first();
+                $name = $contact ? $contact->name : '';
+
+                try {
+                    Mail::to($recipient)->send(new DealerEmailMail($dealerEmail, $name));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send email to recipient', ['email' => $recipient, 'error' => $e->getMessage()]);
+                }
+            }
+
+            // Update last_sent date
+            $dealerEmail->last_sent = now()->format('Y-m-d');
+            $dealerEmail->save();
+        } catch (\Exception $e) {
+            Log::error('Error in sendDealerEmails', ['id' => $dealerEmail->id, 'error' => $e->getMessage()]);
+        }
+    }
+}

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 use App\Enum\ReminderFrequency;
 use App\Filament\Resources\DealershipResource;
 use App\Models\DealerEmailTemplate;
+use App\Models\PdfAttachment;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -61,34 +62,50 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                             $set('subject', '');
                             $set('message', '');
                             $set('attachment', null);
+                            $set('pdf_attachments', []);
                         } else {
                             $template = DealerEmailTemplate::find($state);
                             if ($template) {
                                 $set('subject', $template->subject);
                                 $set('attachment', $template->attachment);
                                 $set('message', $template->body);
+                                $set('pdf_attachments', $template->pdfAttachments->pluck('id')->toArray());
                             } else {
                                 $set('subject', '');
                                 $set('message', '');
                                 $set('attachment', null);
+                                $set('pdf_attachments', []);
                             }
                         }
                     })
                     ->columnSpanFull()
                     ->helperText('Optional: Select a template to use for the email')
                     ->label('Template'),
+                Select::make('pdf_attachments')
+                    ->multiple()
+                    ->relationship('pdfAttachments', 'file_name')
+                    ->preload()
+                    ->columnSpanFull()
+                    ->createOptionForm([
+                        FileUpload::make('file_path')
+                            ->required()
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->storeFileNamesIn('file_name')
+                            ->directory('pdfs'),
+                    ]),
                 Checkbox::make('customize_email')
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
                     ->hidden(fn (Get $get) => $get('dealer_email_template_id') == null)
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        if ($state === '') {
+                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                        $templateId = $get('dealer_email_template_id');
+                        if ($templateId === null) {
                             $set('subject', '');
                             $set('message', '');
                             $set('attachment', null);
                         } else {
-                            $template = DealerEmailTemplate::find($state);
+                            $template = DealerEmailTemplate::find($templateId);
                             if ($template) {
                                 $set('subject', $template->subject);
                                 $set('attachment', $template->attachment);
@@ -101,19 +118,6 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                         }
                     })
                     ->default(false),
-                Checkbox::make('customize_attachment')
-                    ->columnSpanFull()
-                    ->label('Customize attachment')
-                    ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') == null)
-                    ->default(false),
-                FileUpload::make('attachment')
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->storeFileNamesIn('attachment_name')
-                    ->columnSpanFull()
-                    ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_attachment') == false)
-                    ->directory('form-attachments'),
                 TextInput::make('subject')
                     ->columnSpanFull()
                     ->required()

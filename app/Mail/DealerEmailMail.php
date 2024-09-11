@@ -19,7 +19,9 @@ class DealerEmailMail extends Mailable
     public mixed $body;
     public $attachment;
     public $attachmentName;
+    
     public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name) {
+
         if ($dealerEmail->template) {
 
             if ($this->dealerEmail->customize_email) {
@@ -30,21 +32,11 @@ class DealerEmailMail extends Mailable
                 $this->body = $dealerEmail->template->body;
             }
 
-            if ($this->dealerEmail->customize_attachment) {
-                $this->attachment = $dealerEmail->attachment;
-                $this->attachmentName = $dealerEmail->attachment_name;
-            } else {
-                $this->attachment = $dealerEmail->template->attachment_path;
-                $this->attachmentName = $dealerEmail->template->attachment_name;
-            }
-
             $this->body = str_replace('{{contact_name}}', $this->name, $this->body);
 
         } else {
             $this->subject = $dealerEmail->subject;
             $this->body = $dealerEmail->message;
-            $this->attachment = $dealerEmail->attachment;
-            $this->attachmentName = $dealerEmail->attachment_name;
         }
 
     }
@@ -68,14 +60,16 @@ class DealerEmailMail extends Mailable
         );
     }
 
-    public function attachments(): array
+    public function attachments()
     {
-        if ($this->attachment) {
-            return [
-                Attachment::fromStorageDisk('public', $this->attachment)->as($this->attachmentName),
-            ];
+        $attachments = [];
+
+        if ($this->dealerEmail->pdfAttachments) {
+            foreach ($this->dealerEmail->pdfAttachments as $attachment) {
+                $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
+            }
         }
 
-        return [];
+        return $attachments;
     }
 }
