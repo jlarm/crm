@@ -5,7 +5,6 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 use App\Enum\ReminderFrequency;
 use App\Filament\Resources\DealershipResource;
 use App\Models\DealerEmailTemplate;
-use App\Models\PdfAttachment;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
