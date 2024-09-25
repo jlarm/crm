@@ -48,12 +48,15 @@ class SendDealerEmail implements ShouldQueue
                 return;
             }
 
+            Log::info('Attempting to send one off emails');
+
             foreach ($dealerEmail->recipients as $recipient) {
                 $contact = Contact::where('email', $recipient)->first();
                 $name = $contact ? $contact->name : '';
 
                 try {
                     Mail::to($recipient)->send(new DealerEmailMail($dealerEmail, $name));
+                    Log::info('Sent email to: ' . $recipient);
                 } catch (\Exception $e) {
                     Log::error('Failed to send email to recipient', ['email' => $recipient, 'error' => $e->getMessage()]);
                 }
