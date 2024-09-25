@@ -3,9 +3,6 @@
 namespace App\Observers;
 
 use App\Models\DealerEmail;
-use App\Models\Contact;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\DealerEmailMail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;

@@ -143,10 +143,11 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
     {
         return $table
             ->recordTitleAttribute('name')
+            ->defaultSort('last_sent', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('recipients'),
-                Tables\Columns\TextColumn::make('frequency'),
-                Tables\Columns\TextColumn::make('last_sent')->date(),
+                Tables\Columns\TextColumn::make('recipients')->sortable(),
+                Tables\Columns\TextColumn::make('frequency')->sortable(),
+                Tables\Columns\TextColumn::make('last_sent')->date()->sortable(),
             ])
             ->filters([
                 //

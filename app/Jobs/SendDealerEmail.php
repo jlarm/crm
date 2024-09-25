@@ -38,8 +38,6 @@ class SendDealerEmail implements ShouldQueue
     {
         $this->dealerEmail->load('pdfAttachments');
 
-        Log::info(['pdfs' => $this->dealerEmail->pdfAttachments]);
-
         $this->sendDealerEmails($this->dealerEmail);
     }
 
