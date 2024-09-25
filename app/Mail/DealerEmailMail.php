@@ -19,7 +19,7 @@ class DealerEmailMail extends Mailable
     public mixed $body;
     public $attachment;
     public $attachmentName;
-    
+
     public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name) {
 
         if ($dealerEmail->template) {
@@ -55,7 +55,7 @@ class DealerEmailMail extends Mailable
             markdown: 'emails.dealer-email',
             with: [
                 'message' => $this->body,
-                'user' => $this->dealerEmail->user->name,
+                'user' => $this->dealerEmail->user,
             ],
         );
     }
