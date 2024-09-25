@@ -22,7 +22,7 @@ enum ReminderFrequency: int implements HasLabel
             self::Daily => 'Daily',
             self::Weekly => 'Weekly',
             self::Monthly => 'Monthly',
-            self::BiMonthly => 'Bi-Monthly',
+            self::BiMonthly => 'Every Other Monthly',
             self::Quarterly => 'Quarterly',
             self::Yearly => 'Yearly',
         };
