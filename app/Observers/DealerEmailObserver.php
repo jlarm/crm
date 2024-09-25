@@ -18,6 +18,7 @@ class DealerEmailObserver
 
         if ($isFrequencyZero && $isStartDateToday) {
             // Dispatch the job to handle email sending
+            Log::info('Sending one off email');
             SendDealerEmail::dispatch($dealerEmail);
         } else {
             Log::info('Conditions not met for immediate sending', [
