@@ -58,6 +58,11 @@ class Dealership extends Model
         return $this->hasMany(DealerEmail::class);
     }
 
+    public function sentEMails(): HasMany
+    {
+        return $this->hasMany(SentEmail::class);
+    }
+
     protected static function boot(): void
     {
         parent::boot();
