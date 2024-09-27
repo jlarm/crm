@@ -7,12 +7,14 @@ use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\DealerEmailTemplate;
 use App\Models\Reminder;
+use App\Models\SentEmail;
 use App\Models\User;
 use App\Policies\ActivityPolicy;
 use App\Policies\ContactPolicy;
 use App\Policies\DealerEmailPolicy;
 use App\Policies\DealerEmailTemplatePolicy;
 use App\Policies\ReminderPolicy;
+use App\Policies\SentEmailPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -33,6 +35,7 @@ class AuthServiceProvider extends ServiceProvider
         Reminder::class => ReminderPolicy::class,
         DealerEmail::class => DealerEmailPolicy::class,
         DealerEmailTemplate::class => DealerEmailTemplatePolicy::class,
+        SentEmail::class => SentEmailPolicy::class,
     ];
 
     /**

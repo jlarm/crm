@@ -93,4 +93,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(DealerEmail::class);
     }
+
+    public function sentEmails(): HasMany
+    {
+        return $this->hasMany(SentEmail::class);
+    }
 }
