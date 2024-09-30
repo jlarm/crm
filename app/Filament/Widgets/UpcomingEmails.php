@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\DealerEmail;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UpcomingEmails extends BaseWidget
 {
+    use HasWidgetShield;
     protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 1;
