@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Enum\ReminderFrequency;
 use App\Mail\DealerEmailMail;
 use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\SentEmail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+use Log;
 
 class SendDealerEmailCommand extends Command
 {
@@ -44,15 +46,10 @@ class SendDealerEmailCommand extends Command
                 ]);
             }
 
-            $email->last_sent = now()->format('Y-m-d');
-
-            if ($email->frequency > 0) {
-                $email->next_send_date = now()->addDays($email->frequency)->format('Y-m-d');
-            } else {
-                $email->next_send_date = null;
-            }
-
-            $email->save();
+            $email->update([
+                'last_sent' => now()->format('Y-m-d'),
+                'next_send_date' => $email->frequency->value > 0 ? now()->addDays($email->frequency->value)->format('Y-m-d') : null,
+            ]);
         }
     }
 }
