@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\DealerEmailMail;
 use App\Models\Contact;
 use App\Models\DealerEmail;
+use App\Models\SentEmail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -36,6 +37,11 @@ class SendDealerEmailCommand extends Command
             foreach ($email->recipients as $recipient) {
                 $name = Contact::where('email', $recipient)->first()->name;
                 Mail::to($recipient)->send(new DealerEmailMail($email, $name));
+                SentEmail::create([
+                    'user_id' => $email->user_id,
+                    'dealership_id' => $email->dealership_id,
+                    'recipient' => $recipient,
+                ]);
             }
 
             $email->last_sent = now()->format('Y-m-d');
