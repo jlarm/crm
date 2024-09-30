@@ -3,6 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\EditProfile;
+use App\Filament\Widgets\DealershipStatusOverview;
+use App\Filament\Widgets\MyDealerships;
+use App\Filament\Widgets\UpcomingEmails;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -55,6 +58,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                DealershipStatusOverview::class,
+                UpcomingEmails::class,
+                MyDealerships::class,
                 //                Widgets\AccountWidget::class,
                 //                Widgets\FilamentInfoWidget::class,
             ])

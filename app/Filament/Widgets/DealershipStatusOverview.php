@@ -9,6 +9,8 @@ class DealershipStatusOverview extends BaseWidget
 {
     protected $user;
 
+    protected static ?int $sort = 0;
+
     protected function getStats(): array
     {
         $this->user = auth()->user();
