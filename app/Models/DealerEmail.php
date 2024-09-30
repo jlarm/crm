@@ -26,7 +26,8 @@ class DealerEmail extends Model
         'next_send_date',
         'frequency',
         'paused',
-        'attachment_name'
+        'attachment_name',
+        'next_send_date'
     ];
 
     protected $casts = [
@@ -36,7 +37,8 @@ class DealerEmail extends Model
         'recipients' => 'array',
         'frequency' => ReminderFrequency::class,
         'customize_email' => 'boolean',
-        'customize_attachment' => 'boolean'
+        'customize_attachment' => 'boolean',
+        'next_send_date' => 'date:Y-m-d'
     ];
 
     public function user(): BelongsTo
