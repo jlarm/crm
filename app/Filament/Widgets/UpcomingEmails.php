@@ -31,6 +31,10 @@ class UpcomingEmails extends BaseWidget
                 Tables\Columns\TextColumn::make('next_send_date')->date(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user')
+                    ->relationship('user', 'name')
+                    ->label('Consultant')
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('next_send_date')
                     ->options([
                         'seven_days' => 'Next 7 days',
