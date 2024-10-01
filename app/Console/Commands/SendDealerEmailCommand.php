@@ -47,7 +47,7 @@ class SendDealerEmailCommand extends Command
 
             $email->update([
                 'last_sent' => now()->format('Y-m-d'),
-//                'next_send_date' => $email->frequency->value > 0 ? now()->addDays($email->frequency->value)->format('Y-m-d') : null,
+                'next_send_date' => $email->frequency->value > 0 ? now()->addDays($email->frequency->value)->format('Y-m-d') : null,
             ]);
         }
     }
