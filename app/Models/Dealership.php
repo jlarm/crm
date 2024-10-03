@@ -87,6 +87,6 @@ class Dealership extends Model
             'Maritime' => '59c46030-5429-4ffd-a192-42926b9b17eb',
         ];
 
-        return $types[$this->type];
+        return $types[$this->type] ?? 'default_value';
     }
 }
