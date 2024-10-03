@@ -48,12 +48,15 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->options(function () {
                         return $this->getOwnerRecord()->contacts()
                             ->pluck('email', 'email')
+                            ->filter() // Ensure no null values
                             ->toArray();
                     })
                     ->columnSpanFull(),
                 Select::make('dealer_email_template_id')
                     ->options(function () {
-                        return DealerEmailTemplate::pluck('name', 'id')->toArray();
+                        return DealerEmailTemplate::pluck('name', 'id')
+                            ->filter() // Ensure no null values
+                            ->toArray();
                     })
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
