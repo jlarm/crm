@@ -45,6 +45,11 @@ class ContactResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->description(fn (Contact $contact): string => $contact->phone ?? '')
                     ->searchable(),
+                Tables\Columns\IconColumn::make('linkedin_link')
+                    ->label('LinkedIn')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->url(fn ($record) => $record->linkedin_link)
+                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('position'),
                 Tables\Columns\TextColumn::make('dealership.name')
                     ->description(fn (Contact $contact): string => $contact->dealership->city.', '.$contact->dealership->state)
