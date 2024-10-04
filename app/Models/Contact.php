@@ -16,6 +16,7 @@ class Contact extends Model
         'phone',
         'position',
         'primary_contact',
+        'linkedin_link'
     ];
 
     protected $casts = [

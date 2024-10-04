@@ -56,6 +56,11 @@ class ManageDealershipContacts extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->nullable()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('linkedin_link')
+                    ->columnSpanFull()
+                    ->url()
+                    ->placeholder('https://www.linkedin.com/in/tomdortch/')
+                    ->nullable(),
                 Forms\Components\Toggle::make('primary_contact'),
             ]);
     }
@@ -67,7 +72,11 @@ class ManageDealershipContacts extends ManageRelatedRecords
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('phone'),
+                Tables\Columns\IconColumn::make('linkedin_link')
+                    ->label('LinkedIn')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->url(fn ($record) => $record->linkedin_link)
+                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('position'),
                 Tables\Columns\ToggleColumn::make('primary_contact')
                     ->afterStateUpdated(function ($record, $state) {
