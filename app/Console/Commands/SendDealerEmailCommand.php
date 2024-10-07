@@ -25,7 +25,7 @@ class SendDealerEmailCommand extends Command
                     $q->where('frequency', '>', 0)
                         ->where(function ($innerQ) {
                             $innerQ->whereNull('next_send_date')
-                                ->orWhere('next_send_date', '<=', now()->format('Y-m-d'));
+                                ->orWhere('next_send_date', '=', now()->format('Y-m-d'));
                         });
                 })->orWhere(function ($q) {
                     $q->where('frequency', 0)
