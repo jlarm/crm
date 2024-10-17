@@ -131,6 +131,7 @@ class DealershipResource extends Resource
                                                 'RV' => 'RV',
                                                 'Motorsports' => 'Motorsports',
                                                 'Maritime' => 'Maritime',
+                                                'Association' => 'Association',
                                             ])
                                             ->required(),
                                     ]),
@@ -298,6 +299,7 @@ class DealershipResource extends Resource
                         'RV' => 'RV',
                         'Motorsports' => 'Motorsports',
                         'Maritime' => 'Maritime',
+                        'Association' => 'Association',
                     ]),
                 Tables\Filters\SelectFilter::make('user')
                     ->label('Consultant')
