@@ -28,6 +28,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class DealershipResource extends Resource
@@ -287,6 +288,12 @@ class DealershipResource extends Resource
                 Tables\Filters\Filter::make('dealer_group')
                     ->label('Dealer Groups')
                     ->query(fn (Builder $query): Builder => $query->has('stores')),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                        'imported' => 'Imported',
+                    ]),
                 Tables\Filters\SelectFilter::make('rating')
                     ->options([
                         'hot' => 'Hot',
@@ -363,14 +370,30 @@ class DealershipResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                ExportBulkAction::make()->exports([
-                    ExcelExport::make()->withColumns([
-                        \pxlrbt\FilamentExcel\Columns\Column::make('name'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('phone'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('email'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('status'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('rating'),
-                    ]),
+                ExportBulkAction::make()
+                    ->label('Export Dealerships Details')
+                    ->exports([
+                        ExcelExport::make()
+                            ->withColumns([
+                                Column::make('name'),
+                                Column::make('phone'),
+                                Column::make('email'),
+                                Column::make('status'),
+                                Column::make('rating'),
+                        ]),
+                ]),
+                ExportBulkAction::make('contacts')
+                    ->label('Export Contact Emails')
+                    ->exports([
+                        ExcelExport::make()
+                            ->modifyQueryUsing(function ($query) {
+                                return $query->whereIn('dealership_id', $query->pluck('id'))
+                                    ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
+                                    ->select('contacts.email');
+                            })
+                            ->withColumns([
+                                Column::make('email'),
+                        ]),
                 ]),
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
