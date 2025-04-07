@@ -64,8 +64,22 @@ class DealerEmailMail extends Mailable
     {
         $attachments = [];
 
-        if ($this->dealerEmail->pdfAttachments) {
+        // If using a template without customization, include only the template's PDF attachments
+        if ($this->dealerEmail->template && !$this->dealerEmail->customize_email) {
+            foreach ($this->dealerEmail->template->pdfAttachments as $attachment) {
+                $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
+            }
+        } 
+        // If the email has custom PDF attachments, use those
+        elseif ($this->dealerEmail->pdfAttachments->isNotEmpty()) {
             foreach ($this->dealerEmail->pdfAttachments as $attachment) {
+                $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
+            }
+        }
+        // If using a template with customization but no custom PDF attachments were added, 
+        // still include the template's PDF attachments
+        elseif ($this->dealerEmail->template && $this->dealerEmail->customize_email) {
+            foreach ($this->dealerEmail->template->pdfAttachments as $attachment) {
                 $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
             }
         }
