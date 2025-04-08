@@ -81,20 +81,31 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                         }
                     })
                     ->columnSpanFull()
-                    ->helperText('Optional: Select a template to use for the email')
+                    ->helperText(function (Get $get) {
+                        $template = DealerEmailTemplate::find($get('dealer_email_template_id'));
+                        return $template ? 'PDF Attachments: ' . $template->pdfAttachments->pluck('file_name')->implode(', ') : null;
+                    })
                     ->label('Template'),
-                Select::make('pdf_attachments')
-                    ->multiple()
-                    ->relationship('pdfAttachments', 'file_name')
-                    ->preload()
-                    ->columnSpanFull()
-                    ->createOptionForm([
-                        FileUpload::make('file_path')
-                            ->required()
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->storeFileNamesIn('file_name')
-                            ->directory('pdfs'),
-                    ]),
+                // Checkbox::make('attach_pdf_template')
+                //     ->reactive()
+                //     ->columnSpanFull()
+                //     ->label('Add custom PDF attachments')
+                //     ->default(false),
+                // Select::make('pdf_attachments')
+                //     ->label('PDF Attachments')
+                //     ->visible(fn (Get $get) => $get('attach_pdf_template') == true)
+                //     ->reactive()
+                //     ->multiple()
+                //     ->relationship('pdfAttachments', 'file_name')
+                //     ->preload()
+                //     ->columnSpanFull()
+                //     ->createOptionForm([
+                //         FileUpload::make('file_path')
+                //             ->required()
+                //             ->acceptedFileTypes(['application/pdf'])
+                //             ->storeFileNamesIn('file_name')
+                //             ->directory('pdfs'),
+                //     ]),
                 Checkbox::make('customize_email')
                     ->columnSpanFull()
                     ->label('Customize email')
