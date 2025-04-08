@@ -83,7 +83,10 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->helperText(function (Get $get) {
                         $template = DealerEmailTemplate::find($get('dealer_email_template_id'));
-                        return $template ? 'PDF Attachments: ' . $template->pdfAttachments->pluck('file_name')->implode(', ') : null;
+                        if (!$template || $template->pdfAttachments->isEmpty()) {
+                            return null;
+                        }
+                        return 'PDF Attachments: ' . $template->pdfAttachments->pluck('file_name')->implode(', ');
                     })
                     ->label('Template'),
                 // Checkbox::make('attach_pdf_template')
