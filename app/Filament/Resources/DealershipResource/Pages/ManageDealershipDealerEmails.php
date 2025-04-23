@@ -149,6 +149,14 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
+                    ->required()
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('next_send_date', $state);
+                    }),
+                DatePicker::make('next_send_date')
+                    ->closeOnDateSelection()
+                    ->format('Y-m-d')
                     ->required(),
                 Select::make('frequency')
                     ->options(ReminderFrequency::class)
