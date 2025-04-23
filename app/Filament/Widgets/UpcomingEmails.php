@@ -29,8 +29,11 @@ class UpcomingEmails extends BaseWidget
                 Tables\Columns\TextColumn::make('dealership.name'),
                 Tables\Columns\TextColumn::make('recipients')
                     ->limitList(1),
-                Tables\Columns\TextColumn::make('next_send_date')->date(),
+                Tables\Columns\TextColumn::make('next_send_date')
+                    ->sortable()
+                    ->date(),
             ])
+            ->defaultSort('next_send_date', 'asc')
             ->filters([
                 Tables\Filters\SelectFilter::make('user')
                     ->relationship('user', 'name')
