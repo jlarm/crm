@@ -52,7 +52,7 @@ class DealerEmailResource extends Resource
             ->query(
                 DealerEmail::query()
                     ->where('user_id', auth()->id())
-                ->orderBy('created_at', 'desc')
+                ->orderBy('last_sent', 'desc')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('dealership.name')->sortable(),
@@ -60,7 +60,6 @@ class DealerEmailResource extends Resource
                 Tables\Columns\TextColumn::make('frequency')->sortable(),
                 Tables\Columns\TextColumn::make('last_sent')->date()->sortable()
             ])
-            ->defaultSort('last_sent', 'asc')
             ->filters([
                 //
             ])
