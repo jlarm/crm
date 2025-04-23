@@ -49,6 +49,7 @@ class SentEmailResource extends Resource
                     ->date()
                     ->label('Sent'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('user_id')
                     ->label('Consultant')
