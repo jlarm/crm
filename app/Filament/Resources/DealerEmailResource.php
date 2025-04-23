@@ -60,6 +60,7 @@ class DealerEmailResource extends Resource
                 Tables\Columns\TextColumn::make('frequency')->sortable(),
                 Tables\Columns\TextColumn::make('last_sent')->date()->sortable()
             ])
+            ->defaultSort('last_sent', 'desc')
             ->filters([
                 //
             ])
