@@ -27,7 +27,8 @@ class UpcomingEmails extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('user.name'),
                 Tables\Columns\TextColumn::make('dealership.name'),
-                Tables\Columns\TextColumn::make('recipients'),
+                Tables\Columns\TextColumn::make('recipients')
+                    ->limitList(1),
                 Tables\Columns\TextColumn::make('next_send_date')->date(),
             ])
             ->filters([
