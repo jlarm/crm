@@ -14,6 +14,11 @@ class ListDealerships extends ListRecords
 {
     protected static string $resource = DealershipResource::class;
 
+    public function getTitle(): string
+    {
+        return 'All Dealerships'; // Custom page title
+    }
+
     public function getStats(): array
     {
         return [
