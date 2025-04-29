@@ -26,6 +26,7 @@ class MyDealerships extends BaseWidget
             )
             ->columns([
                 TextColumn::make('name')
+                    ->searchable()
                     ->description(fn (Dealership $dealership): string => $dealership->city.', '.$dealership->state),
                 TextColumn::make('phone'),
                 TextColumn::make('status')
