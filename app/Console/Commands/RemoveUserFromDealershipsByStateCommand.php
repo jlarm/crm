@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class RemoveUserFromDealershipsByStateCommand extends Command
 {
-    protected $signature = 'user:remove-dealerships {userId} {state} {--dry-run}';
+    protected $signature = 'user:remove-dealerships {userId} {states*} {--dry-run}';
 
     protected $description = 'Command description';
 
