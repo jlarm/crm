@@ -77,10 +77,7 @@ class DealerEmail extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly([
-                'dealership_id'
-            ])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email {$eventName}");
     }
 }

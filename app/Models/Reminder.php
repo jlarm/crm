@@ -5,9 +5,13 @@ namespace App\Models;
 use App\Enum\ReminderFrequency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Reminder extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'user_id',
         'dev_rel',
@@ -39,5 +43,12 @@ class Reminder extends Model
                 $reminder->user_id = auth()->id();
             }
         });
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Reminder {$eventName}");
     }
 }
