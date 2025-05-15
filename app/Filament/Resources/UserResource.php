@@ -5,11 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
+use App\Filament\Resources\UserResource\RelationManagers\ActivitiesRelationManager;
 
 class UserResource extends Resource
 {
@@ -21,14 +24,20 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->columnSpanFull(),
-                Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name')
-                    ->columnSpanFull()
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
-                TimezoneSelect::make('timezone')->byCountry('US')->columnSpanFull(),
+                Grid::make(3)
+                    ->schema([
+                        Section::make()->schema([
+                            Forms\Components\TextInput::make('name')->columnSpanFull(),
+                            Forms\Components\Select::make('roles')
+                                ->relationship('roles', 'name')
+                                ->columnSpanFull()
+                                ->multiple()
+                                ->preload()
+                                ->searchable(),
+                            TimezoneSelect::make('timezone')->byCountry('US')->columnSpanFull(),
+                        ])->columnSpan(2),
+                        Section::make()->schema([])->columnSpan(1),
+                    ])
             ]);
     }
 
@@ -55,7 +64,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ActivitiesRelationManager::class,
         ];
     }
 

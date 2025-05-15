@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Store extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'user_id',
         'dealership_id',
@@ -23,5 +27,12 @@ class Store extends Model
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Store {$eventName}");
     }
 }

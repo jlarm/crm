@@ -15,6 +15,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Models\Activity;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -97,5 +99,10 @@ class User extends Authenticatable implements FilamentUser
     public function sentEmails(): HasMany
     {
         return $this->hasMany(SentEmail::class);
+    }
+
+    public function activities(): MorphMany
+    {
+        return $this->morphMany(Activity::class, 'causer');
     }
 }

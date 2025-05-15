@@ -8,9 +8,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class DealerEmail extends Model
 {
+    use LogsActivity;
+    
     protected $fillable = [
         'user_id',
         'dealership_id',
@@ -68,5 +72,15 @@ class DealerEmail extends Model
         static::creating(function ($dealerEmail) {
             $dealerEmail->user_id = auth()->id();
         });
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'dealership_id'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

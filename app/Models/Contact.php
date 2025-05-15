@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
 
 class Contact extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'dealership_id',
         'name',
@@ -91,5 +95,12 @@ class Contact extends Model
                 ]
             );
         }
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Contact {$eventName}");
     }
 }

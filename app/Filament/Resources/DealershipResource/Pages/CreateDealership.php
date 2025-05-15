@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
+use Exception;
 
 class CreateDealership extends CreateRecord
 {
@@ -34,26 +36,35 @@ class CreateDealership extends CreateRecord
         $this->record->users()->attach(auth()->user()->id);
 
         if ($this->record->email) {
+            try {
+                $list = Mailcoach::emailList($this->getListType());
 
-            $list = Mailcoach::emailList($this->getListType());
+                if ($list->subscriber($this->record->email) != null) {
+                    return;
+                }
 
-            if ($list->subscriber($this->record->email) != null) {
-                return;
-            }
+                if ($this->record->email) {
+                    $tags = [];
+                    $tags[] = 'Dealership';
+                    $tags[] = auth()->user()->name;
 
-            if ($this->record->email) {
-                $tags = [];
-                $tags[] = 'Dealership';
-                $tags[] = auth()->user()->name;
-
-                $sub = Mailcoach::createSubscriber(
-                    emailListUuid: $this->getListType(),
-                    attributes: [
-                        'first_name' => $this->record->name,
-                        'email' => $this->record->email,
-                        'tags' => $tags,
-                    ]
-                );
+                    $sub = Mailcoach::createSubscriber(
+                        emailListUuid: $this->getListType(),
+                        attributes: [
+                            'first_name' => $this->record->name,
+                            'email' => $this->record->email,
+                            'tags' => $tags,
+                        ]
+                    );
+                }
+            } catch (Exception $e) {
+                // Show notification when Mailcoach operation fails
+                Notification::make()
+                    ->title('Mailcoach Error')
+                    ->body('Failed to add subscriber to Mailcoach: ' . $e->getMessage())
+                    ->danger()
+                    ->persistent()
+                    ->send();
             }
         }
     }

@@ -6,9 +6,13 @@ use App\Enum\DevStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Dealership extends Model
 {
+    use LogsActivity;
+    
     protected $fillable = [
         'user_id',
         'name',
@@ -63,16 +67,6 @@ class Dealership extends Model
         return $this->hasMany(SentEmail::class);
     }
 
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::created(function ($dealership) {
-            $dealership->user_id = auth()->user()->id;
-        });
-
-    }
-
     public function getTotalStoreCountAttribute(): int
     {
         return $this->stores()->count() + 1;
@@ -88,5 +82,12 @@ class Dealership extends Model
         ];
 
         return $types[$this->type] ?? 'default_value';
+    }
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Dealership {$eventName}");
     }
 }

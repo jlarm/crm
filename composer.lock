@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a0f99ca08d30374ec446ba059398b0c",
+    "content-hash": "9c84cc8dc0a164b26b8b77cd666ca4b7",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -128,16 +128,16 @@
         },
         {
             "name": "bezhansalleh/filament-panel-switch",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bezhanSalleh/filament-panel-switch.git",
-                "reference": "01c5a964b7610766b123dbf83ae4d240025aa7c4"
+                "reference": "9df5d1d85e6b7d8690e1e865340636dcd3b294eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bezhanSalleh/filament-panel-switch/zipball/01c5a964b7610766b123dbf83ae4d240025aa7c4",
-                "reference": "01c5a964b7610766b123dbf83ae4d240025aa7c4",
+                "url": "https://api.github.com/repos/bezhanSalleh/filament-panel-switch/zipball/9df5d1d85e6b7d8690e1e865340636dcd3b294eb",
+                "reference": "9df5d1d85e6b7d8690e1e865340636dcd3b294eb",
                 "shasum": ""
             },
             "require": {
@@ -203,7 +203,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-05-12T15:19:18+00:00"
+            "time": "2025-05-14T22:37:57+00:00"
         },
         {
             "name": "bezhansalleh/filament-shield",
@@ -10900,80 +10900,6 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
-        },
-        {
-            "name": "z3d0x/filament-logger",
-            "version": "v0.6.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Z3d0X/filament-logger.git",
-                "reference": "dc5a59fcd6b6c459a059636aee1cb60b902343a1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Z3d0X/filament-logger/zipball/dc5a59fcd6b6c459a059636aee1cb60b902343a1",
-                "reference": "dc5a59fcd6b6c459a059636aee1cb60b902343a1",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^3.0",
-                "illuminate/contracts": "^8.0 | ^9.0 | ^10.0",
-                "php": "^8.0 | ^8.1",
-                "spatie/laravel-activitylog": "^4.5",
-                "spatie/laravel-package-tools": "^1.13.5"
-            },
-            "require-dev": {
-                "nunomaduro/collision": "^6.0",
-                "nunomaduro/larastan": "^2.0.1",
-                "orchestra/testbench": "^7.0",
-                "pestphp/pest": "^1.21",
-                "pestphp/pest-plugin-laravel": "^1.1",
-                "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan-deprecation-rules": "^1.0",
-                "phpstan/phpstan-phpunit": "^1.0",
-                "phpunit/phpunit": "^9.5",
-                "spatie/laravel-ray": "^1.26"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "FilamentLogger": "Z3d0X\\FilamentLogger\\Facades\\FilamentLogger"
-                    },
-                    "providers": [
-                        "Z3d0X\\FilamentLogger\\FilamentLoggerServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Z3d0X\\FilamentLogger\\": "src",
-                    "Z3d0X\\FilamentLogger\\Database\\Factories\\": "database/factories"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ziyaan Hassan",
-                    "email": "ziyaan2010@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Activity logger for filament",
-            "homepage": "https://github.com/z3d0x/filament-logger",
-            "keywords": [
-                "Z3d0X",
-                "filament-logger",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/Z3d0X/filament-logger/issues",
-                "source": "https://github.com/Z3d0X/filament-logger/tree/v0.6.3"
-            },
-            "time": "2024-01-18T04:18:46+00:00"
         }
     ],
     "packages-dev": [
@@ -11384,16 +11310,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.42.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "2edaaf77f3c07a4099965bb3d7dfee16e801c0f6"
+                "reference": "71a509b14b2621ce58574274a74290f933c687f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/2edaaf77f3c07a4099965bb3d7dfee16e801c0f6",
-                "reference": "2edaaf77f3c07a4099965bb3d7dfee16e801c0f6",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/71a509b14b2621ce58574274a74290f933c687f7",
+                "reference": "71a509b14b2621ce58574274a74290f933c687f7",
                 "shasum": ""
             },
             "require": {
@@ -11443,7 +11369,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2025-04-29T14:26:46+00:00"
+            "time": "2025-05-13T13:34:34+00:00"
         },
         {
             "name": "mockery/mockery",
