@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        $schedule->command('telescope:prune')->daily();
         $schedule->command('activitylog:clean')->daily();
         $schedule->command('reminder:send')->dailyAt('06:00');
         $schedule->command('dealer:send')->dailyAt('06:30');
