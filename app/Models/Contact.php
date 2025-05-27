@@ -80,7 +80,7 @@ class Contact extends Model
             $last_name = $name_parts[1] ?? '';
 
             if (count($name_parts) > 1) {
-                $last_name = implode(' ', array_slide($name_parts, 1));
+                $last_name = implode(' ', array_slice($name_parts, 1));
             }
 
             $tags = [];
