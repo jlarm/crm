@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
+use Illuminate\Support\Facades\Log;
 
 class Contact extends Model
 {
@@ -64,7 +65,7 @@ class Contact extends Model
         }
 
         try {
-            $list = Mailcoach::emailList($this->dealersihp->getListType());
+            $list = Mailcoach::emailList($this->dealership->getListType());
 
             if ($list->subscriber($this->email)) {
                 return;
