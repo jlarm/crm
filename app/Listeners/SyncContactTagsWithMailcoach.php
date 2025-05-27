@@ -19,7 +19,19 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
     {
         $model = $event->contact;
 
+        // ==== BEGIN DEBUG LOGGING ====
+        Log::debug('[SyncContactTagsWithMailcoach] Processing job.', [
+            'contact_id' => $model->id,
+            'contact_email' => $model->email,
+            'event_actingUserName' => $event->actingUserName,
+            'model_dealership_exists' => !is_null($model->dealership),
+            'model_dealership_name' => $model->dealership ? $model->dealership->name : 'N/A (dealership is null)',
+            'model_position' => $model->position,
+        ]);
+        // ==== END DEBUG LOGGING ====
+
         if (!$model->dealership) {
+            Log::warning('[SyncContactTagsWithMailcoach] No dealership associated with contact. Aborting.', ['contact_id' => $model->id]);
             return;
         }
 
