@@ -64,6 +64,8 @@ class ManageDealershipContacts extends ManageRelatedRecords
                     ->nullable(),
                 Forms\Components\Toggle::make('primary_contact'),
                 Forms\Components\Select::make('tags')
+                ->label('MailCoach Tags')
+                ->columnSpanFull()
                     ->relationship('tags', 'name')
                     ->multiple()
                     ->preload()
