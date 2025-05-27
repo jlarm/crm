@@ -59,23 +59,31 @@ class Contact extends Model
 
     protected function handleSavedEvent(): void
     {
-        $list = Mailcoach::emailList($this->dealership->getListType());
-
-        if ($list->subscriber($this->email) === null) {
+        if (!$this->dealership) {
             return;
         }
 
-        if ($list->subscriber($this->email)) {
-            return;
-        }
+        try {
+            $list = Mailcoach::emailList($this->dealersihp->getListType());
 
-        if ($this->email) {
-            $name = explode(' ', $this->name);
-            $first_name = $name[0];
-            $last_name = $name[1];
+            if ($list->subscriber($this->email)) {
+                return;
+            }
+
+            if (empty($this->email)) {
+                return;
+            }
+
+            $name_parts = explode(' ', trim($this->name ?? ''));
+            $first_name = $name_parts[0] ?? '';
+            $last_name = $name_parts[1] ?? '';
+
+            if (count($name_parts) > 1) {
+                $last_name = implode(' ', array_slide($name_parts, 1));
+            }
 
             $tags = [];
-            if ($this->position) {
+            if (!empty($this->position)) {
                 $tags[] = $this->position;
             }
 
@@ -83,7 +91,9 @@ class Contact extends Model
                 $tags[] = $this->dealership->name;
             }
 
-            $tags[] = auth()->user()->name;
+            if (auth()->check() && auth()->user()) {
+                $tags[] = auth()->user()->name;
+            }
 
             $sub = Mailcoach::createSubscriber(
                 emailListUuid: $this->dealership->getListType(),
@@ -94,6 +104,11 @@ class Contact extends Model
                     'tags' => $tags,
                 ]
             );
+        } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
+            return;
+        } catch(\Exception $e) {
+            Log::error('Error in Contact->handleSavedEvent: ' . $e->getMessage());
+            return;
         }
     }
 
