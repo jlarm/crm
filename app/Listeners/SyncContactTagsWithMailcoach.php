@@ -40,8 +40,9 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                 $tags[] = $model->dealership->name;
             }
 
-            if (auth()->check() && auth()->user()) {
-                $tags[] = auth()->user()->name;
+            // Use actingUserName from the event
+            if (!empty($event->actingUserName)) {
+                $tags[] = $event->actingUserName;
             }
 
             $freshModelInstance = $model->fresh(['tags']);
@@ -65,6 +66,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             
             if ($subscriber) {
                 try {
+                    // Revert to addTags/removeTags as syncTags is not available on EmailList
                     $currentMailcoachTagsRaw = $subscriber->tags ?? [];
                     $currentMailcoachTags = [];
                     if (is_iterable($currentMailcoachTagsRaw)) {
@@ -101,13 +103,13 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     }
 
                 } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
-                    Log::warning('Mailcoach resource not found during tag sync operation.', [
+                    Log::warning('Mailcoach resource not found during tag add/remove operation.', [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
                         'error' => $e->getMessage()
                     ]);
                 } catch (\Exception $e) {
-                    Log::error('Error updating Mailcoach subscriber tags: ' . $e->getMessage(), [
+                    Log::error('Error updating Mailcoach subscriber tags (add/remove): ' . $e->getMessage(), [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
                         'exception_class' => get_class($e),
@@ -115,9 +117,19 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                 }
             }
         } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
+            // This handles if $list = Mailcoach::emailList($listUuid) fails or $list->subscriber($model->email) fails to find subscriber when it's expected
+            Log::warning('Mailcoach resource not found (likely list or initial subscriber lookup) in SyncContactTagsWithMailcoach.', [
+                'contact_id' => $model->id,
+                'email' => $model->email,
+                'error' => $e->getMessage()
+            ]);
             return;
         } catch(\Exception $e) {
-            Log::error('Error in SyncContactTagsWithMailcoach: ' . $e->getMessage());
+            Log::error('Error in SyncContactTagsWithMailcoach: ' . $e->getMessage(), [
+                'contact_id' => $model->id,
+                'email' => $model->email,
+                'exception_class' => get_class($e),
+            ]);
             return;
         }
     }
