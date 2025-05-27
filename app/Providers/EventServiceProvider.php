@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\DealerEmailTemplate;
+use App\Events\ContactTagSync;
+use App\Listeners\SyncContactTagsWithMailcoach;
+use App\Observers\ContactObserver;
 use App\Observers\DealerEmailObserver;
 use App\Observers\DealerEmailTemplateObserver;
 use Illuminate\Auth\Events\Registered;
@@ -35,6 +39,9 @@ class EventServiceProvider extends ServiceProvider
         Failed::class => [
             [LogAuthenticationEvents::class, 'handleFailed'],
         ],
+        ContactTagSync::class => [
+            SyncContactTagsWithMailcoach::class,
+        ],
     ];
 
     /**
@@ -42,6 +49,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Contact::observe(ContactObserver::class);
         DealerEmail::observe(DealerEmailObserver::class);
         DealerEmailTemplate::observe(DealerEmailTemplateObserver::class);
     }

@@ -37,6 +37,12 @@ class ContactsRelationManager extends RelationManager
                     ->nullable()
                     ->maxLength(255),
                 Forms\Components\Toggle::make('primary_contact'),
+                Forms\Components\Select::make('tags')
+                    ->relationship('tags', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->placeholder('Select tags'),
             ]);
     }
 
