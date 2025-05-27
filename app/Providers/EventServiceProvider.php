@@ -7,6 +7,10 @@ use App\Models\DealerEmailTemplate;
 use App\Observers\DealerEmailObserver;
 use App\Observers\DealerEmailTemplateObserver;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Failed;
+use App\Listeners\LogAuthenticationEvents;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -21,6 +25,15 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        Login::class => [
+            [LogAuthenticationEvents::class, 'handleLogin'],
+        ],
+        Logout::class => [
+            [LogAuthenticationEvents::class, 'handleLogout'],
+        ],
+        Failed::class => [
+            [LogAuthenticationEvents::class, 'handleFailed'],
         ],
     ];
 

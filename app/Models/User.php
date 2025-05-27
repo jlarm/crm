@@ -17,6 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -27,6 +29,7 @@ class User extends Authenticatable implements FilamentUser
     use Notifiable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -104,5 +107,15 @@ class User extends Authenticatable implements FilamentUser
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'name',
+                'email',
+            ])
+            ->setDescriptionForEvent(fn (string $eventName): string => "User {$eventName}");
     }
 }
