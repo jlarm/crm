@@ -5,9 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 class PdfAttachment extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $fillable = ['file_name', 'file_path'];
 
@@ -19,5 +23,12 @@ class PdfAttachment extends Model
     public function attachableTemplate(): MorphMany
     {
         return $this->morphByMany(DealerEmailTemplate::class, 'attachable');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Attachment {$eventName}");
     }
 }
