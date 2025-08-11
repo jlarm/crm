@@ -18,6 +18,7 @@ class Progress extends Model
         'contact_id',
         'details',
         'date',
+        'progress_category_id',
     ];
 
     protected $casts = [
@@ -37,6 +38,11 @@ class Progress extends Model
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProgressCategory::class, 'progress_category_id');
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Models\Contact;
+use App\Models\ProgressCategory;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -33,8 +34,22 @@ class ProgressesRelationManager extends RelationManager
                     ->options(
                         Contact::all()->pluck('name', 'id')
                     )
+                    ->preload()
                     ->searchable(),
                 Forms\Components\DatePicker::make('date'),
+                Forms\Components\Select::make('progress_category_id')
+                    ->label('Select a Progress Category')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')->required(),
+                    ])
+                    ->createOptionUsing(function (array $data): int {
+                        return ProgressCategory::create($data)->getKey();
+                    })
+                    ->required()
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('details')
                     ->columnSpanFull()
                     ->required()

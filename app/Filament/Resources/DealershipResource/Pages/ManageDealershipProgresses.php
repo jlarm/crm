@@ -4,11 +4,13 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
 use App\Models\Contact;
+use App\Models\ProgressCategory;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -41,11 +43,25 @@ class ManageDealershipProgresses extends ManageRelatedRecords
                     ->default(auth()->id()),
                 Forms\Components\Select::make('contact_id')
                     ->label('Select a Contact if available')
+                    ->preload()
                     ->options(
                         Contact::all()->pluck('name', 'id')
                     )
                     ->searchable(),
                 Forms\Components\DatePicker::make('date'),
+                Forms\Components\Select::make('progress_category_id')
+                    ->label('Select a Progress Category')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')->required(),
+                    ])
+                    ->createOptionUsing(function (array $data): int {
+                        return ProgressCategory::create($data)->getKey();
+                    })
+                    ->required()
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('details')
                     ->columnSpanFull()
                     ->required()
@@ -56,14 +72,21 @@ class ManageDealershipProgresses extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('category'))
             ->recordTitleAttribute('name')
             ->columns([
+                Tables\Columns\TextColumn::make('category.name')
+                    ->default('-')
+                    ->label('Category'),
                 Tables\Columns\TextColumn::make('details')->words(30)->wrap(),
                 Tables\Columns\TextColumn::make('created_at')->label('Date')->date(),
                 Tables\Columns\TextColumn::make('contact.name')->label('Contact'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('progress_category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name')
+                    ->preload(),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
