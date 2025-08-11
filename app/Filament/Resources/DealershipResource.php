@@ -30,6 +30,8 @@ use Illuminate\Support\Facades\Mail;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Filament\Forms\Get;
+use App\Exports\AdvancedDealershipExport;
 
 class DealershipResource extends Resource
 {
@@ -350,8 +352,6 @@ class DealershipResource extends Resource
                         ExcelExport::make()
                             ->withColumns([
                                 Column::make('name'),
-                                Column::make('phone'),
-                                Column::make('email'),
                                 Column::make('status'),
                                 Column::make('rating'),
                         ]),
@@ -363,12 +363,147 @@ class DealershipResource extends Resource
                             ->modifyQueryUsing(function ($query) {
                                 return $query->whereIn('dealership_id', $query->pluck('id'))
                                     ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
-                                    ->select('contacts.email');
+                                    ->select(['contacts.name','contacts.email']);
                             })
                             ->withColumns([
+                                Column::make('name'),
                                 Column::make('email'),
                         ]),
                 ]),
+                Tables\Actions\BulkAction::make('export_contacts')
+                    ->label('Export Contacts with Dealership Info')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Forms\Components\Section::make('Export Options')
+                            ->schema([
+                                Forms\Components\CheckboxList::make('dealership_fields')
+                                    ->label('Select Dealership Fields to Include')
+                                    ->options([
+                                        'name' => 'Dealership Name',
+                                        'address' => 'Address',
+                                        'city' => 'City',
+                                        'state' => 'State',
+                                        'zip_code' => 'Zip Code',
+                                        'phone' => 'Dealership Phone',
+                                        'email' => 'Dealership Email',
+                                        'type' => 'Type',
+                                        'status' => 'Status',
+                                        'rating' => 'Rating',
+                                        'current_solution_name' => 'Current Solution',
+                                        'in_development' => 'In Development',
+                                        'consultants' => 'Assigned Consultants',
+                                        'store_count' => 'Number of Stores',
+                                    ])
+                                    ->columns(3)
+                                    ->default(['name', 'city', 'state', 'status', 'rating'])
+                                    ->required(),
+
+                                Forms\Components\CheckboxList::make('contact_fields')
+                                    ->label('Select Contact Fields to Include')
+                                    ->options([
+                                        'name' => 'Contact Name',
+                                        'email' => 'Contact Email',
+                                        'phone' => 'Contact Phone',
+                                        'title' => 'Contact Title',
+                                        'linkedin_link' => 'LinkedIn Profile',
+                                    ])
+                                    ->columns(2)
+                                    ->default(['name', 'email'])
+                                    ->required(),
+                            ]),
+                    ])
+                    ->action(function (array $data, $records) {
+                        // Get contacts from selected dealerships
+                        $dealershipIds = $records->pluck('id');
+                        $contacts = \App\Models\Contact::whereIn('dealership_id', $dealershipIds)
+                            ->with(['dealership.users', 'dealership.stores'])
+                            ->join('dealerships', 'contacts.dealership_id', '=', 'dealerships.id')
+                            ->orderBy('dealerships.name')
+                            ->orderBy('contacts.name')
+                            ->select('contacts.*')
+                            ->get();
+
+                        // Build CSV content
+                        $csvData = [];
+                        
+                        // Build headers
+                        $headers = [];
+                        foreach ($data['dealership_fields'] as $field) {
+                            $headers[] = match($field) {
+                                'name' => 'Dealership Name',
+                                'address' => 'Dealership Address',
+                                'city' => 'Dealership City',
+                                'state' => 'Dealership State',
+                                'zip_code' => 'Dealership Zip Code',
+                                'phone' => 'Dealership Phone',
+                                'email' => 'Dealership Email',
+                                'type' => 'Dealership Type',
+                                'status' => 'Dealership Status',
+                                'rating' => 'Dealership Rating',
+                                'current_solution_name' => 'Current Solution',
+                                'in_development' => 'In Development',
+                                'consultants' => 'Consultants',
+                                'store_count' => 'Store Count',
+                                default => ucwords(str_replace('_', ' ', $field)),
+                            };
+                        }
+                        
+                        foreach ($data['contact_fields'] as $field) {
+                            $headers[] = match($field) {
+                                'name' => 'Contact Name',
+                                'email' => 'Contact Email',
+                                'phone' => 'Contact Phone',
+                                'title' => 'Contact Title',
+                                'linkedin_link' => 'LinkedIn Profile',
+                                default => ucwords(str_replace('_', ' ', $field)),
+                            };
+                        }
+                        $csvData[] = $headers;
+
+                        // Build data rows
+                        foreach ($contacts as $contact) {
+                            $row = [];
+                            
+                            // Add dealership data
+                            foreach ($data['dealership_fields'] as $field) {
+                                $row[] = match($field) {
+                                    'name' => $contact->dealership->name,
+                                    'address' => $contact->dealership->address,
+                                    'city' => $contact->dealership->city,
+                                    'state' => $contact->dealership->state,
+                                    'zip_code' => $contact->dealership->zip_code,
+                                    'phone' => $contact->dealership->phone,
+                                    'email' => $contact->dealership->email,
+                                    'type' => $contact->dealership->type,
+                                    'status' => $contact->dealership->status,
+                                    'rating' => $contact->dealership->rating,
+                                    'current_solution_name' => $contact->dealership->current_solution_name,
+                                    'in_development' => $contact->dealership->in_development ? 'Yes' : 'No',
+                                    'consultants' => $contact->dealership->users->pluck('name')->join(', '),
+                                    'store_count' => $contact->dealership->stores->count(),
+                                    default => $contact->dealership->{$field} ?? '',
+                                };
+                            }
+                            
+                            // Add contact data
+                            foreach ($data['contact_fields'] as $field) {
+                                $row[] = $contact->{$field} ?? '';
+                            }
+                            
+                            $csvData[] = $row;
+                        }
+
+                        // Generate CSV
+                        $filename = 'contacts-with-dealerships-' . now()->format('Y-m-d-H-i-s') . '.csv';
+                        
+                        return response()->streamDownload(function () use ($csvData) {
+                            $file = fopen('php://output', 'w');
+                            foreach ($csvData as $row) {
+                                fputcsv($file, $row);
+                            }
+                            fclose($file);
+                        }, $filename, ['Content-Type' => 'text/csv']);
+                    }),
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
@@ -385,6 +520,7 @@ class DealershipResource extends Resource
             Pages\ManageDealershipDealerEmails::class,
         ]);
     }
+
 
     public static function getPages(): array
     {
