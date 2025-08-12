@@ -80,7 +80,7 @@
                             'max-width: 240px; padding: 12px !important; border-radius: 12px 12px 4px 12px; font-size: 14px; line-height: 1.4; background: #2563eb; color: white;' :
                             'max-width: 240px; padding: 12px !important; border-radius: 12px 12px 12px 4px; font-size: 14px; line-height: 1.4; background: white; color: #374151; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;'"
                     >
-                        <p style="margin: 0; white-space: pre-wrap;" x-text="msg.content"></p>
+                        <div style="margin: 0; white-space: pre-wrap;" x-html="convertLinksToHtml(msg.content)"></div>
                         <span style="font-size: 11px; opacity: 0.7; display: block; margin-top: 4px;" x-text="msg.timestamp"></span>
                     </div>
                 </div>
@@ -171,9 +171,40 @@ function chatbot() {
         isLoading: false,
         sessionId: localStorage.getItem('chatSessionId') || Math.random().toString(36).substring(2, 15),
 
-        init() {
+        async init() {
             if (!localStorage.getItem('chatSessionId')) {
                 localStorage.setItem('chatSessionId', this.sessionId);
+            }
+            
+            // Load chat history from database
+            await this.loadChatHistory();
+        },
+        
+        async loadChatHistory() {
+            try {
+                const response = await fetch(`/chat/history?session_id=${this.sessionId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.messages && data.messages.length > 0) {
+                        // Replace the default welcome message with actual chat history
+                        this.messages = data.messages.map(msg => ({
+                            role: msg.role,
+                            content: msg.content,
+                            timestamp: new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        }));
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load chat history:', error);
+                // Keep default welcome message if loading fails
             }
         },
 
@@ -265,6 +296,14 @@ function chatbot() {
             ];
             this.sessionId = Math.random().toString(36).substring(2, 15);
             localStorage.setItem('chatSessionId', this.sessionId);
+        },
+        
+        convertLinksToHtml(text) {
+            if (!text) return '';
+            
+            // Convert markdown links [text](url) to HTML links
+            const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+            return text.replace(linkRegex, '<a href="$2" target="_blank" style="color: #2563eb; text-decoration: underline; cursor: pointer;">$1</a>');
         }
     }
 }
