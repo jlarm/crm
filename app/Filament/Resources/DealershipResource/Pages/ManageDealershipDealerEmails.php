@@ -4,6 +4,7 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Enum\ReminderFrequency;
 use App\Filament\Resources\DealershipResource;
+use App\Jobs\SendDealerEmail;
 use App\Models\DealerEmailTemplate;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -146,10 +147,17 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->reactive()
                     ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
                     ->required(),
+                Select::make('frequency')
+                    ->columnSpanFull()
+                    ->options(ReminderFrequency::class)
+                    ->reactive()
+                    ->required(),
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->required()
+                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         $set('next_send_date', $state);
@@ -157,10 +165,9 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('next_send_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->required(),
-                Select::make('frequency')
-                    ->options(ReminderFrequency::class)
-                    ->required(),
+                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value),
             ]);
     }
 
@@ -178,7 +185,12 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->after(function ($record) {
+                        if ($record->frequency === ReminderFrequency::Immediate) {
+                            SendDealerEmail::dispatchSync($record);
+                        }
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
+use App\Jobs\SendDealerEmail;
 use App\Models\DealerEmailTemplate;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
@@ -110,13 +111,16 @@ class DealerEmailRelationManager extends RelationManager
                     ->reactive()
                     ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
                     ->required(),
+                Select::make('frequency')
+                    ->options(ReminderFrequency::class)
+                    ->reactive()
+                    ->required(),
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->required(),
-                Select::make('frequency')
-                    ->options(ReminderFrequency::class)
-                    ->required(),
+                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value),
             ]);
     }
 
@@ -132,7 +136,12 @@ class DealerEmailRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->after(function ($record) {
+                        if ($record->frequency === ReminderFrequency::Immediate) {
+                            SendDealerEmail::dispatchSync($record);
+                        }
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
