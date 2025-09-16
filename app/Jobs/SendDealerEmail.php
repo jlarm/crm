@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Mail\DealerEmailMail;
+use App\Models\Contact;
+use App\Models\DealerEmail;
 use App\Models\SentEmail;
 use App\Services\EmailTrackingService;
 use Illuminate\Bus\Queueable;
@@ -9,12 +12,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\DealerEmailMail;
 use Illuminate\Support\Facades\Log;
-use App\Models\Contact;
-use App\Models\DealerEmail;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 
 class SendDealerEmail implements ShouldQueue
 {
@@ -54,18 +53,31 @@ class SendDealerEmail implements ShouldQueue
                 return;
             }
 
-
             foreach ($dealerEmail->recipients as $recipient) {
                 $contact = Contact::where('email', $recipient)->first();
                 $name = $contact ? $contact->name : '';
 
-
                 try {
                     $mailable = new DealerEmailMail($dealerEmail, $name);
-                    $sentMessage = Mail::to($recipient)->send($mailable);
 
                     // Generate a unique tracking ID for this email
-                    $trackingId = 'laravel-' . $dealerEmail->id . '-' . md5($recipient . now()->timestamp);
+                    $trackingId = 'laravel-'.$dealerEmail->id.'-'.md5($recipient.now()->timestamp);
+
+                    // Add tracking to email content using a callback
+                    $mailable->withSymfonyMessage(function ($message) use ($trackingId) {
+                        $trackingService = app(EmailTrackingService::class);
+                        $body = $message->getHtmlBody();
+
+                        if ($body) {
+                            // Add tracking pixel
+                            $body = $trackingService->addTrackingPixel($body, $trackingId);
+                            // Wrap links with click tracking
+                            $body = $trackingService->wrapLinksWithTracking($body, $trackingId);
+                            $message->html($body);
+                        }
+                    });
+
+                    $sentMessage = Mail::to($recipient)->send($mailable);
 
                     // Create sent email record - Mailgun will update with real message ID via webhook
                     SentEmail::create([

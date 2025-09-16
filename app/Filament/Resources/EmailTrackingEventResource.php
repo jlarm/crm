@@ -77,20 +77,18 @@ class EmailTrackingEventResource extends Resource
                 Tables\Columns\TextColumn::make('sentEmail.subject')
                     ->label('Email Subject')
                     ->searchable()
-                    ->limit(50),
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('recipient_email')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sentEmail.dealership.name')
                     ->label('Dealership')
+                    ->limit(30)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sentEmail.user.name')
                     ->label('Sent By')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('url')
-                    ->limit(50)
-                    ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('event_timestamp')
                     ->dateTime()
                     ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->inUserTimezone()->format('M j, Y g:i A T') : null)
