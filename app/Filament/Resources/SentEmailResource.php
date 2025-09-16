@@ -3,13 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SentEmailResource\Pages;
-use App\Filament\Resources\SentEmailResource\RelationManagers;
 use App\Models\SentEmail;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+
 class SentEmailResource extends Resource
 {
     protected static ?string $model = SentEmail::class;
@@ -53,7 +53,8 @@ class SentEmailResource extends Resource
                             ->disabled(),
                         Forms\Components\DateTimePicker::make('created_at')
                             ->label('Sent Date')
-                            ->disabled(),
+                            ->disabled()
+                            ->formatStateUsing(fn ($state) => $state?->inUserTimezone()),
                     ])
                     ->columns(2),
 
@@ -106,6 +107,7 @@ class SentEmailResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->sortable()
                     ->dateTime()
+                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
                     ->label('Sent'),
             ])
             ->defaultSort('created_at', 'desc')
@@ -115,13 +117,13 @@ class SentEmailResource extends Resource
                     ->relationship('user', 'name'),
                 Tables\Filters\Filter::make('opened')
                     ->label('Opened Emails')
-                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn($q) => $q->where('event_type', 'opened'))),
+                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn ($q) => $q->where('event_type', 'opened'))),
                 Tables\Filters\Filter::make('clicked')
                     ->label('Clicked Emails')
-                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn($q) => $q->where('event_type', 'clicked'))),
+                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn ($q) => $q->where('event_type', 'clicked'))),
                 Tables\Filters\Filter::make('bounced')
                     ->label('Bounced Emails')
-                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn($q) => $q->where('event_type', 'bounced'))),
+                    ->query(fn ($query) => $query->whereHas('trackingEvents', fn ($q) => $q->where('event_type', 'bounced'))),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

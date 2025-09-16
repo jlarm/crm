@@ -52,13 +52,16 @@ class DealerEmailResource extends Resource
             ->query(
                 DealerEmail::query()
                     ->where('user_id', auth()->id())
-                ->orderBy('last_sent', 'desc')
+                    ->orderBy('last_sent', 'desc')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('dealership.name')->sortable(),
                 Tables\Columns\TextColumn::make('recipients')->sortable(),
                 Tables\Columns\TextColumn::make('frequency')->sortable(),
-                Tables\Columns\TextColumn::make('last_sent')->date()->sortable()
+                Tables\Columns\TextColumn::make('last_sent')
+                    ->date()
+                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -66,8 +69,7 @@ class DealerEmailResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('view_dealership_emails')
                     ->label('View')
-                    ->url(fn (DealerEmail $record): string =>
-                        DealershipResource::getUrl('emails', ['record' => $record->dealership])
+                    ->url(fn (DealerEmail $record): string => DealershipResource::getUrl('emails', ['record' => $record->dealership])
                     ),
             ])
             ->bulkActions([

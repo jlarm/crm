@@ -49,7 +49,8 @@ class EmailTrackingEventResource extends Resource
                     ->disabled(),
                 Forms\Components\DateTimePicker::make('event_timestamp')
                     ->required()
-                    ->disabled(),
+                    ->disabled()
+                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()),
                 Forms\Components\Textarea::make('user_agent')
                     ->disabled(),
                 Forms\Components\TextInput::make('ip_address')
@@ -92,6 +93,7 @@ class EmailTrackingEventResource extends Resource
                     ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('event_timestamp')
                     ->dateTime()
+                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ip_address')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -108,19 +110,15 @@ class EmailTrackingEventResource extends Resource
                     ]),
                 Tables\Filters\Filter::make('user_emails')
                     ->label('My Emails Only')
-                    ->query(fn (Builder $query): Builder =>
-                        $query->whereHas('sentEmail.dealership.users', fn($q) =>
-                            $q->where('user_id', auth()->id())
-                        )
+                    ->query(fn (Builder $query): Builder => $query->whereHas('sentEmail.dealership.users', fn ($q) => $q->where('user_id', auth()->id())
+                    )
                     )
                     ->default(),
                 Tables\Filters\Filter::make('last_24_hours')
-                    ->query(fn (Builder $query): Builder =>
-                        $query->where('event_timestamp', '>=', now()->subDay())
+                    ->query(fn (Builder $query): Builder => $query->where('event_timestamp', '>=', now()->subDay())
                     ),
                 Tables\Filters\Filter::make('last_week')
-                    ->query(fn (Builder $query): Builder =>
-                        $query->where('event_timestamp', '>=', now()->subWeek())
+                    ->query(fn (Builder $query): Builder => $query->where('event_timestamp', '>=', now()->subWeek())
                     ),
                 Tables\Filters\SelectFilter::make('dealership')
                     ->relationship('sentEmail.dealership', 'name')

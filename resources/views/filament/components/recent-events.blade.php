@@ -27,7 +27,7 @@
                             {{ ucfirst($event->event_type) }}
                         </span>
                         <span class="text-sm text-gray-600">
-                            {{ $event->event_timestamp->format('M j, Y g:i A') }}
+                            {{ $event->event_timestamp->inUserTimezone()->format('M j, Y g:i A T') }}
                         </span>
                     </div>
                     @if($event->url)
