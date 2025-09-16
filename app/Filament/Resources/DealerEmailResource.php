@@ -60,7 +60,6 @@ class DealerEmailResource extends Resource
                 Tables\Columns\TextColumn::make('frequency')->sortable(),
                 Tables\Columns\TextColumn::make('last_sent')
                     ->date()
-                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
                     ->sortable(),
             ])
             ->filters([
