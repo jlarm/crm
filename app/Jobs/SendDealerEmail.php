@@ -65,15 +65,30 @@ class SendDealerEmail implements ShouldQueue
 
                     // Add tracking to email content using a callback
                     $mailable->withSymfonyMessage(function ($message) use ($trackingId) {
+                        \Log::info('withSymfonyMessage callback executed', ['tracking_id' => $trackingId]);
+
                         $trackingService = app(EmailTrackingService::class);
                         $body = $message->getHtmlBody();
+
+                        \Log::info('HTML body retrieved', [
+                            'has_body' => !empty($body),
+                            'body_length' => $body ? strlen($body) : 0,
+                            'tracking_id' => $trackingId
+                        ]);
 
                         if ($body) {
                             // Add tracking pixel
                             $body = $trackingService->addTrackingPixel($body, $trackingId);
+                            \Log::info('Tracking pixel added');
+
                             // Wrap links with click tracking
                             $body = $trackingService->wrapLinksWithTracking($body, $trackingId);
+                            \Log::info('Click tracking added');
+
                             $message->html($body);
+                            \Log::info('HTML body updated');
+                        } else {
+                            \Log::warning('No HTML body found for tracking');
                         }
                     });
 
