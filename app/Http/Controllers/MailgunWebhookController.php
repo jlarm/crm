@@ -160,11 +160,19 @@ class MailgunWebhookController extends Controller
     public function trackOpen(Request $request, string $messageId): Response
     {
         try {
+            \Log::info('Tracking pixel accessed', [
+                'message_id' => $messageId,
+                'user_agent' => $request->userAgent(),
+                'ip' => $request->ip()
+            ]);
+
             $sentEmail = SentEmail::where('message_id', $messageId)->first();
 
             if ($sentEmail) {
+                \Log::info('Found SentEmail record', ['sent_email_id' => $sentEmail->id]);
+
                 // Create tracking event for manual pixel tracking
-                EmailTrackingEvent::firstOrCreate([
+                $trackingEvent = EmailTrackingEvent::firstOrCreate([
                     'sent_email_id' => $sentEmail->id,
                     'message_id' => $messageId,
                     'recipient_email' => $sentEmail->recipient,
@@ -179,6 +187,10 @@ class MailgunWebhookController extends Controller
                         'ip' => $request->ip(),
                     ],
                 ]);
+
+                \Log::info('Tracking event created/found', ['event_id' => $trackingEvent->id]);
+            } else {
+                \Log::warning('No SentEmail found for message_id', ['message_id' => $messageId]);
             }
 
             // Return a 1x1 transparent pixel
