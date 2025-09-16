@@ -62,16 +62,17 @@ class MailgunWebhookController extends Controller
                 ->whereJsonContains('tracking_data->temporary_id', true)
                 ->first();
 
-            // Update with real Mailgun message ID if found
+            // Update with real Mailgun message ID if found, but preserve tracking ID
             if ($sentEmail) {
                 $sentEmail->update([
-                    'message_id' => $messageId,
                     'tracking_data' => array_merge($sentEmail->tracking_data ?? [], [
                         'temporary_id' => false,
                         'mailgun_message_id' => $messageId,
+                        'original_tracking_id' => $sentEmail->message_id, // Preserve original
                         'updated_at' => now()->toISOString(),
                     ])
                 ]);
+                // DON'T update message_id - keep our tracking ID!
 
                 Log::info('Updated sent email with real Mailgun message ID', [
                     'sent_email_id' => $sentEmail->id,
