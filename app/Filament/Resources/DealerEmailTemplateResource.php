@@ -78,7 +78,6 @@ class DealerEmailTemplateResource extends Resource
                 //
             ])
             ->actions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
