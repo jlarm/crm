@@ -19,8 +19,10 @@ class DealerEmailMail extends Mailable
     public mixed $body;
     public $attachment;
     public $attachmentName;
+    public $trackingId;
 
-    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name) {
+    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, ?string $trackingId = null) {
+        $this->trackingId = $trackingId;
 
         if ($dealerEmail->template) {
 

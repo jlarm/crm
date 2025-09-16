@@ -9,4 +9,8 @@ Thanks,<br>
 {{ $user->phone }}<br>
 @endif
 Automotive Risk Management Partners
+
+@if($trackingId)
+<img src="{{ route('mailgun.open-track', ['message_id' => $trackingId]) }}" width="1" height="1" style="display:none;" alt="" />
+@endif
 @endcomponent

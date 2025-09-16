@@ -58,41 +58,14 @@ class SendDealerEmail implements ShouldQueue
                 $name = $contact ? $contact->name : '';
 
                 try {
-                    $mailable = new DealerEmailMail($dealerEmail, $name);
-
                     // Generate a unique tracking ID for this email
                     $trackingId = 'laravel-'.$dealerEmail->id.'-'.md5($recipient.now()->timestamp);
 
-                    // Add tracking to email content using a callback
-                    $mailable->withSymfonyMessage(function ($message) use ($trackingId) {
-                        \Log::info('withSymfonyMessage callback executed', ['tracking_id' => $trackingId]);
-
-                        $trackingService = app(EmailTrackingService::class);
-                        $body = $message->getHtmlBody();
-
-                        \Log::info('HTML body retrieved', [
-                            'has_body' => !empty($body),
-                            'body_length' => $body ? strlen($body) : 0,
-                            'tracking_id' => $trackingId
-                        ]);
-
-                        if ($body) {
-                            // Add tracking pixel
-                            $body = $trackingService->addTrackingPixel($body, $trackingId);
-                            \Log::info('Tracking pixel added');
-
-                            // Wrap links with click tracking
-                            $body = $trackingService->wrapLinksWithTracking($body, $trackingId);
-                            \Log::info('Click tracking added');
-
-                            $message->html($body);
-                            \Log::info('HTML body updated');
-                        } else {
-                            \Log::warning('No HTML body found for tracking');
-                        }
-                    });
+                    $mailable = new DealerEmailMail($dealerEmail, $name, $trackingId);
 
                     $sentMessage = Mail::to($recipient)->send($mailable);
+
+                    \Log::info('Email sent with tracking', ['tracking_id' => $trackingId, 'recipient' => $recipient]);
 
                     // Create sent email record - Mailgun will update with real message ID via webhook
                     SentEmail::create([
