@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Storage;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -23,6 +24,11 @@ class DealerEmailTemplate extends Model
     public function pdfAttachments(): MorphToMany
     {
         return $this->morphToMany(PdfAttachment::class, 'attachable');
+    }
+
+    public function dealerEmails(): HasMany
+    {
+        return $this->hasMany(DealerEmail::class, 'dealer_email_template_id');
     }
 
     public function getActivitylogOptions(): LogOptions

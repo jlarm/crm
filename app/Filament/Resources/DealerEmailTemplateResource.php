@@ -68,6 +68,9 @@ class DealerEmailTemplateResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('dealer_emails_count')
+                    ->counts('dealerEmails')
+                    ->label('Emails Using Template'),
             ])
             ->filters([
                 //
