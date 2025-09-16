@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\SentEmail;
+use App\Services\EmailTrackingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -60,15 +61,39 @@ class SendDealerEmail implements ShouldQueue
 
 
                 try {
-                    Mail::to($recipient)->send(new DealerEmailMail($dealerEmail, $name));
+                    $mailable = new DealerEmailMail($dealerEmail, $name);
+                    $sentMessage = Mail::to($recipient)->send($mailable);
 
-                    SentEmail::create([
-                       'user_id' => $dealerEmail->user_id,
-                       'dealership_id' => $dealerEmail->dealership_id,
-                       'recipient' => $recipient,
-                    ]);
+                    // Use the tracking service to record the sent email
+                    $trackingService = app(EmailTrackingService::class);
+                    $sentEmail = $trackingService->recordSentEmail(
+                        $sentMessage,
+                        $dealerEmail->user_id,
+                        $dealerEmail->dealership_id,
+                        $recipient,
+                        $mailable->subject
+                    );
+
+                    // If we couldn't get the message ID from the sent message, create a basic record
+                    if (!$sentEmail) {
+                        SentEmail::create([
+                            'user_id' => $dealerEmail->user_id,
+                            'dealership_id' => $dealerEmail->dealership_id,
+                            'recipient' => $recipient,
+                            'subject' => $mailable->subject,
+                            'message_id' => 'fallback-' . uniqid(),
+                            'tracking_data' => [
+                                'sent_at' => now()->toISOString(),
+                                'fallback' => true,
+                            ],
+                        ]);
+                    }
                 } catch (\Exception $e) {
-                    Log::error($e->getMessage());
+                    Log::error('Failed to send dealer email', [
+                        'error' => $e->getMessage(),
+                        'recipient' => $recipient,
+                        'dealer_email_id' => $dealerEmail->id,
+                    ]);
                 }
             }
 

@@ -46,6 +46,12 @@ class DealerEmailMail extends Mailable
         return new Envelope(
             from: new Address($this->dealerEmail->user->email, $this->dealerEmail->user->name . ' from ARMP'),
             subject: $this->subject,
+            tags: ['dealer-email', 'campaign-' . $this->dealerEmail->id],
+            metadata: [
+                'dealer_email_id' => $this->dealerEmail->id,
+                'dealership_id' => $this->dealerEmail->dealership_id,
+                'user_id' => $this->dealerEmail->user_id,
+            ],
         );
     }
 
