@@ -54,7 +54,7 @@ class SentEmailResource extends Resource
                         Forms\Components\DateTimePicker::make('created_at')
                             ->label('Sent Date')
                             ->disabled()
-                            ->formatStateUsing(fn ($state) => $state?->inUserTimezone()),
+                            ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->inUserTimezone() : null),
                     ])
                     ->columns(2),
 
@@ -107,7 +107,7 @@ class SentEmailResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->sortable()
                     ->dateTime()
-                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
+                    ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->inUserTimezone()->format('M j, Y g:i A T') : null)
                     ->label('Sent'),
             ])
             ->defaultSort('created_at', 'desc')

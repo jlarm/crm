@@ -50,7 +50,7 @@ class EmailTrackingEventResource extends Resource
                 Forms\Components\DateTimePicker::make('event_timestamp')
                     ->required()
                     ->disabled()
-                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()),
+                    ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->inUserTimezone() : null),
                 Forms\Components\Textarea::make('user_agent')
                     ->disabled(),
                 Forms\Components\TextInput::make('ip_address')
@@ -93,7 +93,7 @@ class EmailTrackingEventResource extends Resource
                     ->tooltip(fn (?string $state): ?string => $state),
                 Tables\Columns\TextColumn::make('event_timestamp')
                     ->dateTime()
-                    ->formatStateUsing(fn ($state) => $state?->inUserTimezone()->format('M j, Y g:i A T'))
+                    ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->inUserTimezone()->format('M j, Y g:i A T') : null)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ip_address')
                     ->toggleable(isToggledHiddenByDefault: true),
