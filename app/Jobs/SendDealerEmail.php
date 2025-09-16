@@ -61,24 +61,28 @@ class SendDealerEmail implements ShouldQueue
                     // Generate a unique tracking ID for this email
                     $trackingId = 'laravel-'.$dealerEmail->id.'-'.md5($recipient.now()->timestamp);
 
-                    $mailable = new DealerEmailMail($dealerEmail, $name, $trackingId);
-
-                    $sentMessage = Mail::to($recipient)->send($mailable);
-
-                    \Log::info('Email sent with tracking', ['tracking_id' => $trackingId, 'recipient' => $recipient]);
-
-                    // Create sent email record - Mailgun will update with real message ID via webhook
-                    SentEmail::create([
+                    // Create sent email record BEFORE sending so tracking works immediately
+                    $sentEmail = SentEmail::create([
                         'user_id' => $dealerEmail->user_id,
                         'dealership_id' => $dealerEmail->dealership_id,
                         'recipient' => $recipient,
-                        'subject' => $mailable->subject,
-                        'message_id' => $trackingId, // Temporary ID, will be updated by webhook
+                        'subject' => $dealerEmail->customize_email ? $dealerEmail->subject : ($dealerEmail->template->subject ?? 'Email'),
+                        'message_id' => $trackingId,
                         'tracking_data' => [
                             'sent_at' => now()->toISOString(),
                             'temporary_id' => true,
                             'dealer_email_id' => $dealerEmail->id,
                         ],
+                    ]);
+
+                    $mailable = new DealerEmailMail($dealerEmail, $name, $trackingId);
+
+                    $sentMessage = Mail::to($recipient)->send($mailable);
+
+                    \Log::info('Email sent with tracking', [
+                        'tracking_id' => $trackingId,
+                        'recipient' => $recipient,
+                        'sent_email_id' => $sentEmail->id
                     ]);
 
                     Log::info('Email sent successfully', [
