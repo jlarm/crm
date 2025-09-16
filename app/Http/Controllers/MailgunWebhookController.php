@@ -52,11 +52,41 @@ class MailgunWebhookController extends Controller
             return;
         }
 
-        // Find the sent email record
+        // Find the sent email record by Mailgun message ID
         $sentEmail = SentEmail::where('message_id', $messageId)->first();
 
+        // If not found, try to find by recipient and recent timestamp for temporary IDs
         if (!$sentEmail) {
-            Log::info('No matching sent email found for message ID', ['message_id' => $messageId]);
+            $sentEmail = SentEmail::where('recipient', $recipient)
+                ->where('created_at', '>=', now()->subHour()) // Within last hour
+                ->whereJsonContains('tracking_data->temporary_id', true)
+                ->first();
+
+            // Update with real Mailgun message ID if found
+            if ($sentEmail) {
+                $sentEmail->update([
+                    'message_id' => $messageId,
+                    'tracking_data' => array_merge($sentEmail->tracking_data ?? [], [
+                        'temporary_id' => false,
+                        'mailgun_message_id' => $messageId,
+                        'updated_at' => now()->toISOString(),
+                    ])
+                ]);
+
+                Log::info('Updated sent email with real Mailgun message ID', [
+                    'sent_email_id' => $sentEmail->id,
+                    'old_message_id' => $sentEmail->getOriginal('message_id'),
+                    'new_message_id' => $messageId,
+                ]);
+            }
+        }
+
+        if (!$sentEmail) {
+            Log::warning('No matching sent email found', [
+                'message_id' => $messageId,
+                'recipient' => $recipient,
+                'event' => $event
+            ]);
             return;
         }
 
@@ -84,7 +114,8 @@ class MailgunWebhookController extends Controller
         Log::info('Email tracking event recorded', [
             'event_type' => $eventType,
             'message_id' => $messageId,
-            'recipient' => $recipient
+            'recipient' => $recipient,
+            'sent_email_id' => $sentEmail->id,
         ]);
     }
 

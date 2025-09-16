@@ -64,30 +64,29 @@ class SendDealerEmail implements ShouldQueue
                     $mailable = new DealerEmailMail($dealerEmail, $name);
                     $sentMessage = Mail::to($recipient)->send($mailable);
 
-                    // Use the tracking service to record the sent email
-                    $trackingService = app(EmailTrackingService::class);
-                    $sentEmail = $trackingService->recordSentEmail(
-                        $sentMessage,
-                        $dealerEmail->user_id,
-                        $dealerEmail->dealership_id,
-                        $recipient,
-                        $mailable->subject
-                    );
+                    // Generate a unique tracking ID for this email
+                    $trackingId = 'laravel-' . $dealerEmail->id . '-' . md5($recipient . now()->timestamp);
 
-                    // If we couldn't get the message ID from the sent message, create a basic record
-                    if (!$sentEmail) {
-                        SentEmail::create([
-                            'user_id' => $dealerEmail->user_id,
-                            'dealership_id' => $dealerEmail->dealership_id,
-                            'recipient' => $recipient,
-                            'subject' => $mailable->subject,
-                            'message_id' => 'fallback-' . uniqid(),
-                            'tracking_data' => [
-                                'sent_at' => now()->toISOString(),
-                                'fallback' => true,
-                            ],
-                        ]);
-                    }
+                    // Create sent email record - Mailgun will update with real message ID via webhook
+                    SentEmail::create([
+                        'user_id' => $dealerEmail->user_id,
+                        'dealership_id' => $dealerEmail->dealership_id,
+                        'recipient' => $recipient,
+                        'subject' => $mailable->subject,
+                        'message_id' => $trackingId, // Temporary ID, will be updated by webhook
+                        'tracking_data' => [
+                            'sent_at' => now()->toISOString(),
+                            'temporary_id' => true,
+                            'dealer_email_id' => $dealerEmail->id,
+                        ],
+                    ]);
+
+                    Log::info('Email sent successfully', [
+                        'recipient' => $recipient,
+                        'tracking_id' => $trackingId,
+                        'dealer_email_id' => $dealerEmail->id,
+                    ]);
+
                 } catch (\Exception $e) {
                     Log::error('Failed to send dealer email', [
                         'error' => $e->getMessage(),

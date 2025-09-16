@@ -52,29 +52,36 @@ class EmailTrackingService
     private function extractMessageId(SentMessage $sentMessage): ?string
     {
         try {
-            $message = $sentMessage->getSymfonySentMessage();
-
-            if (!$message) {
-                return null;
-            }
-
-            // Try to get message ID from headers
-            $headers = $message->getHeaders();
-
-            if ($headers->has('Message-ID')) {
-                return $headers->get('Message-ID')->getBody();
-            }
-
-            // Try to get from original message headers
+            // Try to get from the original message first
             $originalMessage = $sentMessage->getOriginalMessage();
+
             if ($originalMessage && $originalMessage->getHeaders()->has('Message-ID')) {
-                return $originalMessage->getHeaders()->get('Message-ID')->getBody();
+                $messageId = $originalMessage->getHeaders()->get('Message-ID')->getBody();
+                return trim($messageId, '<>'); // Remove angle brackets if present
             }
 
-            return null;
+            // Try to get from Symfony sent message
+            $symphonyMessage = $sentMessage->getSymfonySentMessage();
+
+            if ($symphonyMessage) {
+                // For Mailgun, we can try to get it from the envelope or debug info
+                $envelope = $symphonyMessage->getEnvelope();
+                if ($envelope) {
+                    // Generate a unique ID based on envelope data
+                    $sender = $envelope->getSender()->getAddress();
+                    $recipients = implode(',', array_map(fn($r) => $r->getAddress(), $envelope->getRecipients()));
+                    return 'laravel-' . md5($sender . $recipients . now()->timestamp);
+                }
+            }
+
+            // Fallback: generate a unique ID
+            return 'laravel-' . uniqid() . '-' . time();
+
         } catch (\Exception $e) {
             Log::error('Error extracting message ID', ['error' => $e->getMessage()]);
-            return null;
+
+            // Final fallback
+            return 'fallback-' . uniqid() . '-' . time();
         }
     }
 
