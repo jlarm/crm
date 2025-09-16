@@ -45,7 +45,7 @@ class EmailTrackingEventResource extends Resource
                 Forms\Components\TextInput::make('message_id')
                     ->required()
                     ->disabled(),
-                Forms\Components\Url::make('url')
+                Forms\Components\TextInput::make('url')
                     ->disabled(),
                 Forms\Components\DateTimePicker::make('event_timestamp')
                     ->required()
