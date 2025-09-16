@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealerEmailTemplateResource\Pages;
+use App\Filament\Resources\DealerEmailTemplateResource\RelationManagers;
 use App\Models\DealerEmailTemplate;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -15,6 +16,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -76,6 +78,7 @@ class DealerEmailTemplateResource extends Resource
                 //
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
@@ -86,11 +89,19 @@ class DealerEmailTemplateResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\DealerEmailsRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListDealerEmailTemplates::route('/'),
             'create' => Pages\CreateDealerEmailTemplate::route('/create'),
+            'view' => Pages\ViewDealerEmailTemplate::route('/{record}'),
             'edit' => Pages\EditDealerEmailTemplate::route('/{record}/edit'),
         ];
     }
