@@ -4,7 +4,6 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\EditProfile;
 use App\Filament\Widgets\DealershipStatusOverview;
-use App\Filament\Widgets\EmailAnalyticsWidget;
 use App\Filament\Widgets\MyDealerships;
 use App\Filament\Widgets\UpcomingEmails;
 use Filament\Http\Middleware\Authenticate;
@@ -62,7 +61,6 @@ class AdminPanelProvider extends PanelProvider
                 DealershipStatusOverview::class,
                 UpcomingEmails::class,
                 MyDealerships::class,
-                EmailAnalyticsWidget::class,
             ])
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),

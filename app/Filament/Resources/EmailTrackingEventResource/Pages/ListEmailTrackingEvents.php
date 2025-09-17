@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EmailTrackingEventResource\Pages;
 
 use App\Filament\Resources\EmailTrackingEventResource;
+use App\Filament\Widgets\EmailAnalyticsWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListEmailTrackingEvents extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            EmailAnalyticsWidget::class,
         ];
     }
 }
