@@ -69,34 +69,79 @@ jobs:
       - name: Copy environment file
         run: cp .env.example .env
 
+      - name: Configure database and services
+        run: |
+          sed -i '/^DB_CONNECTION=sqlite/d' .env
+          echo "" >> .env
+          echo "# Testing Environment Configuration" >> .env
+          echo "APP_ENV=testing" >> .env
+          echo "APP_DEBUG=false" >> .env
+          echo "" >> .env
+          echo "# Database Configuration for Testing" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=testing" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=password" >> .env
+          echo "" >> .env
+          echo "# Service Configuration for Testing" >> .env
+          echo "MAILCOACH_API_TOKEN=test_token" >> .env
+          echo "MAILCOACH_API_ENDPOINT=https://test.mailcoach.app/api" >> .env
+          echo "SENTRY_DSN=" >> .env
+          echo "LOG_CHANNEL=stack" >> .env
+          echo "MAIL_MAILER=log" >> .env
+
       - name: Generate app key
         run: php artisan key:generate --ansi
 
-      - name: Configure database
+      - name: Display Laravel environment
         run: |
-          php artisan config:clear
-          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
-          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
-          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
-          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+          echo "=== Environment Check ==="
+          php -v
+          echo "=== Laravel Configuration ==="
+          php artisan env
+          echo "=== Database Configuration ==="
+          php artisan config:show database
 
       - name: Wait for MySQL
         run: |
+          echo "=== Waiting for MySQL ==="
           while ! mysqladmin ping -h"127.0.0.1" -P"3306" -u"root" -p"password" --silent; do
-            sleep 1
+            echo "Waiting for MySQL..."
+            sleep 2
           done
+          echo "MySQL is ready!"
+
+      - name: Cache Laravel configuration
+        run: |
+          echo "=== Caching Configuration ==="
+          php artisan config:cache
+          php artisan route:clear
+          php artisan view:clear
 
       - name: Set up database
         run: |
-          php artisan migrate --force --seed
+          echo "=== Running Migrations ==="
+          php artisan migrate --force --seed --verbose
 
       - name: Run Laravel Pint (Code Style)
-        run: vendor/bin/pint --test
+        run: |
+          echo "=== Running Laravel Pint ==="
+          vendor/bin/pint --test
+
+      - name: Verify test setup
+        run: |
+          echo "=== Verifying Test Environment ==="
+          php artisan config:show database
+          php artisan migrate:status
+          echo "=== Available Tests ==="
+          php artisan test --list-tests
 
       - name: Execute tests
-        run: php artisan test --parallel
+        run: |
+          echo "=== Running Tests ==="
+          php artisan test --parallel --verbose
 
       - name: Upload coverage reports (if available)
         if: matrix.php == '8.4'
