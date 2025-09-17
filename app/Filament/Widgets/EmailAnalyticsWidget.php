@@ -17,12 +17,6 @@ class EmailAnalyticsWidget extends BaseWidget
 
     protected ?string $heading = 'Email Performance Analytics';
 
-    public static function canView(): bool
-    {
-        // Only show this widget on the Email Tracking page, not on the dashboard
-        return request()->routeIs('filament.admin.resources.email-tracking-events.index');
-    }
-
     protected function getStats(): array
     {
         $user = auth()->user();
