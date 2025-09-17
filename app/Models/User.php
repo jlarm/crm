@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -8,17 +10,17 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Models\Activity;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -26,10 +28,10 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory;
     use HasProfilePhoto;
     use HasRoles;
+    use LogsActivity;
     use Notifiable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
-    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -65,11 +67,6 @@ class User extends Authenticatable implements FilamentUser
         'email_verified_at' => 'datetime',
     ];
 
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
-
     /**
      * The accessors to append to the model's array form.
      *
@@ -78,6 +75,11 @@ class User extends Authenticatable implements FilamentUser
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
 
     public function dealerships(): BelongsToMany
     {

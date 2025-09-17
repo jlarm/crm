@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages;
 
 use Exception;
@@ -20,26 +22,20 @@ use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 class EditProfile extends Page
 {
     use InteractsWithForms;
+
+    public ?array $profileData = [];
+
+    public ?array $passwordData = [];
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'filament.pages.edit-profile';
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public ?array $profileData = [];
-    public ?array $passwordData = [];
-
     public function mount(): void
     {
         $this->fillForms();
-    }
-
-    protected function getForms(): array
-    {
-        return [
-            'editProfileForm',
-            'editPasswordForm',
-        ];
     }
 
     public function editProfileForm(Form $form): Form
@@ -95,7 +91,46 @@ class EditProfile extends Page
             ->statePath('passwordData');
     }
 
-    protected function getUser(): Authenticatable & Model
+    public function updateProfile(): void
+    {
+        try {
+            $data = $this->editProfileForm->getState();
+
+            $this->handleRecordUpdate($this->getUser(), $data);
+        } catch (Halt $exception) {
+            return;
+        }
+        $this->sendSuccessNotification();
+    }
+
+    public function updatePassword(): void
+    {
+        try {
+            $data = $this->editPasswordForm->getState();
+
+            $this->handleRecordUpdate($this->getUser(), $data);
+        } catch (Halt $exception) {
+            return;
+        }
+
+        if (request()->hasSession() && array_key_exists('password', $data)) {
+            request()->session()->put([
+                'password_hash_'.Filament::getAuthGuard() => $data['password'],
+            ]);
+        }
+
+        $this->editPasswordForm->fill();
+    }
+
+    protected function getForms(): array
+    {
+        return [
+            'editProfileForm',
+            'editPasswordForm',
+        ];
+    }
+
+    protected function getUser(): Authenticatable&Model
     {
         $user = Filament::auth()->user();
 
@@ -122,37 +157,6 @@ class EditProfile extends Page
                 ->label(__('filament-panels::pages/auth/edit-profile.form.actions.save.label'))
                 ->submit('editPasswordForm'),
         ];
-    }
-
-    public function updateProfile(): void
-    {
-        try {
-            $data = $this->editProfileForm->getState();
-
-            $this->handleRecordUpdate($this->getUser(), $data);
-        } catch (Halt $exception) {
-            return;
-        }
-        $this->sendSuccessNotification();
-    }
-
-    public function updatePassword(): void
-    {
-        try {
-            $data = $this->editPasswordForm->getState();
-
-            $this->handleRecordUpdate($this->getUser(), $data);
-        } catch (Halt $exception) {
-            return;
-        }
-
-        if (request()->hasSession() && array_key_exists('password', $data)) {
-            request()->session()->put([
-                'password_hash_' . Filament::getAuthGuard() => $data['password'],
-            ]);
-        }
-
-        $this->editPasswordForm->fill();
     }
 
     protected function handleRecordUpdate(Model $record, array $data): Model

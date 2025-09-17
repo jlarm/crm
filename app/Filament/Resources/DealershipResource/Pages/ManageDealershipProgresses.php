@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
 use App\Models\Contact;
 use App\Models\ProgressCategory;
-use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -13,7 +14,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ManageDealershipProgresses extends ManageRelatedRecords
 {
@@ -25,14 +25,14 @@ class ManageDealershipProgresses extends ManageRelatedRecords
 
     protected ?string $subheading = 'Manage Progress';
 
-    public function getHeading(): string
-    {
-        return $this->getOwnerRecord()->name;
-    }
-
     public static function getNavigationLabel(): string
     {
         return 'Progress';
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getOwnerRecord()->name;
     }
 
     public function form(Form $form): Form
@@ -75,12 +75,12 @@ class ManageDealershipProgresses extends ManageRelatedRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->with('category'))
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('category.name')
+                TextColumn::make('category.name')
                     ->default('-')
                     ->label('Category'),
-                Tables\Columns\TextColumn::make('details')->words(30)->wrap(),
-                Tables\Columns\TextColumn::make('created_at')->label('Date')->date(),
-                Tables\Columns\TextColumn::make('contact.name')->label('Contact'),
+                TextColumn::make('details')->words(30)->wrap(),
+                TextColumn::make('created_at')->label('Date')->date(),
+                TextColumn::make('contact.name')->label('Contact'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('progress_category_id')

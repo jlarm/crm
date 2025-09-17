@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Enum\ReminderFrequency;
@@ -28,14 +30,14 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
 
     protected ?string $subheading = 'Manage Emails';
 
-    public function getHeading(): string
-    {
-        return $this->getOwnerRecord()->name;
-    }
-
     public static function getNavigationLabel(): string
     {
         return 'Emails';
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getOwnerRecord()->name;
     }
 
     public function form(Form $form): Form
@@ -84,10 +86,11 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->helperText(function (Get $get) {
                         $template = DealerEmailTemplate::find($get('dealer_email_template_id'));
-                        if (!$template || $template->pdfAttachments->isEmpty()) {
+                        if (! $template || $template->pdfAttachments->isEmpty()) {
                             return null;
                         }
-                        return 'PDF Attachments: ' . $template->pdfAttachments->pluck('file_name')->implode(', ');
+
+                        return 'PDF Attachments: '.$template->pdfAttachments->pluck('file_name')->implode(', ');
                     })
                     ->label('Template'),
                 // Checkbox::make('attach_pdf_template')
@@ -114,7 +117,7 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') == null)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
                         $templateId = $get('dealer_email_template_id');
                         if ($templateId === null) {
@@ -139,13 +142,13 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->required()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->maxLength(255),
                 RichEditor::make('message')
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->required(),
                 Select::make('frequency')
                     ->columnSpanFull()
@@ -155,9 +158,9 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
+                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         $set('next_send_date', $state);
@@ -165,9 +168,9 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('next_send_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value),
+                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value),
             ]);
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Mail\ReminderMail;
@@ -16,9 +18,9 @@ class SendReminderCommand extends Command
     public function handle(): void
     {
         $reminders = Reminder::query()
-            ->where("pause", false)
-            ->orWhere("start_date", now()->format("Y-m-d"))
-            ->whereRaw("DATE_ADD(last_sent, INTERVAL sending_frequency DAY) = CURDATE()")
+            ->where('pause', false)
+            ->orWhere('start_date', now()->format('Y-m-d'))
+            ->whereRaw('DATE_ADD(last_sent, INTERVAL sending_frequency DAY) = CURDATE()')
             ->get();
 
         foreach ($reminders as $reminder) {

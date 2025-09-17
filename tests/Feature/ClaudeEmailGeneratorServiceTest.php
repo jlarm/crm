@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\DealerEmailTemplate;
 use App\Models\Dealership;
 use App\Models\User;

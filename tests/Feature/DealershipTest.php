@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enum\DevStatus;
 use App\Enum\ReminderFrequency;
 use App\Models\Contact;
@@ -299,7 +301,7 @@ describe('Dealership Relationships', function () {
             'recipients' => ['test@example.com'],
             'subject' => 'Test Subject',
             'message' => 'Test message',
-            'frequency' => \App\Enum\ReminderFrequency::Immediate,
+            'frequency' => ReminderFrequency::Immediate,
         ]);
 
         $loadedDealership = Dealership::with([
@@ -424,8 +426,8 @@ describe('Dealership Validation and Edge Cases', function () {
             'current_solution_use' => $longText,
         ]);
 
-        expect(strlen($dealership->notes))->toBeGreaterThan(500)
-            ->and(strlen($dealership->current_solution_use))->toBeGreaterThan(500);
+        expect(mb_strlen($dealership->notes))->toBeGreaterThan(500)
+            ->and(mb_strlen($dealership->current_solution_use))->toBeGreaterThan(500);
     });
 
     it('preserves special characters in text fields', function () {

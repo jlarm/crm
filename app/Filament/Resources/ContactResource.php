@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContactResource\Pages;
@@ -15,6 +17,8 @@ class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
 
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
     public static function canCreate(): bool
     {
         return false;
@@ -24,8 +28,6 @@ class ContactResource extends Resource
     {
         return false;
     }
-
-    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {

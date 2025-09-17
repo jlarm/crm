@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Dealership;
@@ -20,8 +22,9 @@ class AssignUserToDealershipsByStateCommand extends Command
 
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             $this->error('User not found');
+
             return;
         }
 
@@ -29,6 +32,7 @@ class AssignUserToDealershipsByStateCommand extends Command
 
         if ($dealerships->isEmpty()) {
             $this->error('No dealerships found for the given states');
+
             return;
         }
 

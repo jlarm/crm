@@ -1,20 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\ReminderFrequency;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class DealerEmail extends Model
 {
     use LogsActivity;
-    
+
     protected $fillable = [
         'user_id',
         'dealership_id',
@@ -31,7 +31,7 @@ class DealerEmail extends Model
         'frequency',
         'paused',
         'attachment_name',
-        'next_send_date'
+        'next_send_date',
     ];
 
     protected $casts = [
@@ -42,7 +42,7 @@ class DealerEmail extends Model
         'frequency' => ReminderFrequency::class,
         'customize_email' => 'boolean',
         'customize_attachment' => 'boolean',
-        'next_send_date' => 'date:Y-m-d'
+        'next_send_date' => 'date:Y-m-d',
     ];
 
     public function user(): BelongsTo
@@ -65,6 +65,13 @@ class DealerEmail extends Model
         return $this->morphToMany(PdfAttachment::class, 'attachable');
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email {$eventName}");
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -72,12 +79,5 @@ class DealerEmail extends Model
         static::creating(function ($dealerEmail) {
             $dealerEmail->user_id = auth()->id();
         });
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email {$eventName}");
     }
 }

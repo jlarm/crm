@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\DealerEmailTemplate;
 use App\Models\Dealership;
+use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +79,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 100);
 
-        return $this->extractContent($response) ?: 'Partnership Opportunity - '.substr($context, 0, 30);
+        return $this->extractContent($response) ?: 'Partnership Opportunity - '.mb_substr($context, 0, 30);
     }
 
     public function generateEmailContentWithContext(string $context, string $tone = 'professional'): string
@@ -94,7 +97,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 100);
 
-        return $this->extractContent($response) ?: 'Re: '.$dealership->name.' - '.substr($context, 0, 30);
+        return $this->extractContent($response) ?: 'Re: '.$dealership->name.' - '.mb_substr($context, 0, 30);
     }
 
     public function generateEmailContentWithDealershipContext(
@@ -109,6 +112,11 @@ class ClaudeEmailGeneratorService
         $response = $this->callClaudeApi($prompt, 1200);
 
         return $this->extractContent($response) ?: $this->getDefaultPersonalizedContent($dealership, $context);
+    }
+
+    public function isConfigured(): bool
+    {
+        return ! empty($this->apiKey);
     }
 
     private function buildSubjectPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
@@ -206,10 +214,10 @@ Format as a numbered list. Return only the list items.";
         }
 
         if ($dealership->notes) {
-            $context .= 'Notes: '.substr($dealership->notes, 0, 200)."\n";
+            $context .= 'Notes: '.mb_substr($dealership->notes, 0, 200)."\n";
         }
 
-        $context .= 'Development Status: '.($dealership->in_development ? "In Development (".($dealership->dev_status?->getLabel() ?? 'Unknown').")" : 'Not in development');
+        $context .= 'Development Status: '.($dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
 
         return $context;
     }
@@ -242,10 +250,10 @@ Format as a numbered list. Return only the list items.";
             ]);
 
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Claude API exception', [
                 'message' => $e->getMessage(),
-                'prompt_length' => strlen($prompt),
+                'prompt_length' => mb_strlen($prompt),
             ]);
 
             return null;
@@ -266,12 +274,7 @@ Format as a numbered list. Return only the list items.";
             return null;
         }
 
-        return trim($data['content'][0]['text']);
-    }
-
-    public function isConfigured(): bool
-    {
-        return ! empty($this->apiKey);
+        return mb_trim($data['content'][0]['text']);
     }
 
     private function buildSubjectPromptWithContext(string $context): string

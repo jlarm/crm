@@ -1,13 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Auth\Events\Failed;
-use Spatie\Activitylog\Facades\LogBatch;
-use Spatie\Activitylog\ActivityLogger;
-use Spatie\Activitylog\ActivityLogStatus;
 
 class LogAuthenticationEvents
 {
@@ -17,7 +16,7 @@ class LogAuthenticationEvents
     public function handleLogin(Login $event): void
     {
         $user = $event->user;
-        
+
         activity()
             ->causedBy($user)
             ->withProperties([
@@ -54,7 +53,7 @@ class LogAuthenticationEvents
                 'user_agent' => request()->userAgent(),
                 'credentials' => [
                     'email' => $event->credentials['email'] ?? null,
-                ]
+                ],
             ])
             ->log('Failed login attempt');
     }

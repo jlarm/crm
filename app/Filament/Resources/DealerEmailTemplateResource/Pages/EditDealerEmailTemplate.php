@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealerEmailTemplateResource\Pages;
 
 use App\Filament\Resources\DealerEmailTemplateResource;
@@ -16,14 +18,6 @@ use Filament\Support\Enums\MaxWidth;
 class EditDealerEmailTemplate extends EditRecord
 {
     protected static string $resource = DealerEmailTemplateResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
-    }
 
     public function getMaxContentWidth(): MaxWidth
     {
@@ -67,5 +61,13 @@ class EditDealerEmailTemplate extends EditRecord
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
     }
 }

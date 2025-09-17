@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
 use App\Models\Store;
-use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -14,8 +15,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ManageDealershipStores extends ManageRelatedRecords
 {
@@ -27,14 +26,14 @@ class ManageDealershipStores extends ManageRelatedRecords
 
     protected ?string $subheading = 'Manage Stores';
 
-    public function getHeading(): string
-    {
-        return $this->getOwnerRecord()->name;
-    }
-
     public static function getNavigationLabel(): string
     {
         return 'Stores';
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getOwnerRecord()->name;
     }
 
     public function form(Form $form): Form
@@ -43,7 +42,7 @@ class ManageDealershipStores extends ManageRelatedRecords
             ->schema([
                 Forms\Components\Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->columnSpanFull()
                     ->required()
                     ->maxLength(255),
@@ -128,7 +127,7 @@ class ManageDealershipStores extends ManageRelatedRecords
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->description(fn (Store $record): string => $record->city. ', ' . $record->state),
+                    ->description(fn (Store $record): string => $record->city.', '.$record->state),
                 Tables\Columns\TextColumn::make('phone'),
             ])
             ->filters([

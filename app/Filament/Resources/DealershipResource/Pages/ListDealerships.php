@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
@@ -28,6 +30,19 @@ class ListDealerships extends ListRecords
         ];
     }
 
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('All'),
+            'active' => Tab::make('Active')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'active')),
+            'inactive' => Tab::make('Inactive')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'inactive')),
+            'imported' => Tab::make('Imported')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'imported')),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -39,19 +54,6 @@ class ListDealerships extends ListRecords
     {
         return [
             DealershipResource\Widgets\DealerOverview::class,
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make('All'),
-            'active' => Tab::make('Active')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'active')),
-            'inactive' => Tab::make('Inactive')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'inactive')),
-            'imported' => Tab::make('Imported')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'imported')),
         ];
     }
 }

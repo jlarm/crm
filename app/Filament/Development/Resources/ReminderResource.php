@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Development\Resources;
 
 use App\Enum\ReminderFrequency;
 use App\Filament\Development\Resources\ReminderResource\Pages;
-use App\Filament\Development\Resources\ReminderResource\RelationManagers;
 use App\Models\Reminder;
 use App\Models\User;
 use Filament\Forms;

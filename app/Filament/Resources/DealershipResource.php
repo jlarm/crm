@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealershipResource\Pages;
-use App\Filament\Resources\DealershipResource\RelationManagers;
-use App\Mail\ClientMail;
 use App\Mail\MessageMail;
 use App\Models\Contact;
 use App\Models\Dealership;
@@ -18,7 +18,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Notifications\Actions\Action;
+use Filament\Forms\Get;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -30,8 +30,6 @@ use Illuminate\Support\Facades\Mail;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use Filament\Forms\Get;
-use App\Exports\AdvancedDealershipExport;
 
 class DealershipResource extends Resource
 {
@@ -156,7 +154,7 @@ class DealershipResource extends Resource
                                         TextInput::make('current_solution_use')
                                             ->label('Use'),
                                     ]),
-                            ])->collapsed()
+                            ])->collapsed(),
                     ])->columnSpan(2),
                 Forms\Components\Group::make()
                     ->schema([
@@ -192,38 +190,38 @@ class DealershipResource extends Resource
                             ]),
                         Forms\Components\Section::make()
                             ->schema([
-                               Forms\Components\Actions::make([
-                                   Forms\Components\Actions\Action::make('Email Sales Development Rep')
-                                       ->link()
-                                       ->icon('heroicon-o-envelope')
+                                Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('Email Sales Development Rep')
+                                        ->link()
+                                        ->icon('heroicon-o-envelope')
 //                                       ->color('gray')
-                                       ->hidden(fn (string $operation): bool => $operation === 'create')
-                                       ->form([
-                                           Select::make('user')
-                                               ->required()
-                                               ->label('Sales Development Rep')
-                                               ->helperText('Select the Sales Development Rep to send the email to.')
+                                        ->hidden(fn (string $operation): bool => $operation === 'create')
+                                        ->form([
+                                            Select::make('user')
+                                                ->required()
+                                                ->label('Sales Development Rep')
+                                                ->helperText('Select the Sales Development Rep to send the email to.')
                                                 ->options(User::role('Sales Development Rep')->pluck('name', 'email')),
-                                           TextInput::make('subject')->required(),
-                                           RichEditor::make('body')->required(),
-                                       ])
-                                       ->action(function (array $data, Form $form) {
-                                           Mail::to($data['user'])
-                                               ->send(new MessageMail(
-                                                   $form->model,
-                                                   auth()->user(),
-                                                   $data['subject'],
-                                                   $data['body']
-                                               ));
-                                           Progress::create([
-                                               'dealership_id' => $form->model->id,
-                                               'user_id' => auth()->id(),
-                                               'date' => now(),
-                                               'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
-                                           ]);
-                                       }),
-                               ])
-                            ])
+                                            TextInput::make('subject')->required(),
+                                            RichEditor::make('body')->required(),
+                                        ])
+                                        ->action(function (array $data, Form $form) {
+                                            Mail::to($data['user'])
+                                                ->send(new MessageMail(
+                                                    $form->model,
+                                                    auth()->user(),
+                                                    $data['subject'],
+                                                    $data['body']
+                                                ));
+                                            Progress::create([
+                                                'dealership_id' => $form->model->id,
+                                                'user_id' => auth()->id(),
+                                                'date' => now(),
+                                                'details' => 'Sent email to '.$data['user'].' - '.$data['subject'],
+                                            ]);
+                                        }),
+                                ]),
+                            ]),
                     ])->columnSpan(1),
             ])->columns(3);
     }
@@ -354,8 +352,8 @@ class DealershipResource extends Resource
                                 Column::make('name'),
                                 Column::make('status'),
                                 Column::make('rating'),
-                        ]),
-                ]),
+                            ]),
+                    ]),
                 ExportBulkAction::make('contacts')
                     ->label('Export Contact Emails')
                     ->exports([
@@ -363,13 +361,13 @@ class DealershipResource extends Resource
                             ->modifyQueryUsing(function ($query) {
                                 return $query->whereIn('dealership_id', $query->pluck('id'))
                                     ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
-                                    ->select(['contacts.name','contacts.email']);
+                                    ->select(['contacts.name', 'contacts.email']);
                             })
                             ->withColumns([
                                 Column::make('name'),
                                 Column::make('email'),
-                        ]),
-                ]),
+                            ]),
+                    ]),
                 Tables\Actions\BulkAction::make('export_contacts')
                     ->label('Export Contacts with Dealership Info')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -415,7 +413,7 @@ class DealershipResource extends Resource
                     ->action(function (array $data, $records) {
                         // Get contacts from selected dealerships
                         $dealershipIds = $records->pluck('id');
-                        $contacts = \App\Models\Contact::whereIn('dealership_id', $dealershipIds)
+                        $contacts = Contact::whereIn('dealership_id', $dealershipIds)
                             ->with(['dealership.users', 'dealership.stores'])
                             ->join('dealerships', 'contacts.dealership_id', '=', 'dealerships.id')
                             ->orderBy('dealerships.name')
@@ -425,11 +423,11 @@ class DealershipResource extends Resource
 
                         // Build CSV content
                         $csvData = [];
-                        
+
                         // Build headers
                         $headers = [];
                         foreach ($data['dealership_fields'] as $field) {
-                            $headers[] = match($field) {
+                            $headers[] = match ($field) {
                                 'name' => 'Dealership Name',
                                 'address' => 'Dealership Address',
                                 'city' => 'Dealership City',
@@ -447,9 +445,9 @@ class DealershipResource extends Resource
                                 default => ucwords(str_replace('_', ' ', $field)),
                             };
                         }
-                        
+
                         foreach ($data['contact_fields'] as $field) {
-                            $headers[] = match($field) {
+                            $headers[] = match ($field) {
                                 'name' => 'Contact Name',
                                 'email' => 'Contact Email',
                                 'phone' => 'Contact Phone',
@@ -463,10 +461,10 @@ class DealershipResource extends Resource
                         // Build data rows
                         foreach ($contacts as $contact) {
                             $row = [];
-                            
+
                             // Add dealership data
                             foreach ($data['dealership_fields'] as $field) {
-                                $row[] = match($field) {
+                                $row[] = match ($field) {
                                     'name' => $contact->dealership->name,
                                     'address' => $contact->dealership->address,
                                     'city' => $contact->dealership->city,
@@ -484,18 +482,18 @@ class DealershipResource extends Resource
                                     default => $contact->dealership->{$field} ?? '',
                                 };
                             }
-                            
+
                             // Add contact data
                             foreach ($data['contact_fields'] as $field) {
                                 $row[] = $contact->{$field} ?? '';
                             }
-                            
+
                             $csvData[] = $row;
                         }
 
                         // Generate CSV
-                        $filename = 'contacts-with-dealerships-' . now()->format('Y-m-d-H-i-s') . '.csv';
-                        
+                        $filename = 'contacts-with-dealerships-'.now()->format('Y-m-d-H-i-s').'.csv';
+
                         return response()->streamDownload(function () use ($csvData) {
                             $file = fopen('php://output', 'w');
                             foreach ($csvData as $row) {
@@ -520,7 +518,6 @@ class DealershipResource extends Resource
             Pages\ManageDealershipDealerEmails::class,
         ]);
     }
-
 
     public static function getPages(): array
     {

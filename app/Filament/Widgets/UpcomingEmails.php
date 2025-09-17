@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\DealerEmail;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 class UpcomingEmails extends BaseWidget
 {
     use HasWidgetShield;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 1;
@@ -63,7 +66,7 @@ class UpcomingEmails extends BaseWidget
                                 break;
                         }
                     })
-                ->preload()
+                    ->preload(),
             ]);
     }
 }

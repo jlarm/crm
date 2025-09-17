@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DealerEmailTemplateResource\Pages;
 use App\Filament\Resources\DealerEmailTemplateResource\RelationManagers;
 use App\Models\DealerEmailTemplate;
+use Exception;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -65,7 +68,7 @@ class DealerEmailTemplateResource extends Resource
                                         ->body('AI-generated subject based on your context.')
                                         ->success()
                                         ->send();
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     \Filament\Notifications\Notification::make()
                                         ->title('Generation Failed')
                                         ->body('Unable to generate subject. Please try again.')
@@ -103,7 +106,7 @@ class DealerEmailTemplateResource extends Resource
                                     ->placeholder('e.g., Product demo invitation, follow-up after meeting, pricing information, partnership proposal, etc.')
                                     ->rows(3)
                                     ->required(),
-                                \Filament\Forms\Components\Select::make('tone')
+                                Select::make('tone')
                                     ->label('Email Tone')
                                     ->options([
                                         'professional' => 'Professional',
@@ -127,7 +130,7 @@ class DealerEmailTemplateResource extends Resource
                                         ->body('AI-generated template content based on your context has been added.')
                                         ->success()
                                         ->send();
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     \Filament\Notifications\Notification::make()
                                         ->title('Generation Failed')
                                         ->body('Unable to generate content. Please try again.')

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
+use Exception;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
-use Exception;
 
 class CreateDealership extends CreateRecord
 {
@@ -39,7 +41,7 @@ class CreateDealership extends CreateRecord
             try {
                 $list = Mailcoach::emailList($this->getListType());
 
-                if ($list->subscriber($this->record->email) != null) {
+                if ($list->subscriber($this->record->email) !== null) {
                     return;
                 }
 
@@ -61,7 +63,7 @@ class CreateDealership extends CreateRecord
                 // Show notification when Mailcoach operation fails
                 Notification::make()
                     ->title('Mailcoach Error')
-                    ->body('Failed to add subscriber to Mailcoach: ' . $e->getMessage())
+                    ->body('Failed to add subscriber to Mailcoach: '.$e->getMessage())
                     ->danger()
                     ->persistent()
                     ->send();

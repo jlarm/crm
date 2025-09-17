@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\DealerEmail;
@@ -16,12 +18,17 @@ class DealerEmailMail extends Mailable
     use Queueable, SerializesModels;
 
     public $subject;
+
     public mixed $body;
+
     public $attachment;
+
     public $attachmentName;
+
     public $trackingId;
 
-    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, ?string $trackingId = null) {
+    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, ?string $trackingId = null)
+    {
         $this->trackingId = $trackingId;
 
         if ($dealerEmail->template) {
@@ -46,9 +53,9 @@ class DealerEmailMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address($this->dealerEmail->user->email, $this->dealerEmail->user->name . ' from ARMP'),
+            from: new Address($this->dealerEmail->user->email, $this->dealerEmail->user->name.' from ARMP'),
             subject: $this->subject,
-            tags: ['dealer-email', 'campaign-' . $this->dealerEmail->id],
+            tags: ['dealer-email', 'campaign-'.$this->dealerEmail->id],
             metadata: [
                 'dealer_email_id' => $this->dealerEmail->id,
                 'dealership_id' => $this->dealerEmail->dealership_id,
@@ -73,18 +80,18 @@ class DealerEmailMail extends Mailable
         $attachments = [];
 
         // If using a template without customization, include only the template's PDF attachments
-        if ($this->dealerEmail->template && !$this->dealerEmail->customize_email) {
+        if ($this->dealerEmail->template && ! $this->dealerEmail->customize_email) {
             foreach ($this->dealerEmail->template->pdfAttachments as $attachment) {
                 $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
             }
-        } 
+        }
         // If the email has custom PDF attachments, use those
         elseif ($this->dealerEmail->pdfAttachments->isNotEmpty()) {
             foreach ($this->dealerEmail->pdfAttachments as $attachment) {
                 $attachments[] = Attachment::fromStorageDisk('public', $attachment->file_path)->as($attachment->file_name);
             }
         }
-        // If using a template with customization but no custom PDF attachments were added, 
+        // If using a template with customization but no custom PDF attachments were added,
         // still include the template's PDF attachments
         elseif ($this->dealerEmail->template && $this->dealerEmail->customize_email) {
             foreach ($this->dealerEmail->template->pdfAttachments as $attachment) {

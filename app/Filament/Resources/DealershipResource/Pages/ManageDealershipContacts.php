@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
-use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 
 class ManageDealershipContacts extends ManageRelatedRecords
@@ -23,14 +22,14 @@ class ManageDealershipContacts extends ManageRelatedRecords
 
     protected ?string $subheading = 'Manage Contacts';
 
-    public function getHeading(): string
-    {
-        return $this->getOwnerRecord()->name;
-    }
-
     public static function getNavigationLabel(): string
     {
         return 'Contacts';
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getOwnerRecord()->name;
     }
 
     public function form(Form $form): Form
@@ -64,8 +63,8 @@ class ManageDealershipContacts extends ManageRelatedRecords
                     ->nullable(),
                 Forms\Components\Toggle::make('primary_contact'),
                 Forms\Components\Select::make('tags')
-                ->label('MailCoach Tags')
-                ->columnSpanFull()
+                    ->label('MailCoach Tags')
+                    ->columnSpanFull()
                     ->relationship('tags', 'name')
                     ->multiple()
                     ->preload()
@@ -124,9 +123,9 @@ class ManageDealershipContacts extends ManageRelatedRecords
                             'current_updated_at' => $record->updated_at->toIso8601String(),
                             'is_dirty_before_our_save' => $record->isDirty(),
                             'dirty_attributes_before_our_save' => $record->getDirty(),
-                            'data_from_form' => $data // See what data Filament's action had
+                            'data_from_form' => $data, // See what data Filament's action had
                         ]);
-                        
+
                         // Explicitly save the record again to ensure 'updated' event fires if $touches didn't suffice
                         // or if Filament's own save didn't make it dirty enough for an event.
                         // We need to check if the timestamp was actually updated by $touches
@@ -135,10 +134,10 @@ class ManageDealershipContacts extends ManageRelatedRecords
                         $currentUpdatedAt = $record->updated_at;
 
                         // If the timestamp hasn't changed, or if it's not dirty for other reasons, force an update.
-                        if (!$record->isDirty() && ($originalUpdatedAt && $currentUpdatedAt && $originalUpdatedAt->equalTo($currentUpdatedAt))) {
+                        if (! $record->isDirty() && ($originalUpdatedAt && $currentUpdatedAt && $originalUpdatedAt->equalTo($currentUpdatedAt))) {
                             Log::debug('Filament EditAction ->after() hook: Record not dirty and timestamp unchanged by Filament/touches, forcing update.', ['contact_id' => $record->id]);
                             $record->updated_at = now(); // Force it to be dirty
-                        } else if ($record->isDirty()) {
+                        } elseif ($record->isDirty()) {
                             Log::debug('Filament EditAction ->after() hook: Record is dirty, proceeding with save.', ['contact_id' => $record->id, 'dirty_fields' => $record->getDirty()]);
                         } else {
                             Log::debug('Filament EditAction ->after() hook: Record not dirty BUT timestamp was updated by Filament/touches. Saving anyway to ensure event.', ['contact_id' => $record->id]);
@@ -148,11 +147,11 @@ class ManageDealershipContacts extends ManageRelatedRecords
                         $record->save();
 
                         // Refresh to get the latest state after our save
-                        $record->refresh(); 
+                        $record->refresh();
                         Log::debug('Filament EditAction ->after() hook - AFTER explicit save.', [
-                            'contact_id' => $record->id, 
+                            'contact_id' => $record->id,
                             'email' => $record->email,
-                            'final_updated_at' => $record->updated_at->toIso8601String()
+                            'final_updated_at' => $record->updated_at->toIso8601String(),
                         ]);
                     }),
                 Tables\Actions\DeleteAction::make(), // Good to have an explicit delete action too

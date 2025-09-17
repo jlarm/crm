@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\Reminder;
@@ -30,7 +32,7 @@ class ReminderMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.reminder',
             with: [
-                'message' => $this->reminder->message
+                'message' => $this->reminder->message,
             ]
         );
     }

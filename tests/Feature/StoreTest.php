@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Dealership;
 use App\Models\Store;
 use App\Models\User;
@@ -282,8 +284,8 @@ describe('Store Validation and Edge Cases', function () {
             'current_solution_use' => $longText,
         ]);
 
-        expect(strlen($store->name))->toBeGreaterThan(100)
-            ->and(strlen($store->current_solution_use))->toBeGreaterThan(100);
+        expect(mb_strlen($store->name))->toBeGreaterThan(100)
+            ->and(mb_strlen($store->current_solution_use))->toBeGreaterThan(100);
     });
 
     it('preserves special characters in text fields', function () {
@@ -484,8 +486,8 @@ describe('Store Model Attributes', function () {
 
         expect($store->created_at)->not->toBeNull()
             ->and($store->updated_at)->not->toBeNull()
-            ->and($store->created_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
-            ->and($store->updated_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            ->and($store->created_at)->toBeInstanceOf(Illuminate\Support\Carbon::class)
+            ->and($store->updated_at)->toBeInstanceOf(Illuminate\Support\Carbon::class);
     });
 
     it('updates timestamp on modification', function () {

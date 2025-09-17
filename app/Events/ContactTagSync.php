@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events;
 
 use App\Models\Contact;
@@ -13,7 +15,7 @@ class ContactTagSync
     /**
      * The contact instance.
      *
-     * @var \App\Models\Contact
+     * @var Contact
      */
     public $contact;
 
@@ -27,8 +29,6 @@ class ContactTagSync
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\Contact  $contact
-     * @param  string|null $actingUserName
      * @return void
      */
     public function __construct(Contact $contact, ?string $actingUserName = null)

@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Events\ContactTagSync;
+use App\Listeners\LogAuthenticationEvents;
+use App\Listeners\SyncContactTagsWithMailcoach;
 use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\DealerEmailTemplate;
-use App\Events\ContactTagSync;
-use App\Listeners\SyncContactTagsWithMailcoach;
 use App\Observers\ContactObserver;
 use App\Observers\DealerEmailObserver;
 use App\Observers\DealerEmailTemplateObserver;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Auth\Events\Failed;
-use App\Listeners\LogAuthenticationEvents;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;

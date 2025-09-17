@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\MailgunWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,8 +19,8 @@ Route::get('/track/open/{message_id}', [MailgunWebhookController::class, 'trackO
 Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'trackClick'])
     ->name('mailgun.click-track');
 
-//Route::get('/mailable', function () {
+// Route::get('/mailable', function () {
 //   $email = \App\Models\DealerEmail::first();
 //
 //   return new App\Mail\DealerEmailMail($email);
-//});
+// });

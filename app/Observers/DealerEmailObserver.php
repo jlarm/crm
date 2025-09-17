@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
+use App\Jobs\SendDealerEmail;
 use App\Models\DealerEmail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\SendDealerEmail;
 
 class DealerEmailObserver
 {
@@ -25,14 +27,14 @@ class DealerEmailObserver
                 'id' => $dealerEmail->id,
                 'frequency' => $dealerEmail->frequency->value,
                 'start_date' => $dealerEmail->start_date,
-                'current_date' => now()->toDateString()
+                'current_date' => now()->toDateString(),
             ]);
         }
     }
 
     public function updated(DealerEmail $dealerEmail): void
     {
-        if ($dealerEmail->isDirty('attachment') && !is_null($dealerEmail->getOriginal('attachment'))) {
+        if ($dealerEmail->isDirty('attachment') && ! is_null($dealerEmail->getOriginal('attachment'))) {
             Storage::disk('public')->delete($dealerEmail->getOriginal('attachment'));
         }
     }

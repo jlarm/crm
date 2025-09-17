@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Filament\Resources\DealershipResource;
@@ -17,8 +19,11 @@ class MessageMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public $dealer;
+
     public $sender;
+
     public $subject;
+
     public $message;
 
     public function __construct(Dealership $dealer, $sender, $subject, $message)

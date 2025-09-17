@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Mail\DealerEmailMail;
 use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\SentEmail;
-use App\Services\EmailTrackingService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -82,7 +84,7 @@ class SendDealerEmail implements ShouldQueue
                     \Log::info('Email sent with tracking', [
                         'tracking_id' => $trackingId,
                         'recipient' => $recipient,
-                        'sent_email_id' => $sentEmail->id
+                        'sent_email_id' => $sentEmail->id,
                     ]);
 
                     Log::info('Email sent successfully', [
@@ -91,7 +93,7 @@ class SendDealerEmail implements ShouldQueue
                         'dealer_email_id' => $dealerEmail->id,
                     ]);
 
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Failed to send dealer email', [
                         'error' => $e->getMessage(),
                         'recipient' => $recipient,
@@ -103,7 +105,7 @@ class SendDealerEmail implements ShouldQueue
             $dealerEmail->last_sent = now()->format('Y-m-d');
             $dealerEmail->save();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
         }
     }

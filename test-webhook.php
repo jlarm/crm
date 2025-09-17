@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Test webhook payload simulation
 $testPayload = [
     'event-data' => [
@@ -8,12 +10,12 @@ $testPayload = [
         'recipient' => 'test@example.com',
         'message' => [
             'headers' => [
-                'message-id' => 'test-message-' . uniqid()
-            ]
+                'message-id' => 'test-message-'.uniqid(),
+            ],
         ],
         'user-agent' => 'Test User Agent',
-        'ip' => '192.168.1.1'
-    ]
+        'ip' => '192.168.1.1',
+    ],
 ];
 
 // Send POST request to your local webhook
@@ -23,7 +25,7 @@ curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($testPayload));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/x-www-form-urlencoded'
+    'Content-Type: application/x-www-form-urlencoded',
 ]);
 
 $response = curl_exec($ch);

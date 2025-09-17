@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
-use App\Models\Dealership;
 use App\Models\Store;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
@@ -24,7 +25,7 @@ class StoresRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Hidden::make('user_id')
                     ->default(auth()->user()->id),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->columnSpanFull()
                     ->required()
                     ->maxLength(255),
@@ -109,7 +110,7 @@ class StoresRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->description(fn (Store $record): string => $record->city. ', ' . $record->state),
+                    ->description(fn (Store $record): string => $record->city.', '.$record->state),
                 Tables\Columns\TextColumn::make('phone'),
             ])
             ->filters([

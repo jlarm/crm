@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -15,7 +17,9 @@ class ClientMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public $sender;
+
     public $subject;
+
     public $message;
 
     public function __construct($sender, $subject, $message)

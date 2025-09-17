@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +11,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EmailTrackingEvent extends Model
 {
     use HasFactory;
+
+    public const EVENT_DELIVERED = 'delivered';
+
+    public const EVENT_OPENED = 'opened';
+
+    public const EVENT_CLICKED = 'clicked';
+
+    public const EVENT_BOUNCED = 'bounced';
+
+    public const EVENT_COMPLAINED = 'complained';
+
+    public const EVENT_UNSUBSCRIBED = 'unsubscribed';
 
     protected $fillable = [
         'sent_email_id',
@@ -26,13 +40,6 @@ class EmailTrackingEvent extends Model
         'mailgun_data' => 'array',
         'event_timestamp' => 'datetime',
     ];
-
-    public const EVENT_DELIVERED = 'delivered';
-    public const EVENT_OPENED = 'opened';
-    public const EVENT_CLICKED = 'clicked';
-    public const EVENT_BOUNCED = 'bounced';
-    public const EVENT_COMPLAINED = 'complained';
-    public const EVENT_UNSUBSCRIBED = 'unsubscribed';
 
     public function sentEmail(): BelongsTo
     {

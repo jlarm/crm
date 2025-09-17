@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
 use App\Jobs\SendDealerEmail;
 use App\Models\DealerEmailTemplate;
+use Exception;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -65,7 +68,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') == null)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
                     ->afterStateUpdated(function ($state, callable $set) {
                         if ($state === '') {
                             $set('subject', '');
@@ -89,20 +92,20 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->label('Customize attachment')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') == null)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
                     ->default(false),
                 FileUpload::make('attachment')
                     ->acceptedFileTypes(['application/pdf'])
                     ->storeFileNamesIn('attachment_name')
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_attachment') == false)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_attachment') === false)
                     ->directory('form-attachments'),
                 TextInput::make('subject')
                     ->columnSpanFull()
                     ->required()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->maxLength(255)
                     ->suffixAction(
                         \Filament\Forms\Components\Actions\Action::make('generateSubject')
@@ -146,7 +149,7 @@ class DealerEmailRelationManager extends RelationManager
                                         ->body('AI-generated subject based on your context and dealership details.')
                                         ->success()
                                         ->send();
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     \Illuminate\Support\Facades\Log::error('Subject generation failed', [
                                         'error' => $e->getMessage(),
                                         'dealership_id' => $dealership->id,
@@ -164,7 +167,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') != null && $get('customize_email') == false)
+                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->required()
                     ->hintActions([
                         \Filament\Forms\Components\Actions\Action::make('generateMessage')
@@ -177,7 +180,7 @@ class DealerEmailRelationManager extends RelationManager
                                     ->placeholder('e.g., Follow-up from our conversation, product demo invitation, pricing discussion, address their current CRM limitations, etc.')
                                     ->rows(3)
                                     ->required(),
-                                \Filament\Forms\Components\Select::make('tone')
+                                Select::make('tone')
                                     ->label('Email Tone')
                                     ->options([
                                         'professional' => 'Professional',
@@ -188,7 +191,7 @@ class DealerEmailRelationManager extends RelationManager
                                     ])
                                     ->default('professional')
                                     ->required(),
-                                \Filament\Forms\Components\Checkbox::make('include_call_to_action')
+                                Checkbox::make('include_call_to_action')
                                     ->label('Include call to action')
                                     ->default(true),
                             ])
@@ -224,7 +227,7 @@ class DealerEmailRelationManager extends RelationManager
                                         ->body('AI-generated message based on your context and dealership profile.')
                                         ->success()
                                         ->send();
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     \Illuminate\Support\Facades\Log::error('Message generation failed', [
                                         'error' => $e->getMessage(),
                                         'dealership_id' => $dealership->id,
@@ -245,9 +248,9 @@ class DealerEmailRelationManager extends RelationManager
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') == ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') != ReminderFrequency::Immediate->value),
+                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value),
             ]);
     }
 

@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Models\Contact;
 use App\Models\ProgressCategory;
-use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -74,8 +75,8 @@ class ProgressesRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
-//                Tables\Actions\EditAction::make(),
-//                Tables\Actions\DeleteAction::make(),
+                //                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

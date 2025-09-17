@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\ContactTagSync;
+use Exception;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SyncContactTagsWithMailcoach implements ShouldQueue
 {
     /**
      * Handle the event.
-     *
-     * @param  \App\Events\ContactTagSync  $event
-     * @return void
      */
     public function handle(ContactTagSync $event): void
     {
@@ -24,14 +24,15 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             'contact_id' => $model->id,
             'contact_email' => $model->email,
             'event_actingUserName' => $event->actingUserName,
-            'model_dealership_exists' => !is_null($model->dealership),
+            'model_dealership_exists' => ! is_null($model->dealership),
             'model_dealership_name' => $model->dealership ? $model->dealership->name : 'N/A (dealership is null)',
             'model_position' => $model->position,
         ]);
         // ==== END DEBUG LOGGING ====
 
-        if (!$model->dealership) {
+        if (! $model->dealership) {
             Log::warning('[SyncContactTagsWithMailcoach] No dealership associated with contact. Aborting.', ['contact_id' => $model->id]);
+
             return;
         }
 
@@ -44,7 +45,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             }
 
             $tags = [];
-            if (!empty($model->position)) {
+            if (! empty($model->position)) {
                 $tags[] = $model->position;
             }
 
@@ -53,7 +54,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             }
 
             // Use actingUserName from the event
-            if (!empty($event->actingUserName)) {
+            if (! empty($event->actingUserName)) {
                 $tags[] = $event->actingUserName;
             }
 
@@ -65,17 +66,17 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             } else {
                 Log::warning('Failed to refresh Contact model in SyncContactTagsWithMailcoach. Contact may have been deleted. Tags from relationship will not be included.', [
                     'contact_id' => $model->id,
-                    'original_email' => $model->email 
+                    'original_email' => $model->email,
                 ]);
             }
-            
-            $tags = array_map(function($tag) {
+
+            $tags = array_map(function ($tag) {
                 return preg_replace('/[^a-zA-Z0-9 -]/', '', $tag);
             }, $tags);
             $tags = array_unique(array_filter($tags));
 
             $subscriber = $list->subscriber($model->email);
-            
+
             if ($subscriber) {
                 try {
                     // Revert to addTags/removeTags as syncTags is not available on EmailList
@@ -94,21 +95,21 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     $tagsToAdd = array_values(array_diff($tags, $currentMailcoachTags));
                     $tagsToRemove = array_values(array_diff($currentMailcoachTags, $tags));
 
-                    if (!empty($tagsToAdd)) {
+                    if (! empty($tagsToAdd)) {
                         $subscriber->addTags($tagsToAdd);
                     }
 
-                    if (!empty($tagsToRemove)) {
+                    if (! empty($tagsToRemove)) {
                         $subscriber->removeTags($tagsToRemove);
                     }
 
-                    if (!empty($tagsToAdd) || !empty($tagsToRemove)) {
+                    if (! empty($tagsToAdd) || ! empty($tagsToRemove)) {
                         Log::info('Successfully synced tags for Mailcoach subscriber', [
-                            'uuid' => $subscriber->uuid, 
+                            'uuid' => $subscriber->uuid,
                             'email' => $subscriber->email,
-                            'added' => $tagsToAdd, 
-                            'removed' => $tagsToRemove, 
-                            'final_crm_state' => $tags
+                            'added' => $tagsToAdd,
+                            'removed' => $tagsToRemove,
+                            'final_crm_state' => $tags,
                         ]);
                     } else {
                         Log::debug('Mailcoach subscriber tags are already in sync.', ['uuid' => $subscriber->uuid, 'email' => $subscriber->email, 'current_tags' => $currentMailcoachTags]);
@@ -118,10 +119,10 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     Log::warning('Mailcoach resource not found during tag add/remove operation.', [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
-                } catch (\Exception $e) {
-                    Log::error('Error updating Mailcoach subscriber tags (add/remove): ' . $e->getMessage(), [
+                } catch (Exception $e) {
+                    Log::error('Error updating Mailcoach subscriber tags (add/remove): '.$e->getMessage(), [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
                         'exception_class' => get_class($e),
@@ -133,15 +134,17 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             Log::warning('Mailcoach resource not found (likely list or initial subscriber lookup) in SyncContactTagsWithMailcoach.', [
                 'contact_id' => $model->id,
                 'email' => $model->email,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return;
-        } catch(\Exception $e) {
-            Log::error('Error in SyncContactTagsWithMailcoach: ' . $e->getMessage(), [
+        } catch (Exception $e) {
+            Log::error('Error in SyncContactTagsWithMailcoach: '.$e->getMessage(), [
                 'contact_id' => $model->id,
                 'email' => $model->email,
                 'exception_class' => get_class($e),
             ]);
+
             return;
         }
     }

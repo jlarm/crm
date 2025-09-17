@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Mail\DealerEmailMail;
@@ -8,7 +10,6 @@ use App\Models\DealerEmail;
 use App\Models\SentEmail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use Log;
 
 class SendDealerEmailCommand extends Command
 {
@@ -19,7 +20,7 @@ class SendDealerEmailCommand extends Command
     public function handle(): void
     {
         $emails = DealerEmail::query()
-            ->where("paused", false)
+            ->where('paused', false)
             ->where(function ($query) {
                 $query->where(function ($q) {
                     $q->where('frequency', '>', 0)

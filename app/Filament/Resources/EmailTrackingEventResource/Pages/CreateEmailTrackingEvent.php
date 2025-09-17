@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\EmailTrackingEventResource\Pages;
 
 use App\Filament\Resources\EmailTrackingEventResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateEmailTrackingEvent extends CreateRecord

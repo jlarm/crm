@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'accepted_mimes' => [
         'application/vnd.ms-excel',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\ContactResource\Pages;
 
 use App\Filament\Resources\ContactResource;
@@ -54,30 +56,30 @@ class ListContacts extends ListRecords
                                 'position' => $data['position'],
                                 'dealership_id' => $dealer->id,
                             ]);
-                        } else {
-                            $newDealer = Dealership::create([
-                                'user_id' => auth()->user()->id,
-                                'name' => $data['dealership']['name'],
-                                'address' => $data['dealership']['address'],
-                                'city' => $data['dealership']['city'],
-                                'state' => $data['dealership']['state'],
-                                'zip_code' => $data['dealership']['zip'],
-                                'phone' => preg_replace('/^\+1-/', '', $data['dealership']['phone']),
-                                'status' => 'imported',
-                                'rating' => 'cold',
-                            ]);
-
-                            $newDealer->users()->attach(User::where('id', 2)->first());
-                            $newDealer->users()->attach(User::where('id', 4)->first());
-
-                            return Contact::create([
-                                'name' => $data['name'],
-                                'phone' => preg_replace('/^\+1-/', '', $data['phone']),
-                                'email' => $data['email'],
-                                'position' => $data['position'],
-                                'dealership_id' => $newDealer->id,
-                            ]);
                         }
+                        $newDealer = Dealership::create([
+                            'user_id' => auth()->user()->id,
+                            'name' => $data['dealership']['name'],
+                            'address' => $data['dealership']['address'],
+                            'city' => $data['dealership']['city'],
+                            'state' => $data['dealership']['state'],
+                            'zip_code' => $data['dealership']['zip'],
+                            'phone' => preg_replace('/^\+1-/', '', $data['dealership']['phone']),
+                            'status' => 'imported',
+                            'rating' => 'cold',
+                        ]);
+
+                        $newDealer->users()->attach(User::where('id', 2)->first());
+                        $newDealer->users()->attach(User::where('id', 4)->first());
+
+                        return Contact::create([
+                            'name' => $data['name'],
+                            'phone' => preg_replace('/^\+1-/', '', $data['phone']),
+                            'email' => $data['email'],
+                            'position' => $data['position'],
+                            'dealership_id' => $newDealer->id,
+                        ]);
+
                     }),
             ];
         }

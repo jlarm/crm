@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DealerEmailTemplateResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
 use Filament\Resources\RelationManagers\RelationManager;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DealerEmailsRelationManager extends RelationManager
 {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Development\Resources;
 
 use App\Enum\DevStatus;
@@ -11,7 +13,6 @@ use App\Mail\ClientMail;
 use App\Mail\MessageMail;
 use App\Models\Dealership;
 use App\Models\Progress;
-use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\RichEditor;
@@ -157,7 +158,7 @@ class DealershipResource extends Resource
                                         TextInput::make('current_solution_use')
                                             ->label('Use'),
                                     ]),
-                            ])->collapsed()
+                            ])->collapsed(),
                     ])->columnSpan(2),
                 Forms\Components\Group::make()
                     ->schema([
@@ -218,7 +219,7 @@ class DealershipResource extends Resource
                                                 'dealership_id' => $form->model->id,
                                                 'user_id' => auth()->id(),
                                                 'date' => now(),
-                                                'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
+                                                'details' => 'Sent email to '.$data['user'].' - '.$data['subject'],
                                             ]);
                                         }),
                                     Forms\Components\Actions\Action::make('Send Email to client')
@@ -242,11 +243,11 @@ class DealershipResource extends Resource
                                                 'dealership_id' => $form->model->id,
                                                 'user_id' => auth()->id(),
                                                 'date' => now(),
-                                                'details' => 'Sent email to '.$data['user']. ' - ' . $data['subject'],
+                                                'details' => 'Sent email to '.$data['user'].' - '.$data['subject'],
                                             ]);
-                                        })
+                                        }),
                                 ]),
-                            ])
+                            ]),
                     ])->columnSpan(1),
             ])->columns(3);
     }
@@ -255,17 +256,17 @@ class DealershipResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address')
+                TextColumn::make('address')
                     ->description(fn (Dealership $record) => $record->city.', '.$record->state.' '.$record->zip_code)
                     ->searchable(),
                 TextColumn::make('stores_count')
                     ->counts('stores')
                     ->label('Stores'),
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('dev_status')
+                TextColumn::make('dev_status')
                     ->badge(),
             ])
             ->filters([

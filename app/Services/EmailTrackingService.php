@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\SentEmail;
+use Exception;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Log;
 
@@ -19,11 +22,12 @@ class EmailTrackingService
             // Extract message ID from the sent message
             $messageId = $this->extractMessageId($sentMessage);
 
-            if (!$messageId) {
+            if (! $messageId) {
                 Log::warning('Could not extract message ID from sent email', [
                     'recipient' => $recipient,
-                    'subject' => $subject
+                    'subject' => $subject,
                 ]);
+
                 return null;
             }
 
@@ -38,7 +42,7 @@ class EmailTrackingService
                     'transport' => $sentMessage->getSymfonySentMessage()?->getTransport()?->__toString(),
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to record sent email', [
                 'error' => $e->getMessage(),
                 'recipient' => $recipient,
@@ -49,53 +53,17 @@ class EmailTrackingService
         }
     }
 
-    private function extractMessageId(SentMessage $sentMessage): ?string
-    {
-        try {
-            // Try to get from the original message first
-            $originalMessage = $sentMessage->getOriginalMessage();
-
-            if ($originalMessage && $originalMessage->getHeaders()->has('Message-ID')) {
-                $messageId = $originalMessage->getHeaders()->get('Message-ID')->getBody();
-                return trim($messageId, '<>'); // Remove angle brackets if present
-            }
-
-            // Try to get from Symfony sent message
-            $symphonyMessage = $sentMessage->getSymfonySentMessage();
-
-            if ($symphonyMessage) {
-                // For Mailgun, we can try to get it from the envelope or debug info
-                $envelope = $symphonyMessage->getEnvelope();
-                if ($envelope) {
-                    // Generate a unique ID based on envelope data
-                    $sender = $envelope->getSender()->getAddress();
-                    $recipients = implode(',', array_map(fn($r) => $r->getAddress(), $envelope->getRecipients()));
-                    return 'laravel-' . md5($sender . $recipients . now()->timestamp);
-                }
-            }
-
-            // Fallback: generate a unique ID
-            return 'laravel-' . uniqid() . '-' . time();
-
-        } catch (\Exception $e) {
-            Log::error('Error extracting message ID', ['error' => $e->getMessage()]);
-
-            // Final fallback
-            return 'fallback-' . uniqid() . '-' . time();
-        }
-    }
-
     public function addTrackingPixel(string $emailContent, string $messageId): string
     {
         // Add a tracking pixel to the email content
         $trackingPixel = $this->generateTrackingPixel($messageId);
 
         // Insert before closing body tag if it exists, otherwise append
-        if (strpos($emailContent, '</body>') !== false) {
-            return str_replace('</body>', $trackingPixel . '</body>', $emailContent);
+        if (mb_strpos($emailContent, '</body>') !== false) {
+            return str_replace('</body>', $trackingPixel.'</body>', $emailContent);
         }
 
-        return $emailContent . $trackingPixel;
+        return $emailContent.$trackingPixel;
     }
 
     public function wrapLinksWithTracking(string $emailContent, string $messageId): string
@@ -107,19 +75,57 @@ class EmailTrackingService
             $originalUrl = $matches[1];
 
             // Skip if it's already a tracking URL or certain types of links
-            if (strpos($originalUrl, 'track-click') !== false ||
-                strpos($originalUrl, 'mailto:') === 0 ||
-                strpos($originalUrl, 'tel:') === 0) {
+            if (mb_strpos($originalUrl, 'track-click') !== false ||
+                mb_strpos($originalUrl, 'mailto:') === 0 ||
+                mb_strpos($originalUrl, 'tel:') === 0) {
                 return $matches[0];
             }
 
             $trackingUrl = route('mailgun.click-track', [
                 'message_id' => $messageId,
-                'url' => urlencode($originalUrl)
+                'url' => urlencode($originalUrl),
             ]);
 
-            return 'href="' . $trackingUrl . '"';
+            return 'href="'.$trackingUrl.'"';
         }, $emailContent);
+    }
+
+    private function extractMessageId(SentMessage $sentMessage): ?string
+    {
+        try {
+            // Try to get from the original message first
+            $originalMessage = $sentMessage->getOriginalMessage();
+
+            if ($originalMessage && $originalMessage->getHeaders()->has('Message-ID')) {
+                $messageId = $originalMessage->getHeaders()->get('Message-ID')->getBody();
+
+                return mb_trim($messageId, '<>'); // Remove angle brackets if present
+            }
+
+            // Try to get from Symfony sent message
+            $symphonyMessage = $sentMessage->getSymfonySentMessage();
+
+            if ($symphonyMessage) {
+                // For Mailgun, we can try to get it from the envelope or debug info
+                $envelope = $symphonyMessage->getEnvelope();
+                if ($envelope) {
+                    // Generate a unique ID based on envelope data
+                    $sender = $envelope->getSender()->getAddress();
+                    $recipients = implode(',', array_map(fn ($r) => $r->getAddress(), $envelope->getRecipients()));
+
+                    return 'laravel-'.md5($sender.$recipients.now()->timestamp);
+                }
+            }
+
+            // Fallback: generate a unique ID
+            return 'laravel-'.uniqid().'-'.time();
+
+        } catch (Exception $e) {
+            Log::error('Error extracting message ID', ['error' => $e->getMessage()]);
+
+            // Final fallback
+            return 'fallback-'.uniqid().'-'.time();
+        }
     }
 
     private function generateTrackingPixel(string $messageId): string

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\ActivitiesRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
@@ -12,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
-use App\Filament\Resources\UserResource\RelationManagers\ActivitiesRelationManager;
 
 class UserResource extends Resource
 {
@@ -37,7 +39,7 @@ class UserResource extends Resource
                             TimezoneSelect::make('timezone')->byCountry('US')->columnSpanFull(),
                         ])->columnSpan(2),
                         Section::make()->schema([])->columnSpan(1),
-                    ])
+                    ]),
             ]);
     }
 
