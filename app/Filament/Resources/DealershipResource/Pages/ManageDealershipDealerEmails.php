@@ -48,21 +48,17 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->label('Recipients')
                     ->multiple()
                     ->required()
-                    ->options(function () {
-                        return $this->getOwnerRecord()->contacts()
-                            ->pluck('email', 'email')
-                            ->filter() // Ensure no null values
-                            ->toArray();
-                    })
+                    ->options(fn() => $this->getOwnerRecord()->contacts()
+                        ->pluck('email', 'email')
+                        ->filter() // Ensure no null values
+                        ->toArray())
                     ->columnSpanFull(),
                 Select::make('dealer_email_template_id')
-                    ->options(function () {
-                        return DealerEmailTemplate::pluck('name', 'id')
-                            ->filter() // Ensure no null values
-                            ->toArray();
-                    })
+                    ->options(fn() => DealerEmailTemplate::pluck('name', 'id')
+                        ->filter() // Ensure no null values
+                        ->toArray())
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if ($state === '') {
                             $set('subject', '');
                             $set('message', '');
@@ -84,7 +80,7 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                         }
                     })
                     ->columnSpanFull()
-                    ->helperText(function (Get $get) {
+                    ->helperText(function (Get $get): ?string {
                         $template = DealerEmailTemplate::find($get('dealer_email_template_id'));
                         if (! $template || $template->pdfAttachments->isEmpty()) {
                             return null;
@@ -117,8 +113,8 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
-                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') === null)
+                    ->afterStateUpdated(function ($state, callable $set, Get $get): void {
                         $templateId = $get('dealer_email_template_id');
                         if ($templateId === null) {
                             $set('subject', '');
@@ -142,13 +138,13 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->required()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->maxLength(255),
                 RichEditor::make('message')
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->required(),
                 Select::make('frequency')
                     ->columnSpanFull()
@@ -158,19 +154,19 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->hidden(fn (Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         $set('next_send_date', $state);
                     }),
                 DatePicker::make('next_send_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value),
+                    ->hidden(fn (Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value),
             ]);
     }
 
@@ -189,7 +185,7 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->after(function ($record) {
+                    ->after(function ($record): void {
                         if ($record->frequency === ReminderFrequency::Immediate) {
                             SendDealerEmail::dispatchSync($record);
                         }

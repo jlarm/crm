@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attachables', function (Blueprint $table) {
+        Schema::create('attachables', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('pdf_attachment_id');
             $table->morphs('attachable');

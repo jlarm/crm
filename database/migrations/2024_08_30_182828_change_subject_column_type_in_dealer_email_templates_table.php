@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dealer_email_templates', function (Blueprint $table) {
+        Schema::table('dealer_email_templates', function (Blueprint $table): void {
             $table->text('body')->change();
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dealer_email_templates', function (Blueprint $table) {
+        Schema::table('dealer_email_templates', function (Blueprint $table): void {
             $table->string('subject')->change();
         });
     }

@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('stores', function (Blueprint $table) {
+        Schema::create('stores', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(App\Models\User::class);
             $table->foreignIdFor(App\Models\Dealership::class);

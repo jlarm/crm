@@ -204,7 +204,7 @@ class MailgunWebhookController extends Controller
         // Map Mailgun events to our event types
         $eventType = $this->mapEventType($event);
 
-        if (! $eventType) {
+        if ($eventType === null || $eventType === '' || $eventType === '0') {
             Log::info('Unmapped event type', ['event' => $event]);
 
             return;
@@ -264,7 +264,7 @@ class MailgunWebhookController extends Controller
         $token = $signature['token'] ?? '';
         $providedSignature = $signature['signature'] ?? '';
 
-        $expectedSignature = hash_hmac('sha256', $timestamp.$token, $signingKey);
+        $expectedSignature = hash_hmac('sha256', $timestamp.$token, (string) $signingKey);
 
         return hash_equals($expectedSignature, $providedSignature);
     }

@@ -74,9 +74,7 @@ class ManageDealershipContacts extends ManageRelatedRecords
                             ->maxLength(255)
                             ->unique('tags', 'name'),
                     ])
-                    ->createOptionUsing(function (array $data) {
-                        return \App\Models\Tag::create($data)->id;
-                    })
+                    ->createOptionUsing(fn(array $data) => \App\Models\Tag::create($data)->id)
                     ->searchable()
                     ->placeholder('Select or create tags')
                     ->helperText('Type to search or create new tags'),
@@ -97,7 +95,7 @@ class ManageDealershipContacts extends ManageRelatedRecords
                     ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('position'),
                 Tables\Columns\ToggleColumn::make('primary_contact')
-                    ->afterStateUpdated(function ($record, $state) {
+                    ->afterStateUpdated(function ($record, $state): void {
                         // turn off anyone else as primary contact
                         if ($state) {
                             $record->dealership->contacts()
@@ -114,7 +112,7 @@ class ManageDealershipContacts extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->after(function (\App\Models\Contact $record, array $data) {
+                    ->after(function (\App\Models\Contact $record, array $data): void {
                         // Log before explicit save to see if $touches worked at all
                         Log::debug('Filament EditAction ->after() hook - BEFORE explicit save.', [
                             'contact_id' => $record->id,

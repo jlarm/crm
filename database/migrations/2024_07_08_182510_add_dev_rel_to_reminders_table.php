@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reminders', function (Blueprint $table) {
+        Schema::table('reminders', function (Blueprint $table): void {
             $table->boolean('dev_rel')->nullable()->after('user_id');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reminders', function (Blueprint $table) {
+        Schema::table('reminders', function (Blueprint $table): void {
             $table->dropColumn('dev_rel');
         });
     }

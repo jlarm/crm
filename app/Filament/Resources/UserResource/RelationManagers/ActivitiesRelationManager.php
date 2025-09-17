@@ -59,7 +59,7 @@ class ActivitiesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('subject_type')
                     ->label('Model')
                     ->formatStateUsing(function (?string $state): string {
-                        if (! $state) {
+                        if ($state === null || $state === '' || $state === '0') {
                             return '';
                         }
 
@@ -70,16 +70,16 @@ class ActivitiesRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('subject_id')
                     ->label('Related Item')
-                    ->formatStateUsing(function ($state, $record): string {
-                        if (! $state || ! $record->subject_type) {
+                    ->formatStateUsing(function (?string $state, $record): string {
+                        if ($state === null || $state === '' || $state === '0' || ! $record->subject_type) {
                             return '';
                         }
 
                         return match ($record->subject_type) {
-                            'App\\Models\\Dealership' => $this->getDealershipName($state),
-                            'App\\Models\\Contact' => $this->getContactName($state),
-                            'App\\Models\\DealerEmail' => $this->getDealerEmailSubject($state),
-                            'App\\Models\\User' => 'User #'.$state,
+                            \App\Models\Dealership::class => $this->getDealershipName($state),
+                            \App\Models\Contact::class => $this->getContactName($state),
+                            \App\Models\DealerEmail::class => $this->getDealerEmailSubject($state),
+                            \App\Models\User::class => 'User #'.$state,
                             default => class_basename($record->subject_type).' #'.$state,
                         };
                     })
@@ -90,9 +90,9 @@ class ActivitiesRelationManager extends RelationManager
                         }
 
                         return match ($record->subject_type) {
-                            'App\\Models\\Dealership' => $this->getDealershipName($state),
-                            'App\\Models\\Contact' => $this->getContactName($state),
-                            'App\\Models\\DealerEmail' => $this->getDealerEmailSubject($state),
+                            \App\Models\Dealership::class => $this->getDealershipName($state),
+                            \App\Models\Contact::class => $this->getContactName($state),
+                            \App\Models\DealerEmail::class => $this->getDealerEmailSubject($state),
                             default => null,
                         };
                     }),
@@ -164,12 +164,12 @@ class ActivitiesRelationManager extends RelationManager
                 SelectFilter::make('subject_type')
                     ->label('Model Type')
                     ->options([
-                        'App\\Models\\Dealership' => 'Dealership',
-                        'App\\Models\\Contact' => 'Contact',
-                        'App\\Models\\DealerEmail' => 'Dealer Email',
-                        'App\\Models\\User' => 'User',
-                        'App\\Models\\Progress' => 'Progress',
-                        'App\\Models\\Reminder' => 'Reminder',
+                        \App\Models\Dealership::class => 'Dealership',
+                        \App\Models\Contact::class => 'Contact',
+                        \App\Models\DealerEmail::class => 'Dealer Email',
+                        \App\Models\User::class => 'User',
+                        \App\Models\Progress::class => 'Progress',
+                        \App\Models\Reminder::class => 'Reminder',
                     ]),
             ])
             ->headerActions([
@@ -186,7 +186,7 @@ class ActivitiesRelationManager extends RelationManager
                             ->disabled(),
                         Forms\Components\TextInput::make('subject_type')
                             ->label('Model Type')
-                            ->formatStateUsing(fn (?string $state): string => $state ? class_basename($state) : '')
+                            ->formatStateUsing(fn (?string $state): string => $state !== null && $state !== '' && $state !== '0' ? class_basename($state) : '')
                             ->disabled(),
                         Forms\Components\Textarea::make('properties')
                             ->label('Properties (JSON)')
@@ -242,7 +242,7 @@ class ActivitiesRelationManager extends RelationManager
         if (preg_match('/Firefox\/[\d.]+/', $userAgent)) {
             return 'Firefox';
         }
-        if (preg_match('/Safari\/[\d.]+/', $userAgent) && ! preg_match('/Chrome/', $userAgent)) {
+        if (preg_match('/Safari\/[\d.]+/', $userAgent) && in_array(preg_match('/Chrome/', $userAgent), [0, false], true)) {
             return 'Safari';
         }
         if (preg_match('/Edge\/[\d.]+/', $userAgent)) {

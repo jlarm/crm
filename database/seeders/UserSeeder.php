@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $user = User::create([
             'name' => 'Joe Lohr',

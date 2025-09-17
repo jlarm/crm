@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->foreignId('dealer_email_template_id')->nullable()->after('dealership_id');
             $table->boolean('customize_email')->default(false)->after('dealer_email_template_id');
             $table->boolean('customize_attachment')->default(false)->after('customize_email');
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->dropColumn('dealer_email_template_id');
             $table->dropColumn('customize_email');
             $table->dropColumn('customize_attachment');

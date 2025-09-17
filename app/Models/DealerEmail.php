@@ -76,7 +76,7 @@ class DealerEmail extends Model
     {
         parent::boot();
 
-        static::creating(function ($dealerEmail) {
+        static::creating(function ($dealerEmail): void {
             $dealerEmail->user_id = auth()->id();
         });
     }

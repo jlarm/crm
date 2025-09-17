@@ -25,6 +25,9 @@ class DealerEmailMail extends Mailable
 
     public $attachmentName;
 
+    /**
+     * @var string|null
+     */
     public $trackingId;
 
     public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, ?string $trackingId = null)
@@ -75,7 +78,10 @@ class DealerEmailMail extends Mailable
         );
     }
 
-    public function attachments()
+    /**
+     * @return list
+     */
+    public function attachments(): array
     {
         $attachments = [];
 

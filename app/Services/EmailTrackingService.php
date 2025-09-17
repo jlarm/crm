@@ -22,7 +22,7 @@ class EmailTrackingService
             // Extract message ID from the sent message
             $messageId = $this->extractMessageId($sentMessage);
 
-            if (! $messageId) {
+            if ($messageId === null || $messageId === '' || $messageId === '0') {
                 Log::warning('Could not extract message ID from sent email', [
                     'recipient' => $recipient,
                     'subject' => $subject,
@@ -71,7 +71,7 @@ class EmailTrackingService
         // This is a basic implementation - in production you might want a more sophisticated approach
         $pattern = '/href="([^"]+)"/i';
 
-        return preg_replace_callback($pattern, function ($matches) use ($messageId) {
+        return preg_replace_callback($pattern, function ($matches) use ($messageId): string {
             $originalUrl = $matches[1];
 
             // Skip if it's already a tracking URL or certain types of links
@@ -90,7 +90,7 @@ class EmailTrackingService
         }, $emailContent);
     }
 
-    private function extractMessageId(SentMessage $sentMessage): ?string
+    private function extractMessageId(SentMessage $sentMessage): string
     {
         try {
             // Try to get from the original message first
@@ -111,7 +111,7 @@ class EmailTrackingService
                 if ($envelope) {
                     // Generate a unique ID based on envelope data
                     $sender = $envelope->getSender()->getAddress();
-                    $recipients = implode(',', array_map(fn ($r) => $r->getAddress(), $envelope->getRecipients()));
+                    $recipients = implode(',', array_map(fn (\Symfony\Component\Mime\Address $r): string => $r->getAddress(), $envelope->getRecipients()));
 
                     return 'laravel-'.md5($sender.$recipients.now()->timestamp);
                 }

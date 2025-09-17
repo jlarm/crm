@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->text('subject')->nullable()->change();
             $table->text('message')->nullable()->change();
         });
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->string('subject')->nullable()->change();
             $table->text('message')->nullable()->change();
         });

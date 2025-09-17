@@ -31,7 +31,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Activity::class => ActivityPolicy::class,
-        'Spatie\Permission\Models\Role' => 'App\Policies\RolePolicy',
+        \Spatie\Permission\Models\Role::class => \App\Policies\RolePolicy::class,
         User::class => UserPolicy::class,
         Contact::class => ContactPolicy::class,
         Reminder::class => ReminderPolicy::class,
@@ -45,8 +45,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('viewPulse', function (User $user) {
-            return $user->hasRole('super_admin');
-        });
+        Gate::define('viewPulse', fn(User $user): bool => $user->hasRole('super_admin'));
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sent_emails', function (Blueprint $table) {
+        Schema::table('sent_emails', function (Blueprint $table): void {
             $table->string('message_id')->nullable()->after('recipient');
             $table->string('subject')->nullable()->after('message_id');
             $table->json('tracking_data')->nullable()->after('subject');
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sent_emails', function (Blueprint $table) {
+        Schema::table('sent_emails', function (Blueprint $table): void {
             $table->dropIndex(['message_id']);
             $table->dropColumn(['message_id', 'subject', 'tracking_data']);
         });

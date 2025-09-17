@@ -58,7 +58,7 @@ class DealerEmailsRelationManager extends RelationManager
                 Tables\Actions\Action::make('view_dealership')
                     ->label('View Dealership')
                     ->icon('heroicon-o-building-office-2')
-                    ->url(fn ($record) => \App\Filament\Resources\DealershipResource::getUrl('edit', ['record' => $record->dealership])),
+                    ->url(fn ($record): string => \App\Filament\Resources\DealershipResource::getUrl('edit', ['record' => $record->dealership])),
             ])
             ->defaultSort('created_at', 'desc');
     }

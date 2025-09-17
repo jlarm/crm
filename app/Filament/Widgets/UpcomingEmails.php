@@ -50,7 +50,7 @@ class UpcomingEmails extends BaseWidget
                         'ninety_days' => 'Next 90 days',
                     ])
                     ->default('seven_days')
-                    ->query(function (Builder $query, array $data) {
+                    ->query(function (Builder $query, array $data): void {
                         switch ($data['value']) {
                             case 'seven_days':
                                 $query->whereBetween('next_send_date', [now(), now()->addDays(7)]);

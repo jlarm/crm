@@ -21,24 +21,19 @@ class SendDealerEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $dealerEmail;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(DealerEmail $dealerEmail)
+    public function __construct(protected \App\Models\DealerEmail $dealerEmail)
     {
-        $this->dealerEmail = $dealerEmail;
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
 
         $this->dealerEmail->load('pdfAttachments');

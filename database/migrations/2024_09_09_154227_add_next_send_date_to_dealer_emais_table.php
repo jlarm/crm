@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->date('next_send_date')->nullable()->after('last_sent');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dealer_emails', function (Blueprint $table) {
+        Schema::table('dealer_emails', function (Blueprint $table): void {
             $table->dropColumn('next_send_date');
         });
     }

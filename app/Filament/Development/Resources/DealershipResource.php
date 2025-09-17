@@ -207,7 +207,7 @@ class DealershipResource extends Resource
                                             TextInput::make('subject')->required(),
                                             RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                         ])
-                                        ->action(function (array $data, Form $form) {
+                                        ->action(function (array $data, Form $form): void {
                                             Mail::to($data['user'])
                                                 ->send(new MessageMail(
                                                     $form->model,
@@ -232,7 +232,7 @@ class DealershipResource extends Resource
                                             TextInput::make('subject')->required(),
                                             RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                         ])
-                                        ->action(function (array $data, Form $form) {
+                                        ->action(function (array $data, Form $form): void {
                                             Mail::to($data['user'])
                                                 ->send(new ClientMail(
                                                     auth()->user(),
@@ -259,7 +259,7 @@ class DealershipResource extends Resource
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('address')
-                    ->description(fn (Dealership $record) => $record->city.', '.$record->state.' '.$record->zip_code)
+                    ->description(fn (Dealership $record): string => $record->city.', '.$record->state.' '.$record->zip_code)
                     ->searchable(),
                 TextColumn::make('stores_count')
                     ->counts('stores')

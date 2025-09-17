@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Log;
 
 class ClaudeEmailGeneratorService
 {
-    private ?string $apiKey;
+    private readonly ?string $apiKey;
 
-    private string $apiUrl;
+    private readonly string $apiUrl;
 
     public function __construct()
     {
@@ -29,7 +29,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 100);
 
-        return $this->extractContent($response) ?: 'Follow-up: '.$dealership->name;
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? 'Follow-up: '.$dealership->name : $this->extractContent($response);
     }
 
     public function generateEmailContent(Dealership $dealership, ?DealerEmailTemplate $template = null): string
@@ -38,7 +38,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 1000);
 
-        return $this->extractContent($response) ?: $template?->body ?? 'Thank you for your time. Looking forward to connecting soon.';
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? $template?->body ?? 'Thank you for your time. Looking forward to connecting soon.' : $this->extractContent($response);
     }
 
     public function generatePersonalizedMessage(Dealership $dealership, string $context = ''): string
@@ -47,7 +47,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 500);
 
-        return $this->extractContent($response) ?: "Hi there! I wanted to reach out regarding your {$dealership->type} dealership.";
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? "Hi there! I wanted to reach out regarding your {$dealership->type} dealership." : $this->extractContent($response);
     }
 
     public function generateFollowUpSuggestions(Dealership $dealership): array
@@ -58,7 +58,7 @@ class ClaudeEmailGeneratorService
 
         $content = $this->extractContent($response);
 
-        if (! $content) {
+        if ($content === null || $content === '' || $content === '0') {
             return [
                 'Schedule a follow-up call',
                 'Send product information',
@@ -79,7 +79,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 100);
 
-        return $this->extractContent($response) ?: 'Partnership Opportunity - '.mb_substr($context, 0, 30);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? 'Partnership Opportunity - '.mb_substr($context, 0, 30) : $this->extractContent($response);
     }
 
     public function generateEmailContentWithContext(string $context, string $tone = 'professional'): string
@@ -88,7 +88,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 1000);
 
-        return $this->extractContent($response) ?: $this->getDefaultTemplateContent($context);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? $this->getDefaultTemplateContent($context) : $this->extractContent($response);
     }
 
     public function generateEmailSubjectWithDealershipContext(Dealership $dealership, string $context, ?DealerEmailTemplate $template = null): string
@@ -97,7 +97,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 100);
 
-        return $this->extractContent($response) ?: 'Re: '.$dealership->name.' - '.mb_substr($context, 0, 30);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? 'Re: '.$dealership->name.' - '.mb_substr($context, 0, 30) : $this->extractContent($response);
     }
 
     public function generateEmailContentWithDealershipContext(
@@ -111,18 +111,18 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 1200);
 
-        return $this->extractContent($response) ?: $this->getDefaultPersonalizedContent($dealership, $context);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? $this->getDefaultPersonalizedContent($dealership, $context) : $this->extractContent($response);
     }
 
     public function isConfigured(): bool
     {
-        return ! empty($this->apiKey);
+        return $this->apiKey !== null && $this->apiKey !== '' && $this->apiKey !== '0';
     }
 
     private function buildSubjectPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template ? "Base template subject: \"{$template->subject}\"\n" : '';
+        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
 
         return "Generate a compelling email subject line for a business outreach email to a {$dealership->type} dealership.
 
@@ -142,7 +142,7 @@ Return only the subject line, no quotes or extra text.";
     private function buildContentPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template ? "Base template:\n{$template->body}\n\n" : '';
+        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
 
         return "Generate personalized email content for a {$dealership->type} dealership outreach.
 
@@ -217,9 +217,7 @@ Format as a numbered list. Return only the list items.";
             $context .= 'Notes: '.mb_substr($dealership->notes, 0, 200)."\n";
         }
 
-        $context .= 'Development Status: '.($dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
-
-        return $context;
+        return $context . ('Development Status: ' . $dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
     }
 
     private function callClaudeApi(string $prompt, int $maxTokens = 500): ?Response
@@ -262,7 +260,7 @@ Format as a numbered list. Return only the list items.";
 
     private function extractContent(?Response $response): ?string
     {
-        if (! $response) {
+        if (!$response instanceof \Illuminate\Http\Client\Response) {
             return null;
         }
 
@@ -333,7 +331,7 @@ Return only the email body content in HTML format.";
     private function buildSubjectPromptWithDealershipContext(Dealership $dealership, string $context, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template ? "Base template subject: \"{$template->subject}\"\n" : '';
+        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
 
         return "Create a personalized subject line for {$dealership->name} about: {$context}
 
@@ -371,7 +369,7 @@ Return ONLY the subject line.";
         ?DealerEmailTemplate $template
     ): string {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template ? "Base template:\n{$template->body}\n\n" : '';
+        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
         $toneDescription = $this->getToneDescription($tone);
         $ctaRequirement = $includeCallToAction ? 'Include a specific, relevant call to action' : 'End with a soft close';
 

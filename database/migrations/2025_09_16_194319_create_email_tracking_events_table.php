@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('email_tracking_events', function (Blueprint $table) {
+        Schema::create('email_tracking_events', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('sent_email_id')->constrained()->onDelete('cascade');
             $table->string('event_type'); // 'delivered', 'opened', 'clicked', 'bounced', 'complained', 'unsubscribed'

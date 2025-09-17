@@ -51,7 +51,7 @@ class ListContacts extends ListRecords
                         if ($dealer = DealershipResource::getEloquentQuery()->where('name', $data['dealership']['name'])->first()) {
                             return Contact::create([
                                 'name' => $data['name'],
-                                'phone' => preg_replace('/^\+1-/', '', $data['phone']),
+                                'phone' => preg_replace('/^\+1-/', '', (string) $data['phone']),
                                 'email' => $data['email'],
                                 'position' => $data['position'],
                                 'dealership_id' => $dealer->id,
@@ -64,7 +64,7 @@ class ListContacts extends ListRecords
                             'city' => $data['dealership']['city'],
                             'state' => $data['dealership']['state'],
                             'zip_code' => $data['dealership']['zip'],
-                            'phone' => preg_replace('/^\+1-/', '', $data['dealership']['phone']),
+                            'phone' => preg_replace('/^\+1-/', '', (string) $data['dealership']['phone']),
                             'status' => 'imported',
                             'rating' => 'cold',
                         ]);
@@ -74,7 +74,7 @@ class ListContacts extends ListRecords
 
                         return Contact::create([
                             'name' => $data['name'],
-                            'phone' => preg_replace('/^\+1-/', '', $data['phone']),
+                            'phone' => preg_replace('/^\+1-/', '', (string) $data['phone']),
                             'email' => $data['email'],
                             'position' => $data['position'],
                             'dealership_id' => $newDealer->id,

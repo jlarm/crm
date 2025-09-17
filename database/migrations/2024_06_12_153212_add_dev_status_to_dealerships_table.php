@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dealerships', function (Blueprint $table) {
+        Schema::table('dealerships', function (Blueprint $table): void {
             $table->string('dev_status')->nullable()->after('in_development');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dealerships', function (Blueprint $table) {
+        Schema::table('dealerships', function (Blueprint $table): void {
             $table->dropColumn('dev_status');
         });
     }

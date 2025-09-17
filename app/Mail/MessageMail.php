@@ -18,20 +18,14 @@ class MessageMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @var \App\Models\Dealership
+     */
     public $dealer;
 
-    public $sender;
-
-    public $subject;
-
-    public $message;
-
-    public function __construct(Dealership $dealer, $sender, $subject, $message)
+    public function __construct(Dealership $dealer, public $sender, public $subject, public $message)
     {
         $this->dealer = $dealer;
-        $this->sender = $sender;
-        $this->subject = $subject;
-        $this->message = $message;
     }
 
     public function envelope(): Envelope

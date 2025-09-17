@@ -21,14 +21,14 @@ class SendDealerEmailCommand extends Command
     {
         $emails = DealerEmail::query()
             ->where('paused', false)
-            ->where(function ($query) {
-                $query->where(function ($q) {
+            ->where(function ($query): void {
+                $query->where(function ($q): void {
                     $q->where('frequency', '>', 0)
-                        ->where(function ($innerQ) {
+                        ->where(function ($innerQ): void {
                             $innerQ->whereNull('next_send_date')
                                 ->orWhere('next_send_date', '=', now()->format('Y-m-d'));
                         });
-                })->orWhere(function ($q) {
+                })->orWhere(function ($q): void {
                     $q->where('frequency', 0)
                         ->whereNull('last_sent');
                 });

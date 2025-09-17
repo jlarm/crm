@@ -97,7 +97,7 @@ class EditProfile extends Page
             $data = $this->editProfileForm->getState();
 
             $this->handleRecordUpdate($this->getUser(), $data);
-        } catch (Halt $exception) {
+        } catch (Halt) {
             return;
         }
         $this->sendSuccessNotification();
@@ -109,7 +109,7 @@ class EditProfile extends Page
             $data = $this->editPasswordForm->getState();
 
             $this->handleRecordUpdate($this->getUser(), $data);
-        } catch (Halt $exception) {
+        } catch (Halt) {
             return;
         }
 

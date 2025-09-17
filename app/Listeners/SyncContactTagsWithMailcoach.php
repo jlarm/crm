@@ -70,9 +70,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                 ]);
             }
 
-            $tags = array_map(function ($tag) {
-                return preg_replace('/[^a-zA-Z0-9 -]/', '', $tag);
-            }, $tags);
+            $tags = array_map(fn($tag): ?string => preg_replace('/[^a-zA-Z0-9 -]/', '', (string) $tag), $tags);
             $tags = array_unique(array_filter($tags));
 
             $subscriber = $list->subscriber($model->email);
@@ -95,15 +93,15 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     $tagsToAdd = array_values(array_diff($tags, $currentMailcoachTags));
                     $tagsToRemove = array_values(array_diff($currentMailcoachTags, $tags));
 
-                    if (! empty($tagsToAdd)) {
+                    if ($tagsToAdd !== []) {
                         $subscriber->addTags($tagsToAdd);
                     }
 
-                    if (! empty($tagsToRemove)) {
+                    if ($tagsToRemove !== []) {
                         $subscriber->removeTags($tagsToRemove);
                     }
 
-                    if (! empty($tagsToAdd) || ! empty($tagsToRemove)) {
+                    if ($tagsToAdd !== [] || $tagsToRemove !== []) {
                         Log::info('Successfully synced tags for Mailcoach subscriber', [
                             'uuid' => $subscriber->uuid,
                             'email' => $subscriber->email,
@@ -125,7 +123,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     Log::error('Error updating Mailcoach subscriber tags (add/remove): '.$e->getMessage(), [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
-                        'exception_class' => get_class($e),
+                        'exception_class' => $e::class,
                     ]);
                 }
             }
@@ -142,7 +140,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             Log::error('Error in SyncContactTagsWithMailcoach: '.$e->getMessage(), [
                 'contact_id' => $model->id,
                 'email' => $model->email,
-                'exception_class' => get_class($e),
+                'exception_class' => $e::class,
             ]);
 
             return;

@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('progresses', function (Blueprint $table) {
+        Schema::table('progresses', function (Blueprint $table): void {
             $table->foreignIdFor(ProgressCategory::class)->nullable()->constrained();
         });
     }
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('progresses', function (Blueprint $table) {
+        Schema::table('progresses', function (Blueprint $table): void {
             //
         });
     }

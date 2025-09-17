@@ -8,16 +8,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('progress_categories', function (Blueprint $table) {
+        Schema::create('progress_categories', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->timestamps();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('progress_categories');
     }

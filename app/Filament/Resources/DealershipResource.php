@@ -205,7 +205,7 @@ class DealershipResource extends Resource
                                             TextInput::make('subject')->required(),
                                             RichEditor::make('body')->required(),
                                         ])
-                                        ->action(function (array $data, Form $form) {
+                                        ->action(function (array $data, Form $form): void {
                                             Mail::to($data['user'])
                                                 ->send(new MessageMail(
                                                     $form->model,
@@ -358,11 +358,9 @@ class DealershipResource extends Resource
                     ->label('Export Contact Emails')
                     ->exports([
                         ExcelExport::make()
-                            ->modifyQueryUsing(function ($query) {
-                                return $query->whereIn('dealership_id', $query->pluck('id'))
-                                    ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
-                                    ->select(['contacts.name', 'contacts.email']);
-                            })
+                            ->modifyQueryUsing(fn($query) => $query->whereIn('dealership_id', $query->pluck('id'))
+                                ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
+                                ->select(['contacts.name', 'contacts.email']))
                             ->withColumns([
                                 Column::make('name'),
                                 Column::make('email'),
@@ -494,7 +492,7 @@ class DealershipResource extends Resource
                         // Generate CSV
                         $filename = 'contacts-with-dealerships-'.now()->format('Y-m-d-H-i-s').'.csv';
 
-                        return response()->streamDownload(function () use ($csvData) {
+                        return response()->streamDownload(function () use ($csvData): void {
                             $file = fopen('php://output', 'w');
                             foreach ($csvData as $row) {
                                 fputcsv($file, $row);

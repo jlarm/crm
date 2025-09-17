@@ -56,7 +56,7 @@ class DealerEmailTemplateResource extends Resource
                                     ->rows(3)
                                     ->required(),
                             ])
-                            ->action(function (callable $set, array $data) {
+                            ->action(function (callable $set, array $data): void {
                                 $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
 
                                 try {
@@ -68,7 +68,7 @@ class DealerEmailTemplateResource extends Resource
                                         ->body('AI-generated subject based on your context.')
                                         ->success()
                                         ->send();
-                                } catch (Exception $e) {
+                                } catch (Exception) {
                                     \Filament\Notifications\Notification::make()
                                         ->title('Generation Failed')
                                         ->body('Unable to generate subject. Please try again.')
@@ -118,7 +118,7 @@ class DealerEmailTemplateResource extends Resource
                                     ->default('professional')
                                     ->required(),
                             ])
-                            ->action(function (callable $set, array $data) {
+                            ->action(function (callable $set, array $data): void {
                                 $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
 
                                 try {
@@ -130,7 +130,7 @@ class DealerEmailTemplateResource extends Resource
                                         ->body('AI-generated template content based on your context has been added.')
                                         ->success()
                                         ->send();
-                                } catch (Exception $e) {
+                                } catch (Exception) {
                                     \Filament\Notifications\Notification::make()
                                         ->title('Generation Failed')
                                         ->body('Unable to generate content. Please try again.')

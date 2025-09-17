@@ -58,7 +58,7 @@ class ContactsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('phone'),
                 Tables\Columns\TextColumn::make('position'),
                 Tables\Columns\ToggleColumn::make('primary_contact')
-                    ->afterStateUpdated(function ($record, $state) {
+                    ->afterStateUpdated(function ($record, $state): void {
                         // turn off anyone else as primary contact
                         if ($state) {
                             $record->dealership->contacts()

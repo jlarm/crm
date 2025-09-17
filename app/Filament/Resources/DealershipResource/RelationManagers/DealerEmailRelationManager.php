@@ -32,18 +32,14 @@ class DealerEmailRelationManager extends RelationManager
                     ->label('Recipients')
                     ->multiple()
                     ->required()
-                    ->options(function (RelationManager $livewire): array {
-                        return $livewire->getOwnerRecord()->contacts()
-                            ->pluck('email', 'email')
-                            ->toArray();
-                    })
+                    ->options(fn(RelationManager $livewire): array => $livewire->getOwnerRecord()->contacts()
+                        ->pluck('email', 'email')
+                        ->toArray())
                     ->columnSpanFull(),
                 Select::make('dealer_email_template_id')
-                    ->options(function () {
-                        return DealerEmailTemplate::pluck('name', 'id')->toArray();
-                    })
+                    ->options(fn() => DealerEmailTemplate::pluck('name', 'id')->toArray())
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if ($state === '') {
                             $set('subject', '');
                             $set('message', '');
@@ -68,8 +64,8 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') === null)
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if ($state === '') {
                             $set('subject', '');
                             $set('message', '');
@@ -92,20 +88,20 @@ class DealerEmailRelationManager extends RelationManager
                     ->columnSpanFull()
                     ->label('Customize attachment')
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') === null)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') === null)
                     ->default(false),
                 FileUpload::make('attachment')
                     ->acceptedFileTypes(['application/pdf'])
                     ->storeFileNamesIn('attachment_name')
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_attachment') === false)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_attachment') === false)
                     ->directory('form-attachments'),
                 TextInput::make('subject')
                     ->columnSpanFull()
                     ->required()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->maxLength(255)
                     ->suffixAction(
                         \Filament\Forms\Components\Actions\Action::make('generateSubject')
@@ -119,7 +115,7 @@ class DealerEmailRelationManager extends RelationManager
                                     ->rows(3)
                                     ->required(),
                             ])
-                            ->action(function (callable $set, callable $get, array $data, RelationManager $livewire) {
+                            ->action(function (callable $set, callable $get, array $data, RelationManager $livewire): void {
                                 $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
 
                                 if (! $claudeService->isConfigured()) {
@@ -167,7 +163,7 @@ class DealerEmailRelationManager extends RelationManager
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get) => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->required()
                     ->hintActions([
                         \Filament\Forms\Components\Actions\Action::make('generateMessage')
@@ -195,7 +191,7 @@ class DealerEmailRelationManager extends RelationManager
                                     ->label('Include call to action')
                                     ->default(true),
                             ])
-                            ->action(function (callable $set, callable $get, array $data, RelationManager $livewire) {
+                            ->action(function (callable $set, callable $get, array $data, RelationManager $livewire): void {
                                 $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
 
                                 if (! $claudeService->isConfigured()) {
@@ -248,9 +244,9 @@ class DealerEmailRelationManager extends RelationManager
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get) => $get('frequency') === ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get) => $get('frequency') !== ReminderFrequency::Immediate->value),
+                    ->hidden(fn (Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value),
             ]);
     }
 
@@ -267,7 +263,7 @@ class DealerEmailRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->after(function ($record) {
+                    ->after(function ($record): void {
                         if ($record->frequency === ReminderFrequency::Immediate) {
                             SendDealerEmail::dispatchSync($record);
                         }
