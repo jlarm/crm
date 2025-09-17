@@ -24,13 +24,18 @@ Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'track
 // PDF viewing route (requires authentication)
 Route::middleware(['auth'])->group(function () {
     Route::get('/pdf/{attachment}', function (PdfAttachment $attachment) {
-        // Check if file exists
-        if (! Storage::exists($attachment->file_path)) {
-            abort(404, 'PDF file not found');
+        // Check if file path exists in record
+        if (empty($attachment->file_path)) {
+            abort(404, 'No PDF file associated with this attachment');
+        }
+
+        // Check if file exists in public storage
+        if (! Storage::disk('public')->exists($attachment->file_path)) {
+            abort(404, 'PDF file not found: '.$attachment->file_name.'. The file may have been moved or deleted.');
         }
 
         // Return the PDF file for viewing in browser
-        return Storage::response($attachment->file_path, $attachment->file_name, [
+        return Storage::disk('public')->response($attachment->file_path, $attachment->file_name, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$attachment->file_name.'"',
         ]);

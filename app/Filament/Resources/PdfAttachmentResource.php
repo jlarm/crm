@@ -51,7 +51,7 @@ class PdfAttachmentResource extends Resource
                     ->color('info')
                     ->url(fn (PdfAttachment $record) => route('pdf.view', $record))
                     ->openUrlInNewTab()
-                    ->visible(fn (PdfAttachment $record): bool => $record->file_path && Storage::exists($record->file_path)),
+                    ->visible(fn (PdfAttachment $record): bool => ! empty($record->file_path) && Storage::disk('public')->exists($record->file_path)),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

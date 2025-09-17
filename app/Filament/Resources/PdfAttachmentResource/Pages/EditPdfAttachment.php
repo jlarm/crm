@@ -21,7 +21,7 @@ class EditPdfAttachment extends EditRecord
                 ->color('info')
                 ->url(fn () => route('pdf.view', $this->record))
                 ->openUrlInNewTab()
-                ->visible(fn (): bool => $this->record->file_path && \Illuminate\Support\Facades\Storage::exists($this->record->file_path)),
+                ->visible(fn (): bool => ! empty($this->record->file_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->record->file_path)),
             Actions\DeleteAction::make(),
         ];
     }
