@@ -6,17 +6,15 @@ use App\Filament\Resources\DealerEmailTemplateResource\Pages;
 use App\Filament\Resources\DealerEmailTemplateResource\RelationManagers;
 use App\Models\DealerEmailTemplate;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -43,7 +41,39 @@ class DealerEmailTemplateResource extends Resource
                 TextInput::make('subject')
                     ->required()
                     ->columnSpanFull()
-                    ->required(),
+                    ->suffixAction(
+                        \Filament\Forms\Components\Actions\Action::make('generateSubject')
+                            ->label('AI Generate')
+                            ->icon('heroicon-o-sparkles')
+                            ->visible(fn () => app(\App\Services\ClaudeEmailGeneratorService::class)->isConfigured())
+                            ->form([
+                                \Filament\Forms\Components\Textarea::make('context')
+                                    ->label('What should this email be about?')
+                                    ->placeholder('e.g., Product demo invitation, follow-up after meeting, pricing information, etc.')
+                                    ->rows(3)
+                                    ->required(),
+                            ])
+                            ->action(function (callable $set, array $data) {
+                                $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
+
+                                try {
+                                    $subject = $claudeService->generateEmailSubjectWithContext($data['context']);
+                                    $set('subject', $subject);
+
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Subject Generated')
+                                        ->body('AI-generated subject based on your context.')
+                                        ->success()
+                                        ->send();
+                                } catch (\Exception $e) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Generation Failed')
+                                        ->body('Unable to generate subject. Please try again.')
+                                        ->danger()
+                                        ->send();
+                                }
+                            })
+                    ),
                 Select::make('pdf_attachments')
                     ->multiple()
                     ->relationship('pdfAttachments', 'file_name')
@@ -61,7 +91,51 @@ class DealerEmailTemplateResource extends Resource
                     ->hintColor('primary')
                     ->required()
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->hintActions([
+                        \Filament\Forms\Components\Actions\Action::make('generateAI')
+                            ->label('AI Generate')
+                            ->icon('heroicon-o-sparkles')
+                            ->visible(fn () => app(\App\Services\ClaudeEmailGeneratorService::class)->isConfigured())
+                            ->form([
+                                \Filament\Forms\Components\Textarea::make('context')
+                                    ->label('What should this email be about?')
+                                    ->placeholder('e.g., Product demo invitation, follow-up after meeting, pricing information, partnership proposal, etc.')
+                                    ->rows(3)
+                                    ->required(),
+                                \Filament\Forms\Components\Select::make('tone')
+                                    ->label('Email Tone')
+                                    ->options([
+                                        'professional' => 'Professional',
+                                        'friendly' => 'Friendly',
+                                        'formal' => 'Formal',
+                                        'casual' => 'Casual',
+                                        'consultative' => 'Consultative',
+                                    ])
+                                    ->default('professional')
+                                    ->required(),
+                            ])
+                            ->action(function (callable $set, array $data) {
+                                $claudeService = app(\App\Services\ClaudeEmailGeneratorService::class);
+
+                                try {
+                                    $content = $claudeService->generateEmailContentWithContext($data['context'], $data['tone']);
+                                    $set('body', $content);
+
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Template Content Generated')
+                                        ->body('AI-generated template content based on your context has been added.')
+                                        ->success()
+                                        ->send();
+                                } catch (\Exception $e) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Generation Failed')
+                                        ->body('Unable to generate content. Please try again.')
+                                        ->danger()
+                                        ->send();
+                                }
+                            }),
+                    ]),
             ]);
     }
 

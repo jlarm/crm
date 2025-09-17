@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Enum\DevStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Dealership extends Model
 {
-    use LogsActivity;
-    
+    use HasFactory, LogsActivity;
+
     protected $fillable = [
         'user_id',
         'name',
@@ -29,7 +30,7 @@ class Dealership extends Model
         'rating',
         'type',
         'in_development',
-        'dev_status'
+        'dev_status',
     ];
 
     protected $casts = [
@@ -83,7 +84,7 @@ class Dealership extends Model
 
         return $types[$this->type] ?? 'default_value';
     }
-    
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
