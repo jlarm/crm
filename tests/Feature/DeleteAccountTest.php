@@ -14,7 +14,8 @@ test('user accounts can be deleted', function () {
         ->set('password', 'password')
         ->call('deleteUser');
 
-    expect($user->fresh())->toBeNull();
+    // Since User model uses soft deletes, check that the user is soft deleted
+    expect($user->fresh()->trashed())->toBeTrue();
 })->skip(function () {
     return ! Features::hasAccountDeletionFeatures();
 }, 'Account deletion is not enabled.');
@@ -27,7 +28,8 @@ test('correct password must be provided before account can be deleted', function
         ->call('deleteUser')
         ->assertHasErrors(['password']);
 
-    expect($user->fresh())->not->toBeNull();
+    // Since User model uses soft deletes, check that the user is NOT soft deleted
+    expect($user->fresh()->trashed())->toBeFalse();
 })->skip(function () {
     return ! Features::hasAccountDeletionFeatures();
 }, 'Account deletion is not enabled.');
