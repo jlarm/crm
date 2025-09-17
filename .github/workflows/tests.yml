@@ -72,22 +72,30 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate --ansi
 
+      - name: Configure database
+        run: |
+          php artisan config:clear
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"3306" -u"root" -p"password" --silent; do
+            sleep 1
+          done
+
       - name: Set up database
         run: |
-          php artisan config:cache
           php artisan migrate --force --seed
 
       - name: Run Laravel Pint (Code Style)
         run: vendor/bin/pint --test
 
       - name: Execute tests
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
         run: php artisan test --parallel
 
       - name: Upload coverage reports (if available)
