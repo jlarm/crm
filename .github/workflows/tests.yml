@@ -14,17 +14,6 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: testing
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     strategy:
       fail-fast: true
       matrix:
@@ -69,28 +58,13 @@ jobs:
       - name: Copy environment file
         run: cp .env.example .env
 
-      - name: Configure database and services
+      - name: Configure testing environment
         run: |
-          sed -i '/^DB_CONNECTION=sqlite/d' .env
-          echo "" >> .env
-          echo "# Testing Environment Configuration" >> .env
-          echo "APP_ENV=testing" >> .env
-          echo "APP_DEBUG=false" >> .env
-          echo "" >> .env
-          echo "# Database Configuration for Testing" >> .env
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=testing" >> .env
-          echo "DB_USERNAME=root" >> .env
-          echo "DB_PASSWORD=password" >> .env
           echo "" >> .env
           echo "# Service Configuration for Testing" >> .env
           echo "MAILCOACH_API_TOKEN=test_token" >> .env
           echo "MAILCOACH_API_ENDPOINT=https://test.mailcoach.app/api" >> .env
           echo "SENTRY_DSN=" >> .env
-          echo "LOG_CHANNEL=stack" >> .env
-          echo "MAIL_MAILER=log" >> .env
 
       - name: Generate app key
         run: php artisan key:generate --ansi
@@ -101,17 +75,6 @@ jobs:
           php -v
           echo "=== Laravel Configuration ==="
           php artisan env
-          echo "=== Database Configuration ==="
-          php artisan config:show database
-
-      - name: Wait for MySQL
-        run: |
-          echo "=== Waiting for MySQL ==="
-          while ! mysqladmin ping -h"127.0.0.1" -P"3306" -u"root" -p"password" --silent; do
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
-          echo "MySQL is ready!"
 
       - name: Cache Laravel configuration
         run: |
@@ -119,11 +82,6 @@ jobs:
           php artisan config:cache
           php artisan route:clear
           php artisan view:clear
-
-      - name: Set up database
-        run: |
-          echo "=== Running Migrations ==="
-          php artisan migrate --force --seed --verbose
 
       - name: Run Laravel Pint (Code Style)
         run: |
@@ -133,15 +91,13 @@ jobs:
       - name: Verify test setup
         run: |
           echo "=== Verifying Test Environment ==="
-          php artisan config:show database
-          php artisan migrate:status
           echo "=== Available Tests ==="
           php artisan test --list-tests
 
       - name: Execute tests
         run: |
           echo "=== Running Tests ==="
-          php artisan test --parallel --verbose
+          php artisan test --without-parallel --verbose
 
       - name: Upload coverage reports (if available)
         if: matrix.php == '8.4'
