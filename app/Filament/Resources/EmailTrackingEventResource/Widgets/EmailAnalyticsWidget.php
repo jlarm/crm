@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Resources\EmailTrackingEventResource\Widgets;
 
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
