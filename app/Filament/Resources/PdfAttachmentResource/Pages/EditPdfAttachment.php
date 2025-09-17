@@ -15,6 +15,13 @@ class EditPdfAttachment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('view_pdf')
+                ->label('View PDF')
+                ->icon('heroicon-o-eye')
+                ->color('info')
+                ->url(fn () => route('pdf.view', $this->record))
+                ->openUrlInNewTab()
+                ->visible(fn (): bool => $this->record->file_path && \Illuminate\Support\Facades\Storage::exists($this->record->file_path)),
             Actions\DeleteAction::make(),
         ];
     }

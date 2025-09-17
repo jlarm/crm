@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class PdfAttachmentResource extends Resource
 {
@@ -44,6 +45,13 @@ class PdfAttachmentResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('view_pdf')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn (PdfAttachment $record) => route('pdf.view', $record))
+                    ->openUrlInNewTab()
+                    ->visible(fn (PdfAttachment $record): bool => $record->file_path && Storage::exists($record->file_path)),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
