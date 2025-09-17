@@ -45,6 +45,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('viewPulse', fn(User $user): bool => $user->hasRole('super_admin'));
+        Gate::define('viewPulse', fn (User $user): bool => $user->hasRole('super_admin'));
     }
 }

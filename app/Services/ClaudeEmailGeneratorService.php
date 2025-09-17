@@ -122,7 +122,7 @@ class ClaudeEmailGeneratorService
     private function buildSubjectPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
+        $templateContext = $template instanceof DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
 
         return "Generate a compelling email subject line for a business outreach email to a {$dealership->type} dealership.
 
@@ -142,7 +142,7 @@ Return only the subject line, no quotes or extra text.";
     private function buildContentPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
+        $templateContext = $template instanceof DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
 
         return "Generate personalized email content for a {$dealership->type} dealership outreach.
 
@@ -217,7 +217,7 @@ Format as a numbered list. Return only the list items.";
             $context .= 'Notes: '.mb_substr($dealership->notes, 0, 200)."\n";
         }
 
-        return $context . ('Development Status: ' . $dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
+        return $context.('Development Status: '.$dealership->in_development !== '' ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
     }
 
     private function callClaudeApi(string $prompt, int $maxTokens = 500): ?Response
@@ -260,7 +260,7 @@ Format as a numbered list. Return only the list items.";
 
     private function extractContent(?Response $response): ?string
     {
-        if (!$response instanceof \Illuminate\Http\Client\Response) {
+        if (! $response instanceof Response) {
             return null;
         }
 
@@ -331,7 +331,7 @@ Return only the email body content in HTML format.";
     private function buildSubjectPromptWithDealershipContext(Dealership $dealership, string $context, ?DealerEmailTemplate $template): string
     {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
+        $templateContext = $template instanceof DealerEmailTemplate ? "Base template subject: \"{$template->subject}\"\n" : '';
 
         return "Create a personalized subject line for {$dealership->name} about: {$context}
 
@@ -369,7 +369,7 @@ Return ONLY the subject line.";
         ?DealerEmailTemplate $template
     ): string {
         $dealershipInfo = $this->getDealershipContext($dealership);
-        $templateContext = $template instanceof \App\Models\DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
+        $templateContext = $template instanceof DealerEmailTemplate ? "Base template:\n{$template->body}\n\n" : '';
         $toneDescription = $this->getToneDescription($tone);
         $ctaRequirement = $includeCallToAction ? 'Include a specific, relevant call to action' : 'End with a soft close';
 

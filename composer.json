@@ -75,7 +75,15 @@
             "@php artisan key:generate --ansi"
         ],
         "lint": "pint",
-        "refactor": "rector"
+        "refactor": "rector",
+        "test:lint": "pint --test",
+        "test:refactor": "rector --dry-run",
+        "test:unit": "pest",
+        "test": [
+            "@test:lint",
+            "@test:refactor",
+            "@test:unit"
+        ]
     },
     "extra": {
         "laravel": {

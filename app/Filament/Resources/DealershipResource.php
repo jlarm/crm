@@ -358,7 +358,7 @@ class DealershipResource extends Resource
                     ->label('Export Contact Emails')
                     ->exports([
                         ExcelExport::make()
-                            ->modifyQueryUsing(fn($query) => $query->whereIn('dealership_id', $query->pluck('id'))
+                            ->modifyQueryUsing(fn ($query) => $query->whereIn('dealership_id', $query->pluck('id'))
                                 ->join('contacts', 'contacts.dealership_id', '=', 'dealerships.id')
                                 ->select(['contacts.name', 'contacts.email']))
                             ->withColumns([

@@ -48,13 +48,13 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->label('Recipients')
                     ->multiple()
                     ->required()
-                    ->options(fn() => $this->getOwnerRecord()->contacts()
+                    ->options(fn () => $this->getOwnerRecord()->contacts()
                         ->pluck('email', 'email')
                         ->filter() // Ensure no null values
                         ->toArray())
                     ->columnSpanFull(),
                 Select::make('dealer_email_template_id')
-                    ->options(fn() => DealerEmailTemplate::pluck('name', 'id')
+                    ->options(fn () => DealerEmailTemplate::pluck('name', 'id')
                         ->filter() // Ensure no null values
                         ->toArray())
                     ->reactive()

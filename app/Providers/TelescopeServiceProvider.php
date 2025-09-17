@@ -38,6 +38,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             if ($entry->isScheduledTask()) {
                 return true;
             }
+
             return $entry->hasMonitoredTag();
         });
     }
@@ -67,6 +68,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', fn($user): bool => $user->email == 'jlohr@autorisknow.com');
+        Gate::define('viewTelescope', fn ($user): bool => $user->email === 'jlohr@autorisknow.com');
     }
 }

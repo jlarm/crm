@@ -19,7 +19,7 @@ class MessageMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     /**
-     * @var \App\Models\Dealership
+     * @var Dealership
      */
     public $dealer;
 

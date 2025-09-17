@@ -71,7 +71,7 @@ class EmailTrackingService
         // This is a basic implementation - in production you might want a more sophisticated approach
         $pattern = '/href="([^"]+)"/i';
 
-        return preg_replace_callback($pattern, function ($matches) use ($messageId): string {
+        return preg_replace_callback($pattern, function (array $matches) use ($messageId): string {
             $originalUrl = $matches[1];
 
             // Skip if it's already a tracking URL or certain types of links

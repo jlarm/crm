@@ -76,9 +76,9 @@ class ActivitiesRelationManager extends RelationManager
                         }
 
                         return match ($record->subject_type) {
-                            \App\Models\Dealership::class => $this->getDealershipName($state),
-                            \App\Models\Contact::class => $this->getContactName($state),
-                            \App\Models\DealerEmail::class => $this->getDealerEmailSubject($state),
+                            Dealership::class => $this->getDealershipName($state),
+                            Contact::class => $this->getContactName($state),
+                            DealerEmail::class => $this->getDealerEmailSubject($state),
                             \App\Models\User::class => 'User #'.$state,
                             default => class_basename($record->subject_type).' #'.$state,
                         };
@@ -90,9 +90,9 @@ class ActivitiesRelationManager extends RelationManager
                         }
 
                         return match ($record->subject_type) {
-                            \App\Models\Dealership::class => $this->getDealershipName($state),
-                            \App\Models\Contact::class => $this->getContactName($state),
-                            \App\Models\DealerEmail::class => $this->getDealerEmailSubject($state),
+                            Dealership::class => $this->getDealershipName($state),
+                            Contact::class => $this->getContactName($state),
+                            DealerEmail::class => $this->getDealerEmailSubject($state),
                             default => null,
                         };
                     }),
@@ -164,9 +164,9 @@ class ActivitiesRelationManager extends RelationManager
                 SelectFilter::make('subject_type')
                     ->label('Model Type')
                     ->options([
-                        \App\Models\Dealership::class => 'Dealership',
-                        \App\Models\Contact::class => 'Contact',
-                        \App\Models\DealerEmail::class => 'Dealer Email',
+                        Dealership::class => 'Dealership',
+                        Contact::class => 'Contact',
+                        DealerEmail::class => 'Dealer Email',
                         \App\Models\User::class => 'User',
                         \App\Models\Progress::class => 'Progress',
                         \App\Models\Reminder::class => 'Reminder',

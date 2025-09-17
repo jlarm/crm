@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Exports;
 
-use Illuminate\Database\Eloquent\Collection;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class AdvancedDealershipExport extends ExcelExport

@@ -26,9 +26,7 @@ class SendDealerEmail implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected \App\Models\DealerEmail $dealerEmail)
-    {
-    }
+    public function __construct(protected DealerEmail $dealerEmail) {}
 
     /**
      * Execute the job.

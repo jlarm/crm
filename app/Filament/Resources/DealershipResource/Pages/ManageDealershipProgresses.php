@@ -57,7 +57,7 @@ class ManageDealershipProgresses extends ManageRelatedRecords
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')->required(),
                     ])
-                    ->createOptionUsing(fn(array $data): int => ProgressCategory::create($data)->getKey())
+                    ->createOptionUsing(fn (array $data): int => ProgressCategory::create($data)->getKey())
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('details')

@@ -32,12 +32,12 @@ class DealerEmailRelationManager extends RelationManager
                     ->label('Recipients')
                     ->multiple()
                     ->required()
-                    ->options(fn(RelationManager $livewire): array => $livewire->getOwnerRecord()->contacts()
+                    ->options(fn (RelationManager $livewire): array => $livewire->getOwnerRecord()->contacts()
                         ->pluck('email', 'email')
                         ->toArray())
                     ->columnSpanFull(),
                 Select::make('dealer_email_template_id')
-                    ->options(fn() => DealerEmailTemplate::pluck('name', 'id')->toArray())
+                    ->options(fn () => DealerEmailTemplate::pluck('name', 'id')->toArray())
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set): void {
                         if ($state === '') {

@@ -24,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Carbon::macro('inApplicationTimezone', fn() => $this->tz(config('app.timezone_display')));
-        Carbon::macro('inUserTimezone', fn() => $this->tz(auth()->user()?->timezone ?? config('app.timezone_display')));
+        Carbon::macro('inApplicationTimezone', fn () => $this->tz(config('app.timezone_display')));
+        Carbon::macro('inUserTimezone', fn () => $this->tz(auth()->user()?->timezone ?? config('app.timezone_display')));
         DatabaseNotifications::trigger('notifications.database-notifications-trigger');
         PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch): void {
             $panelSwitch

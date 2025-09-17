@@ -74,7 +74,7 @@ class ManageDealershipContacts extends ManageRelatedRecords
                             ->maxLength(255)
                             ->unique('tags', 'name'),
                     ])
-                    ->createOptionUsing(fn(array $data) => \App\Models\Tag::create($data)->id)
+                    ->createOptionUsing(fn (array $data) => \App\Models\Tag::create($data)->id)
                     ->searchable()
                     ->placeholder('Select or create tags')
                     ->helperText('Type to search or create new tags'),

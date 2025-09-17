@@ -16,9 +16,7 @@ class ClientMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public $sender, public $subject, public $message)
-    {
-    }
+    public function __construct(public $sender, public $subject, public $message) {}
 
     public function envelope(): Envelope
     {
