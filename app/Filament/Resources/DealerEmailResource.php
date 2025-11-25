@@ -63,6 +63,7 @@ class DealerEmailResource extends Resource
                 Tables\Columns\TextColumn::make('last_sent')
                     ->date()
                     ->sortable(),
+                Tables\Columns\ToggleColumn::make('paused'),
             ])
             ->filters([
                 //
@@ -75,6 +76,21 @@ class DealerEmailResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('toggle_paused')
+                        ->label('Toggle Paused')
+                        ->icon('heroicon-o-pause')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            foreach ($records as $record) {
+                                $record->update(['paused' => ! $record->paused]);
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion()
+                        ->successNotification(
+                            \Filament\Notifications\Notification::make()
+                                ->success()
+                                ->title('Paused status toggled')
+                                ->body('The paused status has been toggled for the selected emails.')
+                        ),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
