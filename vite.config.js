@@ -10,6 +10,13 @@ export default defineConfig({
     define: {
         __BUNDLED_DEV__: false,
     },
+    build: {
+        rolldownOptions: {
+            checks: {
+                pluginTimings: false,
+            },
+        },
+    },
     plugins: [
         tailwindcss(),
         laravel({
