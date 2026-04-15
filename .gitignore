@@ -18,3 +18,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Wayfinder auto-generated files
+/resources/js/routes/
+/resources/js/actions/
