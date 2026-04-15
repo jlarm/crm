@@ -6,10 +6,15 @@ use App\Http\Controllers\MailgunWebhookController;
 use App\Models\PdfAttachment;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/test-inertia', function () {
+    return Inertia::render('Test');
+})->name('test-inertia');
 
 // Mailgun webhook endpoint (no auth required)
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
