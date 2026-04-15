@@ -7,6 +7,7 @@ use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunWebhookController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -29,6 +30,7 @@ Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'track
 
 Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('search', SearchController::class)->name('search');
 
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');

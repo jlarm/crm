@@ -10,12 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Dealership extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, Searchable;
 
     protected $fillable = [
         'user_id',
@@ -86,6 +87,23 @@ class Dealership extends Model
         ];
 
         return $types[$this->type] ?? 'default_value';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'city' => $this->city,
+            'state' => $this->state,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'type' => $this->type,
+            'rating' => $this->rating,
+        ];
     }
 
     public function getActivitylogOptions(): LogOptions
