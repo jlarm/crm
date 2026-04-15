@@ -26,10 +26,16 @@ const props = defineProps<{
 
 function goToPage(url: string | null | undefined): void {
     if (!url) return;
-    router.visit(url, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    const parsed = new URL(url, window.location.origin);
+    router.get(
+        parsed.pathname,
+        Object.fromEntries(parsed.searchParams),
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['dealerships'],
+        },
+    );
 }
 
 const firstPageUrl = computed(

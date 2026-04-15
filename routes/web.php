@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DealershipContactController;
+use App\Http\Controllers\DealershipController;
+use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunWebhookController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -26,6 +29,17 @@ Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'track
 
 Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
+    Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
+
+    Route::post('dealerships/{dealership}/stores', [DealershipStoreController::class, 'store'])->name('dealerships.stores.store');
+    Route::put('dealerships/{dealership}/stores/{store}', [DealershipStoreController::class, 'update'])->name('dealerships.stores.update');
+    Route::delete('dealerships/{dealership}/stores/{store}', [DealershipStoreController::class, 'destroy'])->name('dealerships.stores.destroy');
+
+    Route::post('dealerships/{dealership}/contacts', [DealershipContactController::class, 'store'])->name('dealerships.contacts.store');
+    Route::put('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'update'])->name('dealerships.contacts.update');
+    Route::delete('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'destroy'])->name('dealerships.contacts.destroy');
 
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');

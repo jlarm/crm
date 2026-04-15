@@ -122,7 +122,7 @@ export function createColumns(
                 return h(
                     Link,
                     {
-                        href: `/admin/dealerships/${dealership.id}/edit`,
+                        href: `/dealerships/${dealership.id}`,
                         class: 'inline-flex',
                         'aria-label': `View ${dealership.name}`,
                     },

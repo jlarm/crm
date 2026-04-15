@@ -142,7 +142,7 @@ const columns = createColumns(handleSort);
                     :columns="columns"
                     :data="dealerships!.data"
                     :sorting="currentSorting"
-                    :row-href="(d) => `/admin/dealerships/${d.id}/edit`"
+                    :row-href="(d) => `/dealerships/${d.id}`"
                 />
 
                 <DashboardPagination
