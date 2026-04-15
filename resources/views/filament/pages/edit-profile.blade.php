@@ -1,17 +1,19 @@
 <x-filament-panels::page>
-    <x-filament-panels::form wire:submit="updateProfile">
+    <form wire:submit="updateProfile">
         {{ $this->editProfileForm }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getUpdateProfileFormActions()"
-        />
-    </x-filament-panels::form>
+        <x-filament::button type="submit" class="mt-6">
+            Save Profile
+        </x-filament::button>
+    </form>
 
-    <x-filament-panels::form wire:submit="updatePassword">
+    <div style="height: 2rem;"></div>
+
+    <form wire:submit="updatePassword">
         {{ $this->editPasswordForm }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getUpdatePasswordFormActions()"
-        />
-    </x-filament-panels::form>
+        <x-filament::button type="submit" class="mt-6">
+            Update Password
+        </x-filament::button>
+    </form>
 </x-filament-panels::page>

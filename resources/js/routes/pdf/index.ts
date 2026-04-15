@@ -1,6 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 export const view = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -14,7 +14,7 @@ view.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 view.url = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -46,7 +46,7 @@ view.url = (args: { attachment: number | { id: number } } | [attachment: number 
 }
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 view.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -55,7 +55,7 @@ view.get = (args: { attachment: number | { id: number } } | [attachment: number 
 })
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 view.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -64,7 +64,7 @@ view.head = (args: { attachment: number | { id: number } } | [attachment: number
 })
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 const viewForm = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -73,7 +73,7 @@ const viewForm = (args: { attachment: number | { id: number } } | [attachment: n
 })
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 viewForm.get = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ viewForm.get = (args: { attachment: number | { id: number } } | [attachment: num
 })
 
 /**
-* @see routes/web.php:40
+* @see routes/web.php:41
 * @route '/pdf/{attachment}'
 */
 viewForm.head = (args: { attachment: number | { id: number } } | [attachment: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

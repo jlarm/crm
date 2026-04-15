@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 export const editProfile = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ editProfile.definition = {
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 editProfile.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ editProfile.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 editProfile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ editProfile.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 editProfile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ editProfile.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 const editProfileForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const editProfileForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 editProfileForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ editProfileForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> 
 
 /**
 * @see \App\Filament\Pages\EditProfile::__invoke
-* @see app/Filament/pages/EditProfile.php:7
+* @see app/Filament/Pages/EditProfile.php:7
 * @route '/admin/edit-profile'
 */
 editProfileForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

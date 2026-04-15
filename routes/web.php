@@ -7,6 +7,7 @@ use App\Http\Controllers\MailgunWebhookController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\PdfAttachment;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,7 @@ Route::get('/track/open/{message_id}', [MailgunWebhookController::class, 'trackO
 Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'trackClick'])
     ->name('mailgun.click-track');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('settings')->name('settings.')->group(function () {

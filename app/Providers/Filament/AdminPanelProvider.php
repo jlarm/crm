@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/pages'), for: 'App\\Filament\\pages')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
             ])
