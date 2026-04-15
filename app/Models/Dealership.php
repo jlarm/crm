@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enum\DevStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -92,5 +93,64 @@ class Dealership extends Model
         return LogOptions::defaults()
             ->logAll()
             ->setDescriptionForEvent(fn (string $eventName): string => "Dealership {$eventName}");
+    }
+
+    public function scopeSearch(Builder $query, ?string $search): void
+    {
+        if (! $search) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($search): void {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('city', 'like', "%{$search}%");
+        });
+    }
+
+    public function scopeWithRating(Builder $query, ?string $rating): void
+    {
+        if (! $rating) {
+            return;
+        }
+
+        $query->where('rating', $rating);
+    }
+
+    public function scopeWithType(Builder $query, ?string $type): void
+    {
+        if (! $type) {
+            return;
+        }
+
+        $query->where('type', $type);
+    }
+
+    public function scopeForUser(Builder $query, ?User $user): void
+    {
+        if (! $user) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($user): void {
+            $q->where('user_id', $user->id)
+                ->orWhereHas('users', fn (Builder $r) => $r->where('users.id', $user->id));
+        });
+    }
+
+    public function scopeSortBy(Builder $query, ?string $sort, ?string $direction = 'asc'): void
+    {
+        if (! $sort) {
+            $query->orderBy('name', 'asc');
+
+            return;
+        }
+
+        $allowedSorts = ['name', 'city', 'state', 'status', 'rating'];
+
+        if (in_array($sort, $allowedSorts, true)) {
+            $query->orderBy($sort, $direction === 'desc' ? 'desc' : 'asc');
+        } else {
+            $query->orderBy('name', 'asc');
+        }
     }
 }
