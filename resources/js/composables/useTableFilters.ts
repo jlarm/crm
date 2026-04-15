@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/vue3';
 import { onMounted, ref, watch } from 'vue';
 
+
 interface UseTableFiltersOptions {
     routeUrl: string;
     initialFilters?: Record<string, any>;
@@ -22,6 +23,7 @@ export function useTableFilters(options: UseTableFiltersOptions) {
 
     const defaultFilters = { ...initialFilters };
     const filters = ref({ ...defaultFilters });
+    const isLoadingData = ref(false);
     let debounceTimeout: number | null = null;
 
     onMounted(() => {
@@ -41,6 +43,7 @@ export function useTableFilters(options: UseTableFiltersOptions) {
         filters,
         () => {
             storeFilters();
+            isLoadingData.value = true;
 
             if (debounceTimeout) {
                 clearTimeout(debounceTimeout);
@@ -115,10 +118,15 @@ export function useTableFilters(options: UseTableFiltersOptions) {
             ),
         );
 
+        isLoadingData.value = true;
+
         router.get(routeUrl, params, {
             preserveState: true,
             preserveScroll: true,
             only: onlyProps.length > 0 ? onlyProps : undefined,
+            onFinish: () => {
+                isLoadingData.value = false;
+            },
         });
     }
 
@@ -134,6 +142,7 @@ export function useTableFilters(options: UseTableFiltersOptions) {
 
     return {
         filters,
+        isLoadingData,
         applyFilters,
         resetFilters,
         hasActiveFilters,

@@ -56,18 +56,18 @@ final class DashboardController extends Controller
             ])
             ->all();
 
-        return Inertia::render('Dashboard', [
-            'dealerships' => Inertia::defer(function () use ($request, $applyFilters): mixed {
-                $query = Dealership::query();
-                $applyFilters($query);
+        $query = Dealership::query();
+        $applyFilters($query);
 
-                return $query
-                    ->sortBy($request->input('sort'), $request->input('direction'))
-                    ->select('id', 'name', 'city', 'state', 'status', 'rating')
-                    ->paginate(15)
-                    ->withQueryString()
-                    ->through(fn ($dealership) => DealershipResource::make($dealership)->resolve());
-            }),
+        $dealerships = $query
+            ->sortBy($request->input('sort'), $request->input('direction'))
+            ->select('id', 'name', 'city', 'state', 'status', 'rating')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn ($dealership) => DealershipResource::make($dealership)->resolve());
+
+        return Inertia::render('Dashboard', [
+            'dealerships' => $dealerships,
             'filters' => [
                 'search' => $request->input('search', ''),
                 'status' => $request->input('status', ''),

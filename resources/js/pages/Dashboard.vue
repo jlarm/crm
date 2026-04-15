@@ -7,7 +7,7 @@ import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTableFilters } from '@/composables/useTableFilters';
-import { Deferred, Head } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface FilterOption {
@@ -16,7 +16,7 @@ interface FilterOption {
 }
 
 interface Props {
-    dealerships?: {
+    dealerships: {
         data: Dealership[];
         links: Array<{ url: string | null; label: string; active: boolean }>;
         current_page: number;
@@ -45,7 +45,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { filters, resetFilters } = useTableFilters({
+const { filters, isLoadingData, resetFilters } = useTableFilters({
     routeUrl: '/dashboard',
     initialFilters: {
         search: typeof props.filters.search === 'string' ? props.filters.search : '',
@@ -70,7 +70,7 @@ const { filters, resetFilters } = useTableFilters({
     debounceMs: 500,
     onlyProps: ['dealerships', 'filters'],
     storageKey: 'dashboard-dealership-filters',
-    persistedKeys: ['scope'],
+    persistedKeys: [],
 });
 
 function handleSort(column: string): void {
@@ -107,7 +107,7 @@ const columns = createColumns(handleSort);
                         :variant="filters.scope === 'all' ? 'ghost' : 'secondary'"
                         @click="filters.scope = 'mine'"
                     >
-                        My companies
+                        My dealerships
                     </Button>
                     <Button
                         type="button"
@@ -115,7 +115,7 @@ const columns = createColumns(handleSort);
                         :variant="filters.scope === 'all' ? 'secondary' : 'ghost'"
                         @click="filters.scope = 'all'"
                     >
-                        All companies
+                        All dealerships
                     </Button>
                 </div>
 
@@ -129,31 +129,27 @@ const columns = createColumns(handleSort);
             </div>
         </div>
 
-        <Deferred data="dealerships">
-            <template #fallback>
-                <div class="space-y-2">
-                    <Skeleton class="h-10 w-full" />
-                    <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
-                </div>
-            </template>
+        <div v-if="isLoadingData" class="space-y-2">
+            <Skeleton class="h-10 w-full" />
+            <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
+        </div>
 
-            <template #default>
-                <DataTable
-                    :columns="columns"
-                    :data="dealerships!.data"
-                    :sorting="currentSorting"
-                    :row-href="(d) => `/dealerships/${d.id}`"
-                />
+        <template v-else>
+            <DataTable
+                :columns="columns"
+                :data="dealerships.data"
+                :sorting="currentSorting"
+                :row-href="(d) => `/dealerships/${d.id}`"
+            />
 
-                <DashboardPagination
-                    :current-page="dealerships!.current_page"
-                    :last-page="dealerships!.last_page"
-                    :from="dealerships!.from"
-                    :to="dealerships!.to"
-                    :total="dealerships!.total"
-                    :links="dealerships!.links"
-                />
-            </template>
-        </Deferred>
+            <DashboardPagination
+                :current-page="dealerships.current_page"
+                :last-page="dealerships.last_page"
+                :from="dealerships.from"
+                :to="dealerships.to"
+                :total="dealerships.total"
+                :links="dealerships.links"
+            />
+        </template>
     </div>
 </template>
