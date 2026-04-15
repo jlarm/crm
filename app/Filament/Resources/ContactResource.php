@@ -5,19 +5,26 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContactResource\Pages;
+use App\Filament\Resources\ContactResource\Pages\ListContacts;
 use App\Models\Contact;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     public static function canCreate(): bool
     {
@@ -29,10 +36,10 @@ class ContactResource extends Resource
         return false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -41,38 +48,38 @@ class ContactResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->description(fn (Contact $contact): string => $contact->phone ?? '')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('linkedin_link')
+                IconColumn::make('linkedin_link')
                     ->label('LinkedIn')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn ($record) => $record->linkedin_link)
                     ->openUrlInNewTab(),
-                Tables\Columns\TextColumn::make('position'),
-                Tables\Columns\TextColumn::make('dealership.name')
+                TextColumn::make('position'),
+                TextColumn::make('dealership.name')
                     ->description(fn (Contact $contact): string => $contact->dealership->city.', '.$contact->dealership->state)
                     ->searchable()
                     ->sortable(),
             ])
             ->filters([
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 ExportBulkAction::make()->exports([
                     ExcelExport::make()->withColumns([
-                        \pxlrbt\FilamentExcel\Columns\Column::make('name'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('phone'),
-                        \pxlrbt\FilamentExcel\Columns\Column::make('email'),
+                        Column::make('name'),
+                        Column::make('phone'),
+                        Column::make('email'),
                     ]),
                 ]),
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -87,7 +94,7 @@ class ContactResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListContacts::route('/'),
+            'index' => ListContacts::route('/'),
             //            'create' => Pages\CreateContact::route('/create'),
             //            'edit' => Pages\EditContact::route('/{record}/edit'),
         ];

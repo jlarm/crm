@@ -16,11 +16,13 @@ use App\Policies\ContactPolicy;
 use App\Policies\DealerEmailPolicy;
 use App\Policies\DealerEmailTemplatePolicy;
 use App\Policies\ReminderPolicy;
+use App\Policies\RolePolicy;
 use App\Policies\SentEmailPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -31,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Activity::class => ActivityPolicy::class,
-        \Spatie\Permission\Models\Role::class => \App\Policies\RolePolicy::class,
+        Role::class => RolePolicy::class,
         User::class => UserPolicy::class,
         Contact::class => ContactPolicy::class,
         Reminder::class => ReminderPolicy::class,

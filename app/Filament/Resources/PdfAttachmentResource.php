@@ -4,28 +4,36 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PdfAttachmentResource\Pages;
+use App\Filament\Resources\PdfAttachmentResource\Pages\CreatePdfAttachment;
+use App\Filament\Resources\PdfAttachmentResource\Pages\EditPdfAttachment;
+use App\Filament\Resources\PdfAttachmentResource\Pages\ListPdfAttachments;
 use App\Models\PdfAttachment;
-use Filament\Forms;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
+use UnitEnum;
 
 class PdfAttachmentResource extends Resource
 {
     protected static ?string $model = PdfAttachment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document';
 
-    protected static ?string $navigationGroup = 'Email';
+    protected static string|UnitEnum|null $navigationGroup = 'Email';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\FileUpload::make('file_path')
+        return $schema
+            ->components([
+                FileUpload::make('file_path')
                     ->label('PDF File')
                     ->required()
                     ->acceptedFileTypes(['application/pdf'])
@@ -39,24 +47,24 @@ class PdfAttachmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('file_name'),
+                TextColumn::make('file_name'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\Action::make('view_pdf')
+            ->recordActions([
+                Action::make('view_pdf')
                     ->label('View')
                     ->icon('heroicon-o-eye')
                     ->color('info')
                     ->url(fn (PdfAttachment $record) => route('pdf.view', $record))
                     ->openUrlInNewTab()
                     ->visible(fn (PdfAttachment $record): bool => ! empty($record->file_path) && Storage::disk('public')->exists($record->file_path)),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -71,9 +79,9 @@ class PdfAttachmentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPdfAttachments::route('/'),
-            'create' => Pages\CreatePdfAttachment::route('/create'),
-            'edit' => Pages\EditPdfAttachment::route('/{record}/edit'),
+            'index' => ListPdfAttachments::route('/'),
+            'create' => CreatePdfAttachment::route('/create'),
+            'edit' => EditPdfAttachment::route('/{record}/edit'),
         ];
     }
 }

@@ -6,6 +6,8 @@ namespace App\Filament\Development\Resources;
 
 use App\Enum\DevStatus;
 use App\Filament\Development\Resources\DealershipResource\Pages;
+use App\Filament\Development\Resources\DealershipResource\Pages\EditDealership;
+use App\Filament\Development\Resources\DealershipResource\Pages\ListDealerships;
 use App\Filament\Resources\DealershipResource\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\DealershipResource\RelationManagers\ProgressesRelationManager;
 use App\Filament\Resources\DealershipResource\RelationManagers\StoresRelationManager;
@@ -13,17 +15,25 @@ use App\Mail\ClientMail;
 use App\Mail\MessageMail;
 use App\Models\Dealership;
 use App\Models\Progress;
-use Filament\Forms;
-use Filament\Forms\Components\Grid;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
@@ -32,7 +42,7 @@ class DealershipResource extends Resource
 {
     protected static ?string $model = Dealership::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
 
     public static function getEloquentQuery(): Builder
     {
@@ -44,21 +54,21 @@ class DealershipResource extends Resource
         return false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Group::make()
+        return $schema
+            ->components([
+                Group::make()
                     ->schema([
-                        Tabs::make('Label')
+                        \Filament\Schemas\Components\Tabs::make('Label')
                             ->tabs([
-                                Tabs\Tab::make('General')
+                                Tab::make('General')
                                     ->schema([
                                         TextInput::make('name')
                                             ->columnSpanFull()
                                             ->autofocus()
                                             ->required(),
-                                        Grid::make(3)
+                                        \Filament\Schemas\Components\Grid::make(3)
                                             ->schema([
                                                 TextInput::make('address')
                                                     ->columnSpanFull(),
@@ -121,7 +131,7 @@ class DealershipResource extends Resource
                                                 TextInput::make('zip_code')
                                                     ->columns(1),
                                             ]),
-                                        Grid::make(2)
+                                        \Filament\Schemas\Components\Grid::make(2)
                                             ->schema([
                                                 TextInput::make('phone')
                                                     ->label('Phone Number')
@@ -141,7 +151,7 @@ class DealershipResource extends Resource
                                             ->required(),
                                     ]),
                             ])->columnSpanFull(),
-                        Forms\Components\Section::make('Notes')
+                        Section::make('Notes')
                             ->schema([
                                 Textarea::make('notes')
                                     ->rows(10)
@@ -149,9 +159,9 @@ class DealershipResource extends Resource
                                     ->hiddenLabel()
                                     ->columnSpanFull(),
                             ])->collapsible(),
-                        Forms\Components\Section::make('Current Solution')
+                        Section::make('Current Solution')
                             ->schema([
-                                Grid::make(2)
+                                \Filament\Schemas\Components\Grid::make(2)
                                     ->schema([
                                         TextInput::make('current_solution_name')
                                             ->label('Name'),
@@ -160,9 +170,9 @@ class DealershipResource extends Resource
                                     ]),
                             ])->collapsed(),
                     ])->columnSpan(2),
-                Forms\Components\Group::make()
+                Group::make()
                     ->schema([
-                        Forms\Components\Section::make('Consultant')
+                        Section::make('Consultant')
                             ->schema([
                                 Select::make('users')
                                     ->columnSpanFull()
@@ -170,9 +180,9 @@ class DealershipResource extends Resource
                                     ->relationship('users', 'name')
                                     ->hiddenLabel(),
                             ]),
-                        Forms\Components\Section::make('Status')
+                        Section::make('Status')
                             ->schema([
-                                Forms\Components\Toggle::make('in_development')
+                                Toggle::make('in_development')
                                     ->onColor('success')
                                     ->offColor('primary')
                                     ->helperText('*Turn on "In Development" when actively working on this dealership with the Sales Dev Rep.')
@@ -194,36 +204,36 @@ class DealershipResource extends Resource
                                     ])
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make()
+                        Section::make()
                             ->schema([
-                                Forms\Components\Actions::make([
-                                    Forms\Components\Actions\Action::make('Send Email to Consultant')
-                                        ->form([
+                                Actions::make([
+                                    Action::make('Send Email to Consultant')
+                                        ->schema([
                                             Select::make('user')
                                                 ->required()
                                                 ->label('Consultant')
                                                 ->helperText('Select the Consultant to send the email to.')
-                                                ->options($form->model->users->pluck('name', 'email')),
+                                                ->options($schema->model->users->pluck('name', 'email')),
                                             TextInput::make('subject')->required(),
                                             RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                         ])
-                                        ->action(function (array $data, Form $form): void {
+                                        ->action(function (array $data, Schema $schema): void {
                                             Mail::to($data['user'])
                                                 ->send(new MessageMail(
-                                                    $form->model,
+                                                    $schema->model,
                                                     auth()->user(),
                                                     $data['subject'],
                                                     $data['body']
                                                 ));
                                             Progress::create([
-                                                'dealership_id' => $form->model->id,
+                                                'dealership_id' => $schema->model->id,
                                                 'user_id' => auth()->id(),
                                                 'date' => now(),
                                                 'details' => 'Sent email to '.$data['user'].' - '.$data['subject'],
                                             ]);
                                         }),
-                                    Forms\Components\Actions\Action::make('Send Email to client')
-                                        ->form([
+                                    Action::make('Send Email to client')
+                                        ->schema([
                                             Select::make('user')
                                                 ->required()
                                                 ->label('Dealership Contact')
@@ -232,7 +242,7 @@ class DealershipResource extends Resource
                                             TextInput::make('subject')->required(),
                                             RichEditor::make('body')->disableToolbarButtons(['attachFiles'])->required(),
                                         ])
-                                        ->action(function (array $data, Form $form): void {
+                                        ->action(function (array $data, Schema $schema): void {
                                             Mail::to($data['user'])
                                                 ->send(new ClientMail(
                                                     auth()->user(),
@@ -240,7 +250,7 @@ class DealershipResource extends Resource
                                                     $data['body']
                                                 ));
                                             Progress::create([
-                                                'dealership_id' => $form->model->id,
+                                                'dealership_id' => $schema->model->id,
                                                 'user_id' => auth()->id(),
                                                 'date' => now(),
                                                 'details' => 'Sent email to '.$data['user'].' - '.$data['subject'],
@@ -270,19 +280,19 @@ class DealershipResource extends Resource
                     ->badge(),
             ])
             ->filters([
-                Tables\Filters\Filter::make('dealer_group')
+                Filter::make('dealer_group')
                     ->label('Dealer Groups')
                     ->query(fn (Builder $query): Builder => $query->has('stores')),
-                Tables\Filters\SelectFilter::make('dev_status')
+                SelectFilter::make('dev_status')
                     ->label('Status')
                     ->options(DevStatus::class),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -299,9 +309,9 @@ class DealershipResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDealerships::route('/'),
+            'index' => ListDealerships::route('/'),
             //            'create' => Pages\CreateDealership::route('/create'),
-            'edit' => Pages\EditDealership::route('/{record}/edit'),
+            'edit' => EditDealership::route('/{record}/edit'),
         ];
     }
 }

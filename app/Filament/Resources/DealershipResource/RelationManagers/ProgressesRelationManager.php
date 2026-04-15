@@ -6,10 +6,18 @@ namespace App\Filament\Resources\DealershipResource\RelationManagers;
 
 use App\Models\Contact;
 use App\Models\ProgressCategory;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ProgressesRelationManager extends RelationManager
@@ -24,32 +32,32 @@ class ProgressesRelationManager extends RelationManager
 
     protected static ?string $pluralLabel = 'Progress';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(auth()->id()),
-                Forms\Components\Select::make('contact_id')
+                Select::make('contact_id')
                     ->label('Select a Contact if available')
                     ->options(
                         Contact::all()->pluck('name', 'id')
                     )
                     ->preload()
                     ->searchable(),
-                Forms\Components\DatePicker::make('date'),
-                Forms\Components\Select::make('progress_category_id')
+                DatePicker::make('date'),
+                Select::make('progress_category_id')
                     ->label('Select a Progress Category')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload()
                     ->createOptionForm([
-                        Forms\Components\TextInput::make('name')->required(),
+                        TextInput::make('name')->required(),
                     ])
                     ->createOptionUsing(fn (array $data): int => ProgressCategory::create($data)->getKey())
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('details')
+                Textarea::make('details')
                     ->columnSpanFull()
                     ->required()
                     ->rows(4),
@@ -61,24 +69,24 @@ class ProgressesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('details')->words(30)->wrap(),
-                Tables\Columns\TextColumn::make('created_at')->label('Date')->date(),
-                Tables\Columns\TextColumn::make('contact.name')->label('Contact'),
+                TextColumn::make('details')->words(30)->wrap(),
+                TextColumn::make('created_at')->label('Date')->date(),
+                TextColumn::make('contact.name')->label('Contact'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 //                Tables\Actions\EditAction::make(),
                 //                Tables\Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])->defaultSort('date', 'desc');
     }

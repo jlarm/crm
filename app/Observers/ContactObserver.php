@@ -9,6 +9,7 @@ use App\Models\Contact;
 use App\Models\Dealership;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Spatie\MailcoachSdk\Exceptions\ResourceNotFound;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
 
 class ContactObserver
@@ -116,7 +117,7 @@ class ContactObserver
             );
             Log::info("[ContactObserver] Created Mailcoach subscriber for contact ID {$model->id}, Email: {$model->email}.");
 
-        } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
+        } catch (ResourceNotFound $e) {
             Log::error("[ContactObserver] ResourceNotFound for contact ID {$model->id}. List UUID used: ".($listUuid ?? 'unknown').'. Error: '.$e->getMessage(), ['exception' => $e, 'contact_id' => $model->id, 'dealership_id' => $model->dealership_id, 'email' => $model->email]);
 
             return;

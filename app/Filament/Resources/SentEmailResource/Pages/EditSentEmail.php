@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\SentEmailResource\Pages;
 
 use App\Filament\Resources\SentEmailResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSentEmail extends EditRecord
@@ -15,7 +15,7 @@ class EditSentEmail extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -6,7 +6,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\DealerEmail;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,21 +29,21 @@ class UpcomingEmails extends BaseWidget
                     ->where('frequency', '>', 0)
             )
             ->columns([
-                Tables\Columns\TextColumn::make('user.name'),
-                Tables\Columns\TextColumn::make('dealership.name'),
-                Tables\Columns\TextColumn::make('recipients')
+                TextColumn::make('user.name'),
+                TextColumn::make('dealership.name'),
+                TextColumn::make('recipients')
                     ->limitList(1),
-                Tables\Columns\TextColumn::make('next_send_date')
+                TextColumn::make('next_send_date')
                     ->sortable()
                     ->date(),
             ])
             ->defaultSort('next_send_date', 'asc')
             ->filters([
-                Tables\Filters\SelectFilter::make('user')
+                SelectFilter::make('user')
                     ->relationship('user', 'name')
                     ->label('Consultant')
                     ->preload(),
-                Tables\Filters\SelectFilter::make('next_send_date')
+                SelectFilter::make('next_send_date')
                     ->options([
                         'seven_days' => 'Next 7 days',
                         'thirty_days' => 'Next 30 days',

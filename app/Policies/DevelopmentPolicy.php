@@ -14,7 +14,7 @@ class DevelopmentPolicy
 
     public function viewAny(User $user): bool
     {
-        if (Filament::getCurrentPanel()->getId() === 'development') {
+        if (Filament::getCurrentOrDefaultPanel()->getId() === 'development') {
             return $user->hasAnyRole([
                 'Sales Development Rep',
             ]);

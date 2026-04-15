@@ -8,6 +8,7 @@ use App\Models\SentEmail;
 use Exception;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Mime\Address;
 
 class EmailTrackingService
 {
@@ -111,7 +112,7 @@ class EmailTrackingService
                 if ($envelope) {
                     // Generate a unique ID based on envelope data
                     $sender = $envelope->getSender()->getAddress();
-                    $recipients = implode(',', array_map(fn (\Symfony\Component\Mime\Address $r): string => $r->getAddress(), $envelope->getRecipients()));
+                    $recipients = implode(',', array_map(fn (Address $r): string => $r->getAddress(), $envelope->getRecipients()));
 
                     return 'laravel-'.md5($sender.$recipients.now()->timestamp);
                 }

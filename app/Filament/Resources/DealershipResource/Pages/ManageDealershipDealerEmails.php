@@ -8,16 +8,22 @@ use App\Enum\ReminderFrequency;
 use App\Filament\Resources\DealershipResource;
 use App\Jobs\SendDealerEmail;
 use App\Models\DealerEmailTemplate;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ManageDealershipDealerEmails extends ManageRelatedRecords
@@ -26,7 +32,7 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
 
     protected static string $relationship = 'dealerEmails';
 
-    protected static ?string $navigationIcon = 'heroicon-o-envelope';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
 
     protected ?string $subheading = 'Manage Emails';
 
@@ -40,10 +46,10 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
         return $this->getOwnerRecord()->name;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('recipients')
                     ->label('Recipients')
                     ->multiple()
@@ -80,7 +86,7 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                         }
                     })
                     ->columnSpanFull()
-                    ->helperText(function (Get $get): ?string {
+                    ->helperText(function (\Filament\Schemas\Components\Utilities\Get $get): ?string {
                         $template = DealerEmailTemplate::find($get('dealer_email_template_id'));
                         if (! $template || $template->pdfAttachments->isEmpty()) {
                             return null;
@@ -113,8 +119,8 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->label('Customize email')
                     ->reactive()
-                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') === null)
-                    ->afterStateUpdated(function ($state, callable $set, Get $get): void {
+                    ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('dealer_email_template_id') === null)
+                    ->afterStateUpdated(function ($state, callable $set, \Filament\Schemas\Components\Utilities\Get $get): void {
                         $templateId = $get('dealer_email_template_id');
                         if ($templateId === null) {
                             $set('subject', '');
@@ -138,13 +144,13 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->required()
                     ->reactive()
-                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->maxLength(255),
                 RichEditor::make('message')
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->reactive()
-                    ->hidden(fn (Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
+                    ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('dealer_email_template_id') !== null && $get('customize_email') === false)
                     ->required(),
                 Select::make('frequency')
                     ->columnSpanFull()
@@ -154,9 +160,9 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('start_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set): void {
                         $set('next_send_date', $state);
@@ -164,9 +170,9 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
                 DatePicker::make('next_send_date')
                     ->closeOnDateSelection()
                     ->format('Y-m-d')
-                    ->hidden(fn (Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
-                    ->required(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
-                    ->dehydrated(fn (Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value),
+                    ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') === ReminderFrequency::Immediate->value)
+                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value)
+                    ->dehydrated(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('frequency') !== ReminderFrequency::Immediate->value),
             ]);
     }
 
@@ -176,28 +182,28 @@ class ManageDealershipDealerEmails extends ManageRelatedRecords
             ->recordTitleAttribute('name')
             ->defaultSort('last_sent', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('recipients')->sortable(),
-                Tables\Columns\TextColumn::make('frequency')->sortable(),
-                Tables\Columns\TextColumn::make('last_sent')->date()->sortable(),
+                TextColumn::make('recipients')->sortable(),
+                TextColumn::make('frequency')->sortable(),
+                TextColumn::make('last_sent')->date()->sortable(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->after(function ($record): void {
                         if ($record->frequency === ReminderFrequency::Immediate) {
                             SendDealerEmail::dispatchSync($record);
                         }
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

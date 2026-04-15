@@ -5,35 +5,45 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enum\ReminderFrequency;
-use App\Filament\Resources\ReminderResource\Pages;
+use App\Filament\Resources\ReminderResource\Pages\CreateReminder;
+use App\Filament\Resources\ReminderResource\Pages\EditReminder;
+use App\Filament\Resources\ReminderResource\Pages\ListReminders;
 use App\Models\Reminder;
-use Filament\Forms;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class ReminderResource extends Resource
 {
     protected static ?string $model = Reminder::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clock';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('title')
+        return $schema
+            ->components([
+                TextInput::make('title')
                     ->helperText('A short description for the reminder')
                     ->columnSpanFull()
                     ->required(),
-                Forms\Components\RichEditor::make('message')
+                RichEditor::make('message')
                     ->disableToolbarButtons(['attachFiles', 'codeBlock'])
                     ->columnSpanFull()
                     ->required(),
-                Forms\Components\DatePicker::make('start_date')
+                DatePicker::make('start_date')
                     ->required(),
-                Forms\Components\Select::make('sending_frequency')
+                Select::make('sending_frequency')
                     ->options(ReminderFrequency::class)
                     ->required(),
             ]);
@@ -46,11 +56,11 @@ class ReminderResource extends Resource
                 Reminder::whereBelongsTo(auth()->user())->where('dev_rel', null)
             )
             ->columns([
-                Tables\Columns\TextColumn::make('title'),
-                Tables\Columns\TextColumn::make('sending_frequency'),
-                Tables\Columns\TextColumn::make('start_date')->date(),
-                Tables\Columns\TextColumn::make('last_sent')->date(),
-                Tables\Columns\ToggleColumn::make('pause')
+                TextColumn::make('title'),
+                TextColumn::make('sending_frequency'),
+                TextColumn::make('start_date')->date(),
+                TextColumn::make('last_sent')->date(),
+                ToggleColumn::make('pause')
                     ->label('Status')
                     ->offIcon('heroicon-o-play')
                     ->onIcon('heroicon-s-pause')
@@ -60,12 +70,12 @@ class ReminderResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -80,9 +90,9 @@ class ReminderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListReminders::route('/'),
-            'create' => Pages\CreateReminder::route('/create'),
-            'edit' => Pages\EditReminder::route('/{record}/edit'),
+            'index' => ListReminders::route('/'),
+            'create' => CreateReminder::route('/create'),
+            'edit' => EditReminder::route('/{record}/edit'),
         ];
     }
 }

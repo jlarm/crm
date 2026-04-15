@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -220,7 +221,7 @@ class MailgunWebhookController extends Controller
             'user_agent' => $eventData['user-agent'] ?? null,
             'ip_address' => $eventData['ip'] ?? null,
             'mailgun_data' => $eventData,
-            'event_timestamp' => \Carbon\Carbon::createFromTimestamp($timestamp),
+            'event_timestamp' => Carbon::createFromTimestamp($timestamp),
         ]);
 
         Log::info('Email tracking event recorded', [

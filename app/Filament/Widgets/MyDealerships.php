@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\Dealership;
-use Filament\Tables;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,23 +51,23 @@ class MyDealerships extends BaseWidget
                     ->label('Stores'),
             ])
             ->filters([
-                Tables\Filters\Filter::make('dealer_group')
+                Filter::make('dealer_group')
                     ->label('Dealer Groups')
                     ->query(fn (Builder $query): Builder => $query->has('stores')),
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
                     ]),
-                Tables\Filters\SelectFilter::make('rating')
+                SelectFilter::make('rating')
                     ->options([
                         'hot' => 'Hot',
                         'warm' => 'Warm',
                         'cold' => 'Cold',
                     ]),
             ])
-            ->actions([
-                Tables\Actions\Action::make('view')
+            ->recordActions([
+                Action::make('view')
                     ->url(fn (Dealership $dealership) => route('filament.admin.resources.dealerships.edit', $dealership)),
             ]);
     }

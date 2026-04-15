@@ -5,10 +5,23 @@ declare(strict_types=1);
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
-use Filament\Forms;
-use Filament\Forms\Form;
+use App\Models\Contact;
+use App\Models\Tag;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +31,7 @@ class ManageDealershipContacts extends ManageRelatedRecords
 
     protected static string $relationship = 'contacts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user';
 
     protected ?string $subheading = 'Manage Contacts';
 
@@ -32,49 +45,49 @@ class ManageDealershipContacts extends ManageRelatedRecords
         return $this->getOwnerRecord()->name;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->columnSpanFull()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Grid::make(2)
+                Grid::make(2)
                     ->schema([
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->nullable()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->mask('(999) 999-9999')
                             ->placeholder('(123) 456-7890')
                             ->nullable()
                             ->maxLength(255),
                     ]),
-                Forms\Components\TextInput::make('position')
+                TextInput::make('position')
                     ->columnSpanFull()
                     ->nullable()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('linkedin_link')
+                TextInput::make('linkedin_link')
                     ->columnSpanFull()
                     ->url()
                     ->placeholder('https://www.linkedin.com/in/tomdortch/')
                     ->nullable(),
-                Forms\Components\Toggle::make('primary_contact'),
-                Forms\Components\Select::make('tags')
+                Toggle::make('primary_contact'),
+                Select::make('tags')
                     ->label('MailCoach Tags')
                     ->columnSpanFull()
                     ->relationship('tags', 'name')
                     ->multiple()
                     ->preload()
                     ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255)
                             ->unique('tags', 'name'),
                     ])
-                    ->createOptionUsing(fn (array $data) => \App\Models\Tag::create($data)->id)
+                    ->createOptionUsing(fn (array $data) => Tag::create($data)->id)
                     ->searchable()
                     ->placeholder('Select or create tags')
                     ->helperText('Type to search or create new tags'),
@@ -86,15 +99,15 @@ class ManageDealershipContacts extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\IconColumn::make('linkedin_link')
+                TextColumn::make('name'),
+                TextColumn::make('email'),
+                IconColumn::make('linkedin_link')
                     ->label('LinkedIn')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn ($record) => $record->linkedin_link)
                     ->openUrlInNewTab(),
-                Tables\Columns\TextColumn::make('position'),
-                Tables\Columns\ToggleColumn::make('primary_contact')
+                TextColumn::make('position'),
+                ToggleColumn::make('primary_contact')
                     ->afterStateUpdated(function ($record, $state): void {
                         // turn off anyone else as primary contact
                         if ($state) {
@@ -108,11 +121,11 @@ class ManageDealershipContacts extends ManageRelatedRecords
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->after(function (\App\Models\Contact $record, array $data): void {
+            ->recordActions([
+                EditAction::make()
+                    ->after(function (Contact $record, array $data): void {
                         // Log before explicit save to see if $touches worked at all
                         Log::debug('Filament EditAction ->after() hook - BEFORE explicit save.', [
                             'contact_id' => $record->id,
@@ -152,11 +165,11 @@ class ManageDealershipContacts extends ManageRelatedRecords
                             'final_updated_at' => $record->updated_at->toIso8601String(),
                         ]);
                     }),
-                Tables\Actions\DeleteAction::make(), // Good to have an explicit delete action too
+                DeleteAction::make(), // Good to have an explicit delete action too
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

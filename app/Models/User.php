@@ -81,6 +81,11 @@ class User extends Authenticatable implements FilamentUser
         return true;
     }
 
+    public function canSwitchPanels(): bool
+    {
+        return $this->hasAnyRole(['super_admin', 'Sales Development Rep']);
+    }
+
     public function dealerships(): BelongsToMany
     {
         return $this->belongsToMany(Dealership::class);

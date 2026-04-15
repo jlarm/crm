@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Development\Resources\ReminderResource\Pages;
 
 use App\Filament\Development\Resources\ReminderResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListReminders extends ListRecords
@@ -15,7 +15,7 @@ class ListReminders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -27,9 +27,9 @@ class EditProfile extends Page
 
     public ?array $passwordData = [];
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'filament.pages.edit-profile';
+    protected string $view = 'filament.pages.edit-profile';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -38,11 +38,11 @@ class EditProfile extends Page
         $this->fillForms();
     }
 
-    public function editProfileForm(Form $form): Form
+    public function editProfileForm(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Section::make('Profile Information')
+        return $schema
+            ->components([
+                \Filament\Schemas\Components\Section::make('Profile Information')
                     ->description('Update your account\'s profile information and email address.')
                     ->schema([
                         TextInput::make('name')
@@ -62,11 +62,11 @@ class EditProfile extends Page
             ->statePath('profileData');
     }
 
-    public function editPasswordForm(Form $form): Form
+    public function editPasswordForm(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Section::make('Update Password')
+        return $schema
+            ->components([
+                \Filament\Schemas\Components\Section::make('Update Password')
                     ->description('Ensure your account is using long, random password to stay secure.')
                     ->schema([
                         TextInput::make('Current password')

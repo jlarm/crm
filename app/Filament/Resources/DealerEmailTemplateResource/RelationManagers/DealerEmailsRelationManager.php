@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\DealerEmailTemplateResource\RelationManagers;
 
 use App\Enum\ReminderFrequency;
+use App\Filament\Resources\DealershipResource;
+use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,14 +26,14 @@ class DealerEmailsRelationManager extends RelationManager
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['dealership', 'user']))
             ->columns([
-                Tables\Columns\TextColumn::make('dealership.name')
+                TextColumn::make('dealership.name')
                     ->label('Dealership')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->label('Created By')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('frequency')
+                TextColumn::make('frequency')
                     ->badge()
                     ->color(fn (ReminderFrequency $state): string => match ($state) {
                         ReminderFrequency::Immediate => 'success',
@@ -40,25 +45,25 @@ class DealerEmailsRelationManager extends RelationManager
                         ReminderFrequency::Quarterly => 'gray',
                         ReminderFrequency::Yearly => 'slate',
                     }),
-                Tables\Columns\TextColumn::make('last_sent')
+                TextColumn::make('last_sent')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('next_send_date')
+                TextColumn::make('next_send_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('paused')
+                IconColumn::make('paused')
                     ->boolean(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('frequency')
+                SelectFilter::make('frequency')
                     ->options(ReminderFrequency::class),
-                Tables\Filters\TernaryFilter::make('paused'),
+                TernaryFilter::make('paused'),
             ])
-            ->actions([
-                Tables\Actions\Action::make('view_dealership')
+            ->recordActions([
+                Action::make('view_dealership')
                     ->label('View Dealership')
                     ->icon('heroicon-o-building-office-2')
-                    ->url(fn ($record): string => \App\Filament\Resources\DealershipResource::getUrl('edit', ['record' => $record->dealership])),
+                    ->url(fn ($record): string => DealershipResource::getUrl('edit', ['record' => $record->dealership])),
             ])
             ->defaultSort('created_at', 'desc');
     }

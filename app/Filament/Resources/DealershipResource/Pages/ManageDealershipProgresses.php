@@ -7,11 +7,21 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 use App\Filament\Resources\DealershipResource;
 use App\Models\Contact;
 use App\Models\ProgressCategory;
-use Filament\Forms;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,7 +31,7 @@ class ManageDealershipProgresses extends ManageRelatedRecords
 
     protected static string $relationship = 'progresses';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected ?string $subheading = 'Manage Progress';
 
@@ -35,32 +45,32 @@ class ManageDealershipProgresses extends ManageRelatedRecords
         return $this->getOwnerRecord()->name;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(auth()->id()),
-                Forms\Components\Select::make('contact_id')
+                Select::make('contact_id')
                     ->label('Select a Contact if available')
                     ->preload()
                     ->options(
                         Contact::all()->pluck('name', 'id')
                     )
                     ->searchable(),
-                Forms\Components\DatePicker::make('date'),
-                Forms\Components\Select::make('progress_category_id')
+                DatePicker::make('date'),
+                Select::make('progress_category_id')
                     ->label('Select a Progress Category')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload()
                     ->createOptionForm([
-                        Forms\Components\TextInput::make('name')->required(),
+                        TextInput::make('name')->required(),
                     ])
                     ->createOptionUsing(fn (array $data): int => ProgressCategory::create($data)->getKey())
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('details')
+                Textarea::make('details')
                     ->columnSpanFull()
                     ->required()
                     ->rows(4),
@@ -81,21 +91,21 @@ class ManageDealershipProgresses extends ManageRelatedRecords
                 TextColumn::make('contact.name')->label('Contact'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('progress_category_id')
+                SelectFilter::make('progress_category_id')
                     ->label('Category')
                     ->relationship('category', 'name')
                     ->preload(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

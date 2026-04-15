@@ -8,6 +8,7 @@ use App\Events\ContactTagSync;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
+use Spatie\MailcoachSdk\Exceptions\ResourceNotFound;
 use Spatie\MailcoachSdk\Facades\Mailcoach;
 
 class SyncContactTagsWithMailcoach implements ShouldQueue
@@ -113,7 +114,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                         Log::debug('Mailcoach subscriber tags are already in sync.', ['uuid' => $subscriber->uuid, 'email' => $subscriber->email, 'current_tags' => $currentMailcoachTags]);
                     }
 
-                } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
+                } catch (ResourceNotFound $e) {
                     Log::warning('Mailcoach resource not found during tag add/remove operation.', [
                         'subscriber_uuid' => $subscriber->uuid ?? 'unknown',
                         'email' => $model->email,
@@ -127,7 +128,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                     ]);
                 }
             }
-        } catch (\Spatie\MailcoachSdk\Exceptions\ResourceNotFound $e) {
+        } catch (ResourceNotFound $e) {
             // This handles if $list = Mailcoach::emailList($listUuid) fails or $list->subscriber($model->email) fails to find subscriber when it's expected
             Log::warning('Mailcoach resource not found (likely list or initial subscriber lookup) in SyncContactTagsWithMailcoach.', [
                 'contact_id' => $model->id,

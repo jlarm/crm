@@ -6,14 +6,19 @@ namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
 use App\Models\Store;
-use Filament\Forms;
-use Filament\Forms\Components\Grid;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ManageDealershipStores extends ManageRelatedRecords
@@ -22,7 +27,7 @@ class ManageDealershipStores extends ManageRelatedRecords
 
     protected static string $relationship = 'stores';
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
 
     protected ?string $subheading = 'Manage Stores';
 
@@ -36,17 +41,17 @@ class ManageDealershipStores extends ManageRelatedRecords
         return $this->getOwnerRecord()->name;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(auth()->user()->id),
                 TextInput::make('name')
                     ->columnSpanFull()
                     ->required()
                     ->maxLength(255),
-                Grid::make(3)
+                \Filament\Schemas\Components\Grid::make(3)
                     ->schema([
                         TextInput::make('address')
                             ->columnSpanFull(),
@@ -126,23 +131,23 @@ class ManageDealershipStores extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->description(fn (Store $record): string => $record->city.', '.$record->state),
-                Tables\Columns\TextColumn::make('phone'),
+                TextColumn::make('phone'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

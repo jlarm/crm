@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\RelationManagers\ActivitiesRelationManager;
 use App\Models\User;
-use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
@@ -20,17 +25,17 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Grid::make(3)
+        return $schema
+            ->components([
+                \Filament\Schemas\Components\Grid::make(3)
                     ->schema([
-                        Section::make()->schema([
-                            Forms\Components\TextInput::make('name')->columnSpanFull(),
-                            Forms\Components\Select::make('roles')
+                        \Filament\Schemas\Components\Section::make()->schema([
+                            TextInput::make('name')->columnSpanFull(),
+                            Select::make('roles')
                                 ->relationship('roles', 'name')
                                 ->columnSpanFull()
                                 ->multiple()
@@ -38,7 +43,7 @@ class UserResource extends Resource
                                 ->searchable(),
                             TimezoneSelect::make('timezone')->byCountry('US')->columnSpanFull(),
                         ])->columnSpan(2),
-                        Section::make()->schema([])->columnSpan(1),
+                        \Filament\Schemas\Components\Section::make()->schema([])->columnSpan(1),
                     ]),
             ]);
     }
@@ -47,18 +52,18 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('timezone'),
+                TextColumn::make('name'),
+                TextColumn::make('timezone'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -73,9 +78,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

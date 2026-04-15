@@ -7,10 +7,16 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\Dealership;
-use Filament\Forms;
-use Filament\Forms\Form;
+use App\Models\Progress;
+use App\Models\Reminder;
+use App\Models\User;
+use Carbon\Carbon;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -21,11 +27,11 @@ class ActivitiesRelationManager extends RelationManager
 
     protected static ?string $title = 'Activity Log';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('description')
+        return $schema
+            ->components([
+                TextInput::make('description')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -36,7 +42,7 @@ class ActivitiesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                Tables\Columns\TextColumn::make('event')
+                TextColumn::make('event')
                     ->label('Action')
                     ->badge()
                     ->color(fn (?string $state): string => match ($state) {
@@ -50,13 +56,13 @@ class ActivitiesRelationManager extends RelationManager
                     ->formatStateUsing(fn (?string $state): string => ucfirst($state ?? 'unknown'))
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Description')
                     ->wrap()
                     ->searchable()
                     ->weight('medium'),
 
-                Tables\Columns\TextColumn::make('subject_type')
+                TextColumn::make('subject_type')
                     ->label('Model')
                     ->formatStateUsing(function (?string $state): string {
                         if ($state === null || $state === '' || $state === '0') {
@@ -68,7 +74,7 @@ class ActivitiesRelationManager extends RelationManager
                     ->badge()
                     ->color('gray'),
 
-                Tables\Columns\TextColumn::make('subject_id')
+                TextColumn::make('subject_id')
                     ->label('Related Item')
                     ->formatStateUsing(function (?string $state, $record): string {
                         if ($state === null || $state === '' || $state === '0' || ! $record->subject_type) {
@@ -79,7 +85,7 @@ class ActivitiesRelationManager extends RelationManager
                             Dealership::class => $this->getDealershipName($state),
                             Contact::class => $this->getContactName($state),
                             DealerEmail::class => $this->getDealerEmailSubject($state),
-                            \App\Models\User::class => 'User #'.$state,
+                            User::class => 'User #'.$state,
                             default => class_basename($record->subject_type).' #'.$state,
                         };
                     })
@@ -97,7 +103,7 @@ class ActivitiesRelationManager extends RelationManager
                         };
                     }),
 
-                Tables\Columns\TextColumn::make('properties')
+                TextColumn::make('properties')
                     ->label('Changes')
                     ->formatStateUsing(function ($state): HtmlString {
                         if (! $state) {
@@ -140,12 +146,12 @@ class ActivitiesRelationManager extends RelationManager
                     ->wrap()
                     ->limit(100),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('When')
                     ->dateTime('M j, Y H:i')
                     ->sortable()
                     ->since()
-                    ->tooltip(fn ($state): string => $state instanceof \Carbon\Carbon
+                    ->tooltip(fn ($state): string => $state instanceof Carbon
                             ? $state->format('F j, Y \a\t g:i:s A')
                             : (string) $state
                     ),
@@ -167,42 +173,42 @@ class ActivitiesRelationManager extends RelationManager
                         Dealership::class => 'Dealership',
                         Contact::class => 'Contact',
                         DealerEmail::class => 'Dealer Email',
-                        \App\Models\User::class => 'User',
-                        \App\Models\Progress::class => 'Progress',
-                        \App\Models\Reminder::class => 'Reminder',
+                        User::class => 'User',
+                        Progress::class => 'Progress',
+                        Reminder::class => 'Reminder',
                     ]),
             ])
             ->headerActions([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->form([
-                        Forms\Components\TextInput::make('description')
+            ->recordActions([
+                ViewAction::make()
+                    ->schema([
+                        TextInput::make('description')
                             ->label('Description')
                             ->disabled(),
-                        Forms\Components\TextInput::make('event')
+                        TextInput::make('event')
                             ->label('Event')
                             ->disabled(),
-                        Forms\Components\TextInput::make('subject_type')
+                        TextInput::make('subject_type')
                             ->label('Model Type')
                             ->formatStateUsing(fn (?string $state): string => $state !== null && $state !== '' && $state !== '0' ? class_basename($state) : '')
                             ->disabled(),
-                        Forms\Components\Textarea::make('properties')
+                        Textarea::make('properties')
                             ->label('Properties (JSON)')
                             ->formatStateUsing(fn ($state): string => is_string($state) ? $state : json_encode($state, JSON_PRETTY_PRINT))
                             ->rows(10)
                             ->disabled(),
-                        Forms\Components\TextInput::make('created_at')
+                        TextInput::make('created_at')
                             ->label('Created At')
-                            ->formatStateUsing(fn ($state): string => $state instanceof \Carbon\Carbon
+                            ->formatStateUsing(fn ($state): string => $state instanceof Carbon
                                     ? $state->format('F j, Y \a\t g:i:s A')
                                     : (string) $state
                             )
                             ->disabled(),
                     ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 //
             ]);
     }

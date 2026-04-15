@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Resources\DealershipResource\Pages;
 
 use App\Filament\Resources\DealershipResource;
+use App\Filament\Resources\DealershipResource\Widgets\DealerOverview;
 use App\Models\Dealership;
-use Filament\Actions;
-use Filament\Resources\Components\Tab;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,12 +33,12 @@ class ListDealerships extends ListRecords
     public function getTabs(): array
     {
         return [
-            'all' => Tab::make('All'),
-            'active' => Tab::make('Active')
+            'all' => \Filament\Schemas\Components\Tabs\Tab::make('All'),
+            'active' => \Filament\Schemas\Components\Tabs\Tab::make('Active')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'active')),
-            'inactive' => Tab::make('Inactive')
+            'inactive' => \Filament\Schemas\Components\Tabs\Tab::make('Inactive')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'inactive')),
-            'imported' => Tab::make('Imported')
+            'imported' => \Filament\Schemas\Components\Tabs\Tab::make('Imported')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'imported')),
         ];
     }
@@ -46,14 +46,14 @@ class ListDealerships extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            DealershipResource\Widgets\DealerOverview::class,
+            DealerOverview::class,
         ];
     }
 }
