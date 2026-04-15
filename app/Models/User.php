@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -26,7 +25,6 @@ class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens;
     use HasFactory;
-    use HasProfilePhoto;
     use HasRoles;
     use LogsActivity;
     use Notifiable;
@@ -65,15 +63,6 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'profile_photo_url',
     ];
 
     public function canAccessPanel(Panel $panel): bool
@@ -125,7 +114,6 @@ class User extends Authenticatable implements FilamentUser
                 'remember_token',
                 'two_factor_recovery_codes',
                 'two_factor_secret',
-                'profile_photo_path',
                 'email_verified_at',
             ])
             ->setDescriptionForEvent(fn (string $eventName): string => "User {$eventName}");
