@@ -2,32 +2,41 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MailgunWebhookController;
+use App\Http\Controllers\Settings\AppearanceController;
+use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\SecurityController;
 use App\Models\PdfAttachment;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test-inertia', function () {
-    return Inertia::render('Test');
-})->name('test-inertia');
-
-// Mailgun webhook endpoint (no auth required)
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
     ->name('mailgun.webhook');
 
-// Email tracking endpoints (no auth required)
 Route::get('/track/open/{message_id}', [MailgunWebhookController::class, 'trackOpen'])
     ->name('mailgun.open-track');
 Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'trackClick'])
     ->name('mailgun.click-track');
 
-// PDF viewing route (requires authentication)
 Route::middleware(['auth'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+        Route::get('security', [SecurityController::class, 'edit'])->name('security.edit');
+        Route::put('security', [SecurityController::class, 'update'])->name('security.update');
+
+        Route::get('appearance', [AppearanceController::class, 'edit'])->name('appearance.edit');
+    });
+
     Route::get('/pdf/{attachment}', function (PdfAttachment $attachment) {
         // Check if file path exists in record
         if (empty($attachment->file_path)) {
@@ -46,9 +55,3 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('pdf.view');
 });
-
-// Route::get('/mailable', function () {
-//   $email = \App\Models\DealerEmail::first();
-//
-//   return new App\Mail\DealerEmailMail($email);
-// });

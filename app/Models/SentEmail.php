@@ -45,26 +45,46 @@ class SentEmail extends Model
 
     public function wasOpened(): bool
     {
+        if ($this->relationLoaded('trackingEvents')) {
+            return $this->trackingEvents->contains('event_type', EmailTrackingEvent::EVENT_OPENED);
+        }
+
         return $this->trackingEvents()->opened()->exists();
     }
 
     public function wasClicked(): bool
     {
+        if ($this->relationLoaded('trackingEvents')) {
+            return $this->trackingEvents->contains('event_type', EmailTrackingEvent::EVENT_CLICKED);
+        }
+
         return $this->trackingEvents()->clicked()->exists();
     }
 
     public function wasBounced(): bool
     {
+        if ($this->relationLoaded('trackingEvents')) {
+            return $this->trackingEvents->contains('event_type', EmailTrackingEvent::EVENT_BOUNCED);
+        }
+
         return $this->trackingEvents()->bounced()->exists();
     }
 
     public function openCount(): int
     {
+        if ($this->relationLoaded('trackingEvents')) {
+            return $this->trackingEvents->where('event_type', EmailTrackingEvent::EVENT_OPENED)->count();
+        }
+
         return $this->trackingEvents()->opened()->count();
     }
 
     public function clickCount(): int
     {
+        if ($this->relationLoaded('trackingEvents')) {
+            return $this->trackingEvents->where('event_type', EmailTrackingEvent::EVENT_CLICKED)->count();
+        }
+
         return $this->trackingEvents()->clicked()->count();
     }
 

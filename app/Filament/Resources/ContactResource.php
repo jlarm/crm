@@ -95,8 +95,8 @@ class ContactResource extends Resource
     {
         return [
             'index' => ListContacts::route('/'),
-            //            'create' => Pages\CreateContact::route('/create'),
-            //            'edit' => Pages\EditContact::route('/{record}/edit'),
+            //            'create' => pages\CreateContact::route('/create'),
+            //            'edit' => pages\EditContact::route('/{record}/edit'),
         ];
     }
 }

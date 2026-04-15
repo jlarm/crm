@@ -39,4 +39,13 @@ return [
         'api_url' => env('CLAUDE_API_URL', 'https://api.anthropic.com/v1/messages'),
     ],
 
+    'mailcoach' => [
+        'lists' => [
+            'automotive' => env('MAILCOACH_LIST_AUTOMOTIVE', 'f694f7fd-dbb9-489d-bced-03e2fbee78af'),
+            'rv' => env('MAILCOACH_LIST_RV', '2d97d6ea-90a0-4b49-90df-980a258884b2'),
+            'motorsports' => env('MAILCOACH_LIST_MOTORSPORTS', 'd2a68b06-08e4-4e76-a714-151e07a5a907'),
+            'maritime' => env('MAILCOACH_LIST_MARITIME', '59c46030-5429-4ffd-a192-42926b9b17eb'),
+        ],
+    ],
+
 ];

@@ -35,9 +35,9 @@ class DevelopmentPanelProvider extends PanelProvider
             ])
             ->topNavigation()
             ->discoverResources(in: app_path('Filament/Development/Resources'), for: 'App\\Filament\\Development\\Resources')
-            ->discoverPages(in: app_path('Filament/Development/Pages'), for: 'App\\Filament\\Development\\Pages')
+            ->discoverPages(in: app_path('Filament/Development/pages'), for: 'App\\Filament\\Development\\pages')
             ->pages([
-                //                Pages\Dashboard::class,
+                //                pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Development/Widgets'), for: 'App\\Filament\\Development\\Widgets')
             ->widgets([

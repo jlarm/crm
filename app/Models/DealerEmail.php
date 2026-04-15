@@ -32,7 +32,6 @@ class DealerEmail extends Model
         'frequency',
         'paused',
         'attachment_name',
-        'next_send_date',
     ];
 
     protected $casts = [

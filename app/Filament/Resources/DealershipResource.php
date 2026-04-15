@@ -536,7 +536,7 @@ class DealershipResource extends Resource
     public static function getPages(): array
     {
         return [
-            //            'view' => Pages\ViewDealership::route('/{record}'),
+            //            'view' => pages\ViewDealership::route('/{record}'),
             'index' => ListDealerships::route('/'),
             'create' => CreateDealership::route('/create'),
             'edit' => EditDealership::route('/{record}/edit'),

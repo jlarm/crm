@@ -37,7 +37,7 @@ class SendDealerEmailCommand extends Command
 
         foreach ($emails as $email) {
             foreach ($email->recipients as $recipient) {
-                $name = Contact::where('email', $recipient)->first()->name;
+                $name = Contact::where('email', $recipient)->first()?->name ?? '';
                 Mail::to($recipient)->send(new DealerEmailMail($email, $name));
                 SentEmail::create([
                     'user_id' => $email->user_id,

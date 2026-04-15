@@ -310,7 +310,7 @@ class DealershipResource extends Resource
     {
         return [
             'index' => ListDealerships::route('/'),
-            //            'create' => Pages\CreateDealership::route('/create'),
+            //            'create' => pages\CreateDealership::route('/create'),
             'edit' => EditDealership::route('/{record}/edit'),
         ];
     }

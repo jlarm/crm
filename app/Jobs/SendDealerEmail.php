@@ -72,13 +72,7 @@ class SendDealerEmail implements ShouldQueue
 
                     $mailable = new DealerEmailMail($dealerEmail, $name, $trackingId);
 
-                    $sentMessage = Mail::to($recipient)->send($mailable);
-
-                    \Log::info('Email sent with tracking', [
-                        'tracking_id' => $trackingId,
-                        'recipient' => $recipient,
-                        'sent_email_id' => $sentEmail->id,
-                    ]);
+                    Mail::to($recipient)->send($mailable);
 
                     Log::info('Email sent successfully', [
                         'recipient' => $recipient,

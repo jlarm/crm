@@ -65,7 +65,7 @@ class Dealership extends Model
         return $this->hasMany(DealerEmail::class);
     }
 
-    public function sentEMails(): HasMany
+    public function sentEmails(): HasMany
     {
         return $this->hasMany(SentEmail::class);
     }
@@ -78,10 +78,10 @@ class Dealership extends Model
     public function getListType(): string
     {
         $types = [
-            'Automotive' => 'f694f7fd-dbb9-489d-bced-03e2fbee78af',
-            'RV' => '2d97d6ea-90a0-4b49-90df-980a258884b2',
-            'Motorsports' => 'd2a68b06-08e4-4e76-a714-151e07a5a907',
-            'Maritime' => '59c46030-5429-4ffd-a192-42926b9b17eb',
+            'Automotive' => config('services.mailcoach.lists.automotive'),
+            'RV' => config('services.mailcoach.lists.rv'),
+            'Motorsports' => config('services.mailcoach.lists.motorsports'),
+            'Maritime' => config('services.mailcoach.lists.maritime'),
         ];
 
         return $types[$this->type] ?? 'default_value';

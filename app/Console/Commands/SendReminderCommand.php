@@ -13,11 +13,12 @@ class SendReminderCommand extends Command
 {
     protected $signature = 'reminder:send';
 
-    protected $description = 'Command description';
+    protected $description = 'Send scheduled reminders to users';
 
     public function handle(): void
     {
         $reminders = Reminder::query()
+            ->with('user')
             ->where('pause', false)
             ->orWhere('start_date', now()->format('Y-m-d'))
             ->whereRaw('DATE_ADD(last_sent, INTERVAL sending_frequency DAY) = CURDATE()')

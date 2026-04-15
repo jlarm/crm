@@ -16,9 +16,14 @@ class ListDealerships extends ListRecords
 {
     protected static string $resource = DealershipResource::class;
 
+    public function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('users');
+    }
+
     public function getTitle(): string
     {
-        return 'All Dealerships'; // Custom page title
+        return 'All Dealerships';
     }
 
     public function getStats(): array
