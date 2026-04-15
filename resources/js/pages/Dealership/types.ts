@@ -42,5 +42,5 @@ export interface Dealership {
     rating: string;
     stores: Store[];
     contacts: Contact[];
-    users: { data: User[] };
+    users: User[];
 }

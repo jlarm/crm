@@ -52,7 +52,7 @@ const filteredConsultants = computed(() => {
 });
 
 function syncConsultantsFromDealership(): void {
-    const ids = (props.dealership.users?.data ?? []).map((u) => u.id);
+    const ids = (props.dealership.users ?? []).map((u) => u.id);
     selectedConsultantIds.value = ids;
     initialConsultantIds.value = ids;
 }
@@ -79,7 +79,7 @@ const consultantsDirty = computed(() => {
 });
 
 watch(
-    () => (props.dealership.users?.data ?? []).map((u) => u.id).join(','),
+    () => (props.dealership.users ?? []).map((u) => u.id).join(','),
     () => {
         if (!consultantsDirty.value) {
             syncConsultantsFromDealership();
