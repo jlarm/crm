@@ -22,6 +22,7 @@ interface Props {
         rating: string;
         type: string;
         scope: string;
+        include_imported: string;
     };
     statuses: FilterOption[];
     ratings: FilterOption[];
@@ -33,7 +34,7 @@ interface Emits {
     (e: 'reset'): void;
 }
 
-type FilterSection = 'status' | 'rating' | 'type';
+type FilterSection = 'status' | 'rating' | 'type' | 'imported';
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
@@ -79,6 +80,10 @@ const activeChips = computed(() => {
         chips.push({ key: 'type', label: `Type: ${typeLabel}` });
     }
 
+    if (props.modelValue.include_imported === '1') {
+        chips.push({ key: 'include_imported', label: 'Show imported' });
+    }
+
     return chips;
 });
 
@@ -98,6 +103,7 @@ function clearFilters(): void {
         status: '',
         rating: '',
         type: '',
+        include_imported: '',
     };
     emit('reset');
     open.value = false;
@@ -134,7 +140,7 @@ function clearChip(key: keyof Props['modelValue']): void {
 
                         <div class="mt-4 space-y-1">
                             <button
-                                v-for="section in ['status', 'rating', 'type'] as FilterSection[]"
+                                v-for="section in ['status', 'rating', 'type', 'imported'] as FilterSection[]"
                                 :key="section"
                                 type="button"
                                 class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition capitalize"
@@ -201,7 +207,7 @@ function clearChip(key: keyof Props['modelValue']): void {
                             </div>
                         </div>
 
-                        <div v-else class="space-y-3">
+                        <div v-else-if="activeSection === 'type'" class="space-y-3">
                             <button
                                 type="button"
                                 class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
@@ -224,6 +230,17 @@ function clearChip(key: keyof Props['modelValue']): void {
                                     <span class="text-sm">{{ type.label }}</span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div v-else class="space-y-3">
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
+                                @click="updateDraft('include_imported', draftFilters.include_imported === '1' ? '' : '1')"
+                            >
+                                <Checkbox :model-value="draftFilters.include_imported === '1'" />
+                                <span class="text-sm">Show imported dealerships</span>
+                            </button>
                         </div>
 
                         <div

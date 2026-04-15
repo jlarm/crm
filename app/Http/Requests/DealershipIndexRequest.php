@@ -16,6 +16,7 @@ final class DealershipIndexRequest extends FormRequest
             'rating' => ['nullable', 'string', 'in:hot,warm,cold'],
             'type' => ['nullable', 'string', 'max:255'],
             'scope' => ['nullable', 'string', 'in:mine,all'],
+            'include_imported' => ['nullable', 'boolean'],
             'sort' => ['nullable', 'string', 'in:name,city,state,status,rating'],
             'direction' => ['nullable', 'string', 'in:asc,desc'],
             'page' => ['nullable', 'integer', 'min:1'],

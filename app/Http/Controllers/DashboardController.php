@@ -21,11 +21,16 @@ final class DashboardController extends Controller
             $scope = 'mine';
         }
 
+        $includeImported = $request->boolean('include_imported');
         $status = $request->input('status');
 
-        $applyFilters = function (Builder $query) use ($request, $scope, $status): void {
+        $applyFilters = function (Builder $query) use ($request, $scope, $includeImported, $status): void {
             if ($scope === 'mine') {
                 $query->forUser($request->user());
+            }
+
+            if (! $includeImported) {
+                $query->whereNot('status', 'imported');
             }
 
             $query->search($request->input('search'))
@@ -36,16 +41,6 @@ final class DashboardController extends Controller
                 $query->where('status', $status);
             }
         };
-
-        $dealershipQuery = Dealership::query();
-        $applyFilters($dealershipQuery);
-
-        $dealerships = $dealershipQuery
-            ->sortBy($request->input('sort'), $request->input('direction'))
-            ->select('id', 'name', 'city', 'state', 'status', 'rating')
-            ->paginate(15)
-            ->withQueryString()
-            ->through(fn ($dealership) => DealershipResource::make($dealership)->resolve());
 
         $typeOptionsQuery = Dealership::query();
         $typeOptions = $typeOptionsQuery
@@ -62,13 +57,24 @@ final class DashboardController extends Controller
             ->all();
 
         return Inertia::render('Dashboard', [
-            'dealerships' => $dealerships,
+            'dealerships' => Inertia::defer(function () use ($request, $applyFilters): mixed {
+                $query = Dealership::query();
+                $applyFilters($query);
+
+                return $query
+                    ->sortBy($request->input('sort'), $request->input('direction'))
+                    ->select('id', 'name', 'city', 'state', 'status', 'rating')
+                    ->paginate(15)
+                    ->withQueryString()
+                    ->through(fn ($dealership) => DealershipResource::make($dealership)->resolve());
+            }),
             'filters' => [
                 'search' => $request->input('search', ''),
                 'status' => $request->input('status', ''),
                 'rating' => $request->input('rating', ''),
                 'type' => $request->input('type', ''),
                 'scope' => $scope,
+                'include_imported' => $includeImported ? '1' : '',
                 'sort' => $request->input('sort', ''),
                 'direction' => $request->input('direction', 'asc'),
             ],

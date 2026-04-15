@@ -5,8 +5,9 @@ import DealershipFilters from '@/components/DealershipFilters.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
 import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTableFilters } from '@/composables/useTableFilters';
-import { Head } from '@inertiajs/vue3';
+import { Deferred, Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface FilterOption {
@@ -15,7 +16,7 @@ interface FilterOption {
 }
 
 interface Props {
-    dealerships: {
+    dealerships?: {
         data: Dealership[];
         links: Array<{ url: string | null; label: string; active: boolean }>;
         current_page: number;
@@ -31,6 +32,7 @@ interface Props {
         rating?: string;
         type?: string;
         scope?: string;
+        include_imported?: string;
         sort?: string;
         direction?: string;
     };
@@ -55,6 +57,10 @@ const { filters, resetFilters } = useTableFilters({
             ['mine', 'all'].includes(props.filters.scope)
                 ? props.filters.scope
                 : 'mine',
+        include_imported:
+            typeof props.filters.include_imported === 'string'
+                ? props.filters.include_imported
+                : '',
         sort: typeof props.filters.sort === 'string' ? props.filters.sort : '',
         direction:
             typeof props.filters.direction === 'string'
@@ -123,20 +129,31 @@ const columns = createColumns(handleSort);
             </div>
         </div>
 
-        <DataTable
-            :columns="columns"
-            :data="dealerships.data"
-            :sorting="currentSorting"
-            :row-href="(d) => `/admin/dealerships/${d.id}/edit`"
-        />
+        <Deferred data="dealerships">
+            <template #fallback>
+                <div class="space-y-2">
+                    <Skeleton class="h-10 w-full" />
+                    <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
+                </div>
+            </template>
 
-        <DashboardPagination
-            :current-page="dealerships.current_page"
-            :last-page="dealerships.last_page"
-            :from="dealerships.from"
-            :to="dealerships.to"
-            :total="dealerships.total"
-            :links="dealerships.links"
-        />
+            <template #default>
+                <DataTable
+                    :columns="columns"
+                    :data="dealerships!.data"
+                    :sorting="currentSorting"
+                    :row-href="(d) => `/admin/dealerships/${d.id}/edit`"
+                />
+
+                <DashboardPagination
+                    :current-page="dealerships!.current_page"
+                    :last-page="dealerships!.last_page"
+                    :from="dealerships!.from"
+                    :to="dealerships!.to"
+                    :total="dealerships!.total"
+                    :links="dealerships!.links"
+                />
+            </template>
+        </Deferred>
     </div>
 </template>
