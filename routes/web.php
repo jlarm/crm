@@ -32,6 +32,8 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('search', SearchController::class)->name('search');
 
+    Route::get('dealerships/create', [DealershipController::class, 'create'])->name('dealerships.create');
+    Route::post('dealerships', [DealershipController::class, 'store'])->name('dealerships.store');
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
 

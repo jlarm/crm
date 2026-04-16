@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DealershipStoreRequest;
 use App\Http\Requests\DealershipUpdateRequest;
 use App\Http\Resources\DealershipShowResource;
 use App\Models\Dealership;
@@ -14,6 +15,32 @@ use Inertia\Response;
 
 final class DealershipController extends Controller
 {
+    public function create(): Response
+    {
+        return Inertia::render('Dealership/Create', [
+            'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function store(DealershipStoreRequest $request): RedirectResponse
+    {
+        $dealership = Dealership::create([
+            ...$request->safe()->except(['user_ids']),
+            'user_id' => auth()->id(),
+        ]);
+
+        $userIds = $request->validated('user_ids', []);
+
+        if (! in_array(auth()->id(), $userIds, true)) {
+            $userIds[] = auth()->id();
+        }
+
+        $dealership->users()->sync($userIds);
+
+        return redirect()->route('dealerships.show', $dealership)
+            ->with('success', 'Dealership created successfully.');
+    }
+
     public function show(Dealership $dealership): Response
     {
         $dealership->load([

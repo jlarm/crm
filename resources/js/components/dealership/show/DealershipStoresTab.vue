@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/ui/phone-input/PhoneInput.vue';
 import type { Dealership, Store } from '@/pages/Dealership/types';
 import { Form, router } from '@inertiajs/vue3';
 import { MoreVertical } from 'lucide-vue-next';
@@ -89,7 +90,7 @@ function deleteStore(dealershipId: number, store: Store): void {
                         </Field>
                         <Field>
                             <FieldLabel for="store_phone">Phone</FieldLabel>
-                            <Input id="store_phone" name="phone" />
+                            <PhoneInput id="store_phone" name="phone" />
                         </Field>
                         <Field class="col-span-2">
                             <FieldLabel for="store_solution_name">Current Solution Name</FieldLabel>
@@ -166,6 +167,8 @@ function deleteStore(dealershipId: number, store: Store): void {
                     :action="`/dealerships/${dealership.id}/stores/${editingStore.id}`"
                     method="put"
                     class="grid grid-cols-2 gap-4"
+                    preserve-scroll
+                    :on-success="() => (isEditOpen = false)"
                     v-slot="{ errors, processing }"
                 >
                     <Field class="col-span-2">
@@ -212,7 +215,7 @@ function deleteStore(dealershipId: number, store: Store): void {
                     </Field>
                     <Field>
                         <FieldLabel for="store_edit_phone">Phone</FieldLabel>
-                        <Input
+                        <PhoneInput
                             id="store_edit_phone"
                             name="phone"
                             :default-value="editingStore.phone"

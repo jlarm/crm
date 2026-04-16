@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/ui/phone-input/PhoneInput.vue';
 import {
     Select,
     SelectContent,
@@ -173,11 +174,10 @@ function toggleConsultant(userId: number, add: boolean): void {
 
                                 <Field class="col-span-full">
                                     <FieldLabel for="phone">Phone</FieldLabel>
-                                    <Input
+                                    <PhoneInput
                                         id="phone"
                                         name="phone"
                                         :default-value="dealership.phone"
-                                        placeholder="999-999-9999"
                                     />
                                 </Field>
 

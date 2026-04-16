@@ -7,7 +7,7 @@ import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTableFilters } from '@/composables/useTableFilters';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface FilterOption {
@@ -127,6 +127,12 @@ const columns = createColumns(handleSort);
                     @reset="resetFilters"
                 />
             </div>
+
+            <Link href="/dealerships/create">
+                <Button type="button">
+                    New Dealership
+                </Button>
+            </Link>
         </div>
 
         <div v-if="isLoadingData" class="space-y-2">

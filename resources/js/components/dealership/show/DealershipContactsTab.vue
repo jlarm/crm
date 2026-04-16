@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/ui/phone-input/PhoneInput.vue';
 import type { Contact, Dealership } from '@/pages/Dealership/types';
 import { Form, router } from '@inertiajs/vue3';
 import { Linkedin, Mail, MoreVertical, Phone, Star } from 'lucide-vue-next';
@@ -77,7 +78,7 @@ function deleteContact(dealershipId: number, contact: Contact): void {
                         </Field>
                         <Field>
                             <FieldLabel for="contact_phone">Phone</FieldLabel>
-                            <Input id="contact_phone" name="phone" />
+                            <PhoneInput id="contact_phone" name="phone" />
                         </Field>
                         <Field class="col-span-2">
                             <FieldLabel for="contact_position">Position</FieldLabel>
@@ -158,9 +159,14 @@ function deleteContact(dealershipId: number, contact: Contact): void {
                             <Mail class="h-3 w-3 text-slate-500" />
                             <span>{{ contact.email }}</span>
                         </div>
-                        <div v-if="contact.linkedinLink" class="flex items-center gap-3">
+                        <div v-if="contact.linkedinLink" class="flex min-w-0 items-center gap-3">
                             <Linkedin class="h-3 w-3 shrink-0 text-slate-500" />
-                            <span>LinkedIn</span>
+                            <a
+                                :href="contact.linkedinLink"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="truncate text-blue-600 hover:underline"
+                            >{{ contact.linkedinLink }}</a>
                         </div>
                     </div>
                 </CardContent>
@@ -181,6 +187,8 @@ function deleteContact(dealershipId: number, contact: Contact): void {
                     :action="`/dealerships/${dealership.id}/contacts/${editingContact.id}`"
                     method="put"
                     class="grid grid-cols-2 gap-4"
+                    preserve-scroll
+                    :on-success="() => (isEditOpen = false)"
                     v-slot="{ errors, processing }"
                 >
                     <Field class="col-span-2">
@@ -204,10 +212,10 @@ function deleteContact(dealershipId: number, contact: Contact): void {
                     </Field>
                     <Field>
                         <FieldLabel for="contact_edit_phone">Phone</FieldLabel>
-                        <Input
+                        <PhoneInput
                             id="contact_edit_phone"
                             name="phone"
-                            :default-value="editingContact.phone || ''"
+                            :default-value="editingContact.phone"
                         />
                     </Field>
                     <Field class="col-span-2">
