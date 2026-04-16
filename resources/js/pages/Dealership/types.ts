@@ -1,4 +1,4 @@
-export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks';
+export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks' | 'opportunities';
 
 export interface User {
     id: number;
@@ -27,6 +27,28 @@ export interface Contact {
     primaryContact: boolean;
 }
 
+export interface Activity {
+    id: number;
+    type: 'call' | 'note' | 'email';
+    typeLabel: string;
+    details: string;
+    occurredAt: string | null;
+    createdAt: string;
+    user: { id: number; name: string };
+}
+
+export interface Opportunity {
+    id: number;
+    name: string;
+    stage: string;
+    stageLabel: string;
+    estimatedValue: number;
+    probability: number | null;
+    expectedCloseDate: string | null;
+    nextAction: string | null;
+    activities: Activity[];
+}
+
 export interface Dealership {
     id: number;
     name: string;
@@ -43,4 +65,5 @@ export interface Dealership {
     stores: Store[];
     contacts: Contact[];
     users: User[];
+    opportunities: Opportunity[];
 }

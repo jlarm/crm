@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DealershipContactsTab from '@/components/dealership/show/DealershipContactsTab.vue';
 import DealershipDetailsTab from '@/components/dealership/show/DealershipDetailsTab.vue';
+import DealershipOpportunitiesTab from '@/components/dealership/show/DealershipOpportunitiesTab.vue';
 import DealershipShowTabs from '@/components/dealership/show/DealershipShowTabs.vue';
 import DealershipStoresTab from '@/components/dealership/show/DealershipStoresTab.vue';
 import DealershipTasksTab from '@/components/dealership/show/DealershipTasksTab.vue';
@@ -29,6 +30,7 @@ const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     stores: 0,
     contacts: 0,
     tasks: 0,
+    opportunities: 0,
 });
 
 function setActiveTab(tab: DealershipShowTab): void {
@@ -94,6 +96,11 @@ function setActiveTab(tab: DealershipShowTab): void {
             :tasks="tasks"
             :all-users="allUsers"
             :task-filter-options="taskFilterOptions"
+        />
+
+        <DealershipOpportunitiesTab
+            v-if="activeTab === 'opportunities'"
+            :dealership="dealership"
         />
     </div>
 </template>

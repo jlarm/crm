@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { CheckSquare, LayoutGrid } from 'lucide-vue-next';
+import { BarChart2, CheckSquare, LayoutGrid } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -14,6 +14,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import sales from '@/routes/sales';
 import tasks from '@/routes/tasks';
 import type { NavItem } from '@/types';
 
@@ -22,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Sales',
+        href: sales.index(),
+        icon: BarChart2,
     },
     {
         title: 'Tasks',

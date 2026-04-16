@@ -48,6 +48,25 @@ final class DealershipShowResource extends JsonResource
                 'id' => $user->id,
                 'name' => $user->name,
             ])),
+            'opportunities' => $this->whenLoaded('opportunities', fn () => $this->opportunities->map(fn ($o) => [
+                'id' => $o->id,
+                'name' => $o->name,
+                'stage' => $o->stage->value,
+                'stageLabel' => $o->stage->getLabel(),
+                'estimatedValue' => (float) ($o->estimated_value ?? 0),
+                'probability' => $o->probability,
+                'expectedCloseDate' => $o->expected_close_date?->format('Y-m-d'),
+                'nextAction' => $o->next_action,
+                'activities' => $o->relationLoaded('activities') ? $o->activities->map(fn ($a) => [
+                    'id' => $a->id,
+                    'type' => $a->type->value,
+                    'typeLabel' => $a->type->label(),
+                    'details' => $a->details,
+                    'occurredAt' => $a->occurred_at?->format('Y-m-d'),
+                    'createdAt' => $a->created_at->format('Y-m-d'),
+                    'user' => ['id' => $a->user->id, 'name' => $a->user->name],
+                ]) : [],
+            ])),
         ];
     }
 }

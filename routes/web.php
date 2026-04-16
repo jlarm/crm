@@ -5,8 +5,11 @@ declare(strict_types=1);
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
+use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunWebhookController;
+use App\Http\Controllers\OpportunityActivityController;
+use App\Http\Controllers\SalesDashboardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -32,12 +35,20 @@ Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'track
 
 Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('sales', SalesDashboardController::class)->name('sales.index');
     Route::get('search', SearchController::class)->name('search');
 
     Route::get('dealerships/create', [DealershipController::class, 'create'])->name('dealerships.create');
     Route::post('dealerships', [DealershipController::class, 'store'])->name('dealerships.store');
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
+
+    Route::post('dealerships/{dealership}/opportunities', [DealershipOpportunityController::class, 'store'])->name('dealerships.opportunities.store');
+    Route::put('dealerships/{dealership}/opportunities/{opportunity}', [DealershipOpportunityController::class, 'update'])->name('dealerships.opportunities.update');
+    Route::delete('dealerships/{dealership}/opportunities/{opportunity}', [DealershipOpportunityController::class, 'destroy'])->name('dealerships.opportunities.destroy');
+
+    Route::post('dealerships/{dealership}/opportunities/{opportunity}/activities', [OpportunityActivityController::class, 'store'])->name('dealerships.opportunities.activities.store');
+    Route::delete('dealerships/{dealership}/opportunities/{opportunity}/activities/{activity}', [OpportunityActivityController::class, 'destroy'])->name('dealerships.opportunities.activities.destroy');
 
     Route::post('dealerships/{dealership}/stores', [DealershipStoreController::class, 'store'])->name('dealerships.stores.store');
     Route::put('dealerships/{dealership}/stores/{store}', [DealershipStoreController::class, 'update'])->name('dealerships.stores.update');

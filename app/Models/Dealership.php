@@ -67,6 +67,11 @@ class Dealership extends Model
         return $this->hasMany(Progress::class);
     }
 
+    public function opportunities(): HasMany
+    {
+        return $this->hasMany(Opportunity::class);
+    }
+
     public function dealerEmails(): HasMany
     {
         return $this->hasMany(DealerEmail::class);

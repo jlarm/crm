@@ -50,6 +50,7 @@ final class DealershipController extends Controller
             'users' => fn ($query) => $query->select('id', 'name'),
             'stores',
             'contacts',
+            'opportunities' => fn ($query) => $query->with(['activities.user'])->orderBy('created_at', 'desc'),
         ]);
 
         $tasks = $dealership->tasks()
