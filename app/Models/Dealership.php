@@ -57,6 +57,11 @@ class Dealership extends Model
         return $this->hasMany(Contact::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);

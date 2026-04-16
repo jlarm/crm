@@ -18,6 +18,7 @@ const emit = defineEmits<{
                     { tab: 'details', label: 'Info' },
                     { tab: 'stores', label: 'Stores' },
                     { tab: 'contacts', label: 'Contacts' },
+                    { tab: 'tasks', label: 'Tasks' },
                 ] as { tab: DealershipShowTab; label: string }[]"
                 :key="tab"
                 type="button"

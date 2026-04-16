@@ -3,15 +3,22 @@ import DealershipContactsTab from '@/components/dealership/show/DealershipContac
 import DealershipDetailsTab from '@/components/dealership/show/DealershipDetailsTab.vue';
 import DealershipShowTabs from '@/components/dealership/show/DealershipShowTabs.vue';
 import DealershipStoresTab from '@/components/dealership/show/DealershipStoresTab.vue';
+import DealershipTasksTab from '@/components/dealership/show/DealershipTasksTab.vue';
 import { Badge } from '@/components/ui/badge';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
 import type { Dealership, DealershipShowTab, User } from '@/pages/Dealership/types';
+import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 
 interface Props {
     dealership: Dealership;
     allUsers: User[];
+    tasks: Task[];
+    taskFilterOptions: {
+        types: FilterOption[];
+        priorities: FilterOption[];
+    };
 }
 
 const props = defineProps<Props>();
@@ -21,6 +28,7 @@ const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     details: 0,
     stores: 0,
     contacts: 0,
+    tasks: 0,
 });
 
 function setActiveTab(tab: DealershipShowTab): void {
@@ -78,6 +86,14 @@ function setActiveTab(tab: DealershipShowTab): void {
         <DealershipContactsTab
             v-if="activeTab === 'contacts'"
             :dealership="dealership"
+        />
+
+        <DealershipTasksTab
+            v-if="activeTab === 'tasks'"
+            :dealership="dealership"
+            :tasks="tasks"
+            :all-users="allUsers"
+            :task-filter-options="taskFilterOptions"
         />
     </div>
 </template>

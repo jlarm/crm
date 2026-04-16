@@ -6,7 +6,12 @@ import { Loader2 } from 'lucide-vue-next';
 const isLoading = ref(false);
 let timeout: ReturnType<typeof setTimeout> | null = null;
 
-router.on('start', () => {
+router.on('start', (event) => {
+    const only = event.detail.visit.only;
+    if (!only || only.length === 0) {
+        return;
+    }
+
     timeout = setTimeout(() => {
         isLoading.value = true;
     }, 250);

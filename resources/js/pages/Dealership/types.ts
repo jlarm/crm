@@ -1,4 +1,4 @@
-export type DealershipShowTab = 'details' | 'stores' | 'contacts';
+export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks';
 
 export interface User {
     id: number;

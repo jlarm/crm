@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
+import AppHeaderLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { router, usePage } from '@inertiajs/vue3';
 import { onMounted, onUnmounted } from 'vue';

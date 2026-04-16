@@ -20,6 +20,7 @@ final class DealershipResource extends JsonResource
             'statusLabel' => ucfirst((string) $this->status),
             'rating' => $this->rating,
             'ratingLabel' => ucfirst((string) $this->rating),
+            'openTasksCount' => (int) ($this->open_tasks_count ?? 0),
         ];
     }
 }

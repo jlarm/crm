@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { type Dealership, createColumns } from '@/components/companies/columns';
 import DataTable from '@/components/companies/DataTable.vue';
-import DealershipFilters from '@/components/DealershipFilters.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
+import DashboardTaskStats from '@/components/dashboard/DashboardTaskStats.vue';
+import DashboardTasksWidget from '@/components/dashboard/DashboardTasksWidget.vue';
+import DealershipFilters from '@/components/DealershipFilters.vue';
 import LoadingOverlay from '@/components/LoadingOverlay.vue';
+import TaskFormModal from '@/components/tasks/TaskFormModal.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTableFilters } from '@/composables/useTableFilters';
-import { Head, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import type { FilterOption, Task } from '@/pages/Tasks/types';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Plus } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
-interface FilterOption {
+interface FilterOption2 {
     value: string;
     label: string;
 }
@@ -37,13 +42,37 @@ interface Props {
         direction?: string;
     };
     filterOptions: {
-        statuses: FilterOption[];
-        ratings: FilterOption[];
+        statuses: FilterOption2[];
+        ratings: FilterOption2[];
+        types: FilterOption2[];
+    };
+    taskStats: {
+        incomplete: number;
+        overdue: number;
+        dueToday: number;
+        completedThisWeek: number;
+    };
+    upcomingTasks: Task[];
+    taskFormData: {
+        allUsers: { id: number; name: string }[];
+        allDealerships: { id: number; name: string }[];
         types: FilterOption[];
+        priorities: FilterOption[];
     };
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
+const currentUserId = computed(() => (page.props.auth as { user: { id: number } }).user.id);
+
+const isTaskFormOpen = ref(false);
+const editingTask = ref<Task | null>(null);
+
+function openTaskCreate(): void {
+    editingTask.value = null;
+    isTaskFormOpen.value = true;
+}
 
 const { filters, isLoadingData, resetFilters } = useTableFilters({
     routeUrl: '/dashboard',
@@ -93,14 +122,26 @@ const columns = createColumns(handleSort);
 <template>
     <Head title="Dashboard" />
 
-    <div class="space-y-6 p-6">
+    <TaskFormModal
+        v-model:open="isTaskFormOpen"
+        :task="editingTask"
+        :all-users="taskFormData.allUsers"
+        :all-dealerships="taskFormData.allDealerships"
+        :types="taskFormData.types"
+        :priorities="taskFormData.priorities"
+        :current-user-id="currentUserId"
+    />
+
+    <div class="space-y-5 p-6">
         <LoadingOverlay />
 
+        <!-- Task stat cards -->
+        <DashboardTaskStats :stats="taskStats" />
+
+        <!-- Actions row -->
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
-                <div
-                    class="inline-flex rounded-md border border-border bg-background p-1"
-                >
+                <div class="inline-flex rounded-md border border-border bg-background p-1">
                     <Button
                         type="button"
                         size="sm"
@@ -128,34 +169,52 @@ const columns = createColumns(handleSort);
                 />
             </div>
 
-            <Link href="/dealerships/create">
-                <Button type="button">
-                    New Dealership
+            <div class="flex items-center gap-2">
+                <Button type="button" variant="outline" @click="openTaskCreate">
+                    <Plus class="mr-1.5 h-4 w-4" />
+                    New Task
                 </Button>
-            </Link>
+                <Link href="/dealerships/create">
+                    <Button type="button">New Dealership</Button>
+                </Link>
+            </div>
         </div>
 
-        <div v-if="isLoadingData" class="space-y-2">
-            <Skeleton class="h-10 w-full" />
-            <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
+        <!-- Two-column layout: dealerships + tasks widget -->
+        <div class="flex items-start gap-5">
+            <!-- Dealership table -->
+            <div class="min-w-0 flex-1">
+                <div v-if="isLoadingData" class="space-y-2">
+                    <Skeleton class="h-10 w-full" />
+                    <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
+                </div>
+
+                <template v-else>
+                    <DataTable
+                        :columns="columns"
+                        :data="dealerships.data"
+                        :sorting="currentSorting"
+                        :row-href="(d) => `/dealerships/${d.id}`"
+                    />
+
+                    <DashboardPagination
+                        :current-page="dealerships.current_page"
+                        :last-page="dealerships.last_page"
+                        :from="dealerships.from"
+                        :to="dealerships.to"
+                        :total="dealerships.total"
+                        :links="dealerships.links"
+                    />
+                </template>
+            </div>
+
+            <!-- Tasks widget -->
+            <div class="w-72 shrink-0 xl:w-80">
+                <DashboardTasksWidget
+                    :tasks="upcomingTasks"
+                    @create-task="openTaskCreate"
+                />
+            </div>
         </div>
-
-        <template v-else>
-            <DataTable
-                :columns="columns"
-                :data="dealerships.data"
-                :sorting="currentSorting"
-                :row-href="(d) => `/dealerships/${d.id}`"
-            />
-
-            <DashboardPagination
-                :current-page="dealerships.current_page"
-                :last-page="dealerships.last_page"
-                :from="dealerships.from"
-                :to="dealerships.to"
-                :total="dealerships.total"
-                :links="dealerships.links"
-            />
-        </template>
     </div>
 </template>

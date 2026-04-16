@@ -60,7 +60,7 @@ const nextPageUrl = computed(
 </script>
 
 <template>
-    <div class="flex items-center justify-between">
+    <div class="mt-4 flex items-center justify-between">
         <div class="text-sm text-muted-foreground">
             Showing {{ from || 0 }} to {{ to || 0 }} of {{ total }} results
         </div>

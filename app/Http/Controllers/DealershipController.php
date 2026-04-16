@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enum\TaskPriority;
+use App\Enum\TaskType;
 use App\Http\Requests\DealershipStoreRequest;
 use App\Http\Requests\DealershipUpdateRequest;
 use App\Http\Resources\DealershipShowResource;
+use App\Http\Resources\TaskResource;
 use App\Models\Dealership;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -49,9 +52,27 @@ final class DealershipController extends Controller
             'contacts',
         ]);
 
+        $tasks = $dealership->tasks()
+            ->with(['user', 'createdBy', 'contact'])
+            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
+            ->orderBy('due_date')
+            ->get()
+            ->map(fn ($task) => TaskResource::make($task)->resolve());
+
         return Inertia::render('Dealership/Show', [
             'dealership' => DealershipShowResource::make($dealership)->resolve(),
             'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'tasks' => $tasks,
+            'taskFilterOptions' => [
+                'types' => collect(TaskType::cases())->map(fn ($case) => [
+                    'value' => $case->value,
+                    'label' => $case->label(),
+                ]),
+                'priorities' => collect(TaskPriority::cases())->map(fn ($case) => [
+                    'value' => $case->value,
+                    'label' => $case->label(),
+                ]),
+            ],
         ]);
     }
 

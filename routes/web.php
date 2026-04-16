@@ -11,6 +11,8 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Settings\AppearanceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\TaskCompleteController;
+use App\Http\Controllers\TaskController;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\PdfAttachment;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +46,12 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::post('dealerships/{dealership}/contacts', [DealershipContactController::class, 'store'])->name('dealerships.contacts.store');
     Route::put('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'update'])->name('dealerships.contacts.update');
     Route::delete('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'destroy'])->name('dealerships.contacts.destroy');
+
+    Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
+    Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
+    Route::put('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+    Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+    Route::patch('tasks/{task}/complete', TaskCompleteController::class)->name('tasks.complete');
 
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');

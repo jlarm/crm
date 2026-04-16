@@ -14,6 +14,7 @@ export interface Dealership {
     statusLabel: string;
     rating: string;
     ratingLabel: string;
+    openTasksCount: number;
 }
 
 export function createColumns(
@@ -38,7 +39,25 @@ export function createColumns(
                 );
             },
             cell: ({ row }) => {
-                return h('div', { class: 'font-medium' }, row.getValue('name'));
+                const dealership = row.original;
+                const children: ReturnType<typeof h>[] = [
+                    h('span', {}, dealership.name),
+                ];
+
+                if (dealership.openTasksCount > 0) {
+                    children.push(
+                        h(
+                            'span',
+                            {
+                                class: 'ml-2 inline-flex items-center rounded-full bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                title: `${dealership.openTasksCount} open task${dealership.openTasksCount === 1 ? '' : 's'}`,
+                            },
+                            String(dealership.openTasksCount),
+                        ),
+                    );
+                }
+
+                return h('div', { class: 'flex items-center font-medium' }, children);
             },
         },
         {
