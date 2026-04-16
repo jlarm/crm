@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import DatePicker from '@/components/ui/date-picker/DatePicker.vue';
 import SearchableSelect from '@/components/ui/searchable-select/SearchableSelect.vue';
 import { Textarea } from '@/components/ui/textarea';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
@@ -171,8 +172,11 @@ function submit(): void {
                 </Field>
 
                 <Field>
-                    <FieldLabel for="task_due_date">Due Date</FieldLabel>
-                    <Input id="task_due_date" v-model="form.due_date" type="date" />
+                    <FieldLabel>Due Date</FieldLabel>
+                    <DatePicker
+                        :model-value="form.due_date || null"
+                        @update:model-value="form.due_date = $event ?? ''"
+                    />
                     <InputError :message="form.errors.due_date" />
                 </Field>
 
