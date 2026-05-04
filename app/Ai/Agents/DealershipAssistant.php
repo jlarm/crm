@@ -5,18 +5,13 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Models\Dealership;
-use Laravel\Ai\Attributes\Model;
-use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
-use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 
-#[Provider(Lab::Anthropic)]
-#[Model('claude-sonnet-4-6')]
 #[Temperature(0.3)]
 #[Timeout(90)]
 class DealershipAssistant implements Agent, Conversational
