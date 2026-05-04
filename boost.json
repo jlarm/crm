@@ -4,9 +4,10 @@
         "codex",
         "gemini"
     ],
+    "cloud": false,
     "guidelines": true,
     "mcp": true,
-    "nightwatch_mcp": false,
+    "nightwatch": false,
     "packages": [
         "filament/filament"
     ],
@@ -15,8 +16,11 @@
         "fortify-development",
         "laravel-best-practices",
         "pulse-development",
+        "scout-development",
+        "wayfinder-development",
         "livewire-development",
         "pest-testing",
+        "inertia-vue-development",
         "tailwindcss-development"
     ]
 }
