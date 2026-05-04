@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
@@ -63,6 +64,8 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::put('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     Route::patch('tasks/{task}/complete', TaskCompleteController::class)->name('tasks.complete');
+
+    Route::post('ai/chat', [AiChatController::class, 'send'])->name('ai.chat.send');
 
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
