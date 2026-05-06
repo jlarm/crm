@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Building2, Search, User } from 'lucide-vue-next';
+import { Building2, CheckSquare, Search, Store as StoreIcon, User } from 'lucide-vue-next';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useSearch, type SearchResult } from '@/composables/useSearch';
 
@@ -17,6 +17,12 @@ const dealershipResults = computed(() =>
 );
 const contactResults = computed(() =>
     results.value.filter((r) => r.type === 'contact'),
+);
+const storeResults = computed(() =>
+    results.value.filter((r) => r.type === 'store'),
+);
+const taskResults = computed(() =>
+    results.value.filter((r) => r.type === 'task'),
 );
 
 watch(open, async (val) => {
@@ -84,7 +90,7 @@ function flatIndex(result: SearchResult): number {
                     ref="inputRef"
                     v-model="query"
                     type="text"
-                    placeholder="Search dealerships and contacts..."
+                    placeholder="Search dealerships, stores, contacts, tasks..."
                     class="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                     @keydown="onKeydown"
                 />
@@ -157,17 +163,55 @@ function flatIndex(result: SearchResult): number {
                     </button>
                 </template>
 
+                <!-- Stores -->
+                <template v-if="storeResults.length > 0">
+                    <div
+                        class="mb-1 mt-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                    >
+                        Stores
+                    </div>
+                    <button
+                        v-for="result in storeResults"
+                        :key="`store-${result.id}`"
+                        :data-active="activeIndex === flatIndex(result)"
+                        class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors"
+                        :class="
+                            activeIndex === flatIndex(result)
+                                ? 'bg-accent text-accent-foreground'
+                                : 'hover:bg-accent hover:text-accent-foreground'
+                        "
+                        @click="navigate(result)"
+                        @mouseenter="activeIndex = flatIndex(result)"
+                    >
+                        <div
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-500/10"
+                        >
+                            <StoreIcon class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate font-medium">
+                                {{ result.label }}
+                            </div>
+                            <div
+                                v-if="result.subtitle || result.meta"
+                                class="truncate text-xs text-muted-foreground"
+                            >
+                                {{ [result.subtitle, result.meta].filter(Boolean).join(' · ') }}
+                            </div>
+                        </div>
+                    </button>
+                </template>
+
                 <!-- Contacts -->
                 <template v-if="contactResults.length > 0">
                     <div
                         class="mb-1 mt-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
-                        :class="{ 'mt-2': dealershipResults.length > 0 }"
                     >
                         Contacts
                     </div>
                     <button
                         v-for="result in contactResults"
-                        :key="result.id"
+                        :key="`contact-${result.id}`"
                         :data-active="activeIndex === flatIndex(result)"
                         class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors"
                         :class="
@@ -182,6 +226,45 @@ function flatIndex(result: SearchResult): number {
                             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary"
                         >
                             <User class="h-4 w-4 text-secondary-foreground" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate font-medium">
+                                {{ result.label }}
+                            </div>
+                            <div
+                                v-if="result.subtitle || result.meta"
+                                class="truncate text-xs text-muted-foreground"
+                            >
+                                {{ [result.subtitle, result.meta].filter(Boolean).join(' · ') }}
+                            </div>
+                        </div>
+                    </button>
+                </template>
+
+                <!-- Tasks -->
+                <template v-if="taskResults.length > 0">
+                    <div
+                        class="mb-1 mt-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                    >
+                        Tasks
+                    </div>
+                    <button
+                        v-for="result in taskResults"
+                        :key="`task-${result.id}`"
+                        :data-active="activeIndex === flatIndex(result)"
+                        class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors"
+                        :class="
+                            activeIndex === flatIndex(result)
+                                ? 'bg-accent text-accent-foreground'
+                                : 'hover:bg-accent hover:text-accent-foreground'
+                        "
+                        @click="navigate(result)"
+                        @mouseenter="activeIndex = flatIndex(result)"
+                    >
+                        <div
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-500/10"
+                        >
+                            <CheckSquare class="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div class="min-w-0 flex-1">
                             <div class="truncate font-medium">

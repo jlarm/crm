@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Dealership;
+use App\Models\Store;
+use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -44,8 +46,42 @@ final class SearchController extends Controller
                 'url' => route('dealerships.show', $c->dealership_id),
             ]);
 
+        $stores = Store::search($query)
+            ->take(5)
+            ->get()
+            ->load('dealership')
+            ->map(fn (Store $s): array => [
+                'type' => 'store',
+                'id' => $s->id,
+                'label' => $s->name,
+                'subtitle' => $s->dealership?->name,
+                'meta' => collect([$s->city, $s->state])->filter()->implode(', ') ?: null,
+                'url' => route('dealerships.show', $s->dealership_id),
+            ]);
+
+        $userId = $request->user()?->id;
+
+        $tasks = Task::search($query)
+            ->take(20)
+            ->get()
+            ->when($userId, fn ($collection) => $collection->where('user_id', $userId))
+            ->take(5)
+            ->load(['dealership', 'contact'])
+            ->map(fn (Task $t): array => [
+                'type' => 'task',
+                'id' => $t->id,
+                'label' => $t->title,
+                'subtitle' => $t->dealership?->name ?? $t->contact?->name,
+                'meta' => $t->isCompleted() ? 'Completed' : ($t->due_date?->format('M j, Y')),
+                'url' => route('tasks.index', ['highlight' => $t->id]),
+            ]);
+
         return response()->json(
-            $dealerships->concat($contacts)->values()
+            $dealerships
+                ->concat($contacts)
+                ->concat($stores)
+                ->concat($tasks)
+                ->values()
         );
     }
 }

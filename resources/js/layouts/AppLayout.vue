@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import AiChatWidget from '@/components/ai/AiChatWidget.vue';
+import SearchModal from '@/components/SearchModal.vue';
 import AppHeaderLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
+import { useSearchModal } from '@/composables/useSearchModal';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted } from 'vue';
 import { toast, Toaster } from 'vue-sonner';
@@ -35,6 +37,18 @@ const removeListener = router.on('success', (event) => {
 });
 
 onUnmounted(removeListener);
+
+const { open: searchOpen, show: showSearch } = useSearchModal();
+
+function onSearchKeydown(e: KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        showSearch();
+    }
+}
+
+onMounted(() => window.addEventListener('keydown', onSearchKeydown));
+onUnmounted(() => window.removeEventListener('keydown', onSearchKeydown));
 </script>
 
 <template>
@@ -55,4 +69,5 @@ onUnmounted(removeListener);
         :dealership-id="aiDealership?.id ?? null"
         :dealership-name="aiDealership?.name ?? null"
     />
+    <SearchModal v-model:open="searchOpen" />
 </template>

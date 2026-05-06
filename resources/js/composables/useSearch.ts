@@ -2,7 +2,7 @@ import { ref, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { search } from '@/routes';
 
-export type SearchResultType = 'dealership' | 'contact';
+export type SearchResultType = 'dealership' | 'contact' | 'store' | 'task';
 
 export interface SearchResult {
     type: SearchResultType;
