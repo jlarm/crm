@@ -28,13 +28,11 @@ const form = useForm({
     roles: props.user?.roles?.map((role) => role.id) ?? [],
 });
 
-function toggleRole(roleId: number, checked: boolean | 'indeterminate'): void {
-    if (checked === true) {
-        if (!form.roles.includes(roleId)) {
-            form.roles = [...form.roles, roleId];
-        }
-    } else {
+function toggleRole(roleId: number): void {
+    if (form.roles.includes(roleId)) {
         form.roles = form.roles.filter((id) => id !== roleId);
+    } else {
+        form.roles = [...form.roles, roleId];
     }
 }
 
@@ -128,19 +126,18 @@ function submit(): void {
                         No roles defined.
                     </div>
                     <div v-else class="space-y-3">
-                        <label
+                        <button
                             v-for="role in roles"
                             :key="role.id"
-                            class="flex cursor-pointer items-center gap-3 rounded-md border border-transparent px-2 py-1.5 hover:border-slate-200 hover:bg-slate-50"
+                            type="button"
+                            class="flex w-full cursor-pointer items-center gap-3 rounded-md border border-transparent px-2 py-1.5 text-left hover:border-slate-200 hover:bg-slate-50"
+                            @click="toggleRole(role.id)"
                         >
-                            <Checkbox
-                                :model-value="form.roles.includes(role.id)"
-                                @update:model-value="toggleRole(role.id, $event)"
-                            />
+                            <Checkbox :model-value="form.roles.includes(role.id)" />
                             <span class="text-sm capitalize">
                                 {{ role.name.replace(/_/g, ' ') }}
                             </span>
-                        </label>
+                        </button>
                     </div>
                     <InputError :message="form.errors.roles" class="mt-2" />
                 </CardContent>
