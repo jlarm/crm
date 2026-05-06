@@ -147,7 +147,6 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         id="city"
                                         name="city"
                                         :default-value="dealership.city"
-                                        required
                                         placeholder="City"
                                     />
                                     <InputError :message="errors.city" />
@@ -159,7 +158,6 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         id="state"
                                         name="state"
                                         :default-value="dealership.state"
-                                        required
                                         placeholder="ST"
                                         maxlength="2"
                                     />
