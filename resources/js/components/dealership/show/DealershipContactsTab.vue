@@ -44,6 +44,14 @@ function deleteContact(dealershipId: number, contact: Contact): void {
     }
     router.delete(`/dealerships/${dealershipId}/contacts/${contact.id}`);
 }
+
+function togglePrimary(dealershipId: number, contact: Contact): void {
+    router.patch(
+        `/dealerships/${dealershipId}/contacts/${contact.id}/primary`,
+        {},
+        { preserveScroll: true },
+    );
+}
 </script>
 
 <template>
@@ -133,6 +141,9 @@ function deleteContact(dealershipId: number, contact: Contact): void {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem @click="openEdit(contact)">Edit</DropdownMenuItem>
+                                <DropdownMenuItem @click="togglePrimary(dealership.id, contact)">
+                                    {{ contact.primaryContact ? 'Unset primary contact' : 'Set as primary contact' }}
+                                </DropdownMenuItem>
                                 <DropdownMenuItem
                                     class="text-red-600 focus:text-red-600"
                                     @click="deleteContact(dealership.id, contact)"

@@ -63,6 +63,7 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
 
     Route::post('dealerships/{dealership}/contacts', [DealershipContactController::class, 'store'])->name('dealerships.contacts.store');
     Route::put('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'update'])->name('dealerships.contacts.update');
+    Route::patch('dealerships/{dealership}/contacts/{contact}/primary', [DealershipContactController::class, 'togglePrimary'])->name('dealerships.contacts.primary');
     Route::delete('dealerships/{dealership}/contacts/{contact}', [DealershipContactController::class, 'destroy'])->name('dealerships.contacts.destroy');
 
     Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');

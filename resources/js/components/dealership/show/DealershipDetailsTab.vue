@@ -22,7 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import type { Dealership, User } from '@/pages/Dealership/types';
 import { Form } from '@inertiajs/vue3';
-import { Save } from 'lucide-vue-next';
+import { Linkedin, Mail, Phone as PhoneIcon, Save } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -37,6 +37,10 @@ const lastDealershipId = ref<number | null>(null);
 
 const selectedConsultants = computed(() =>
     props.allUsers.filter((user) => selectedConsultantIds.value.includes(user.id)),
+);
+
+const primaryContact = computed(
+    () => props.dealership.contacts?.find((contact) => contact.primaryContact) ?? null,
 );
 
 const filteredConsultants = computed(() => {
@@ -318,6 +322,46 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         </SelectContent>
                                     </Select>
                                 </Field>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card v-if="primaryContact">
+                    <CardHeader>
+                        <CardTitle>Primary Contact</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                    {{ primaryContact.name }}
+                                </span>
+                            </div>
+                            <span
+                                v-if="primaryContact.position"
+                                class="inline-flex w-fit items-center rounded-xl bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
+                            >
+                                {{ primaryContact.position }}
+                            </span>
+                            <div class="space-y-2 text-xs text-slate-600">
+                                <div v-if="primaryContact.phone" class="flex items-center gap-3">
+                                    <PhoneIcon class="h-3 w-3 text-slate-500" />
+                                    <span>{{ primaryContact.phone }}</span>
+                                </div>
+                                <div v-if="primaryContact.email" class="flex items-center gap-3">
+                                    <Mail class="h-3 w-3 text-slate-500" />
+                                    <span>{{ primaryContact.email }}</span>
+                                </div>
+                                <div v-if="primaryContact.linkedinLink" class="flex min-w-0 items-center gap-3">
+                                    <Linkedin class="h-3 w-3 shrink-0 text-slate-500" />
+                                    <a
+                                        :href="primaryContact.linkedinLink"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="truncate text-blue-600 hover:underline"
+                                    >{{ primaryContact.linkedinLink }}</a>
+                                </div>
                             </div>
                         </div>
                     </CardContent>

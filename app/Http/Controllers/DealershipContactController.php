@@ -51,6 +51,23 @@ final class DealershipContactController extends Controller
         return back()->with('success', 'Contact updated successfully.');
     }
 
+    public function togglePrimary(Dealership $dealership, Contact $contact): RedirectResponse
+    {
+        abort_unless($contact->dealership_id === $dealership->id, 404);
+
+        $makePrimary = ! $contact->primary_contact;
+
+        if ($makePrimary) {
+            $dealership->contacts()
+                ->where('id', '!=', $contact->id)
+                ->update(['primary_contact' => false]);
+        }
+
+        $contact->update(['primary_contact' => $makePrimary]);
+
+        return back()->with('success', $makePrimary ? 'Primary contact updated.' : 'Primary contact removed.');
+    }
+
     public function destroy(Dealership $dealership, Contact $contact): RedirectResponse
     {
         abort_unless($contact->dealership_id === $dealership->id, 404);
