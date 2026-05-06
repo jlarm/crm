@@ -73,8 +73,50 @@ it('builds dealership context into the agent instructions', function () {
         ->toContain('Called the GM about renewal');
 });
 
-it('falls back to a generic prompt when no dealership is set', function () {
+it('falls back to a generic prompt when no dealership and no user is set', function () {
     $instructions = (new DealershipAssistant)->instructions();
 
     expect($instructions)->toContain('has not selected a specific dealership');
+});
+
+it('includes company context in the agent instructions', function () {
+    config()->set('company.name', 'Test Co.');
+    config()->set('company.tagline', 'We do the thing.');
+    config()->set('company.value_props', ['First prop', 'Second prop']);
+    config()->set('company.email_guidelines', ['Be concise.']);
+
+    $instructions = (new DealershipAssistant)->instructions();
+
+    expect($instructions)
+        ->toContain('Test Co.')
+        ->toContain('We do the thing.')
+        ->toContain('First prop')
+        ->toContain('Be concise.');
+});
+
+it('lists only the user\'s active dealerships when no dealership is selected', function () {
+    $otherUser = User::factory()->create();
+
+    $mine = Dealership::factory()->create([
+        'user_id' => $this->user->id,
+        'name' => 'My Active Dealer',
+        'status' => 'active',
+    ]);
+    Dealership::factory()->create([
+        'user_id' => $this->user->id,
+        'name' => 'My Inactive Dealer',
+        'status' => 'inactive',
+    ]);
+    Dealership::factory()->create([
+        'user_id' => $otherUser->id,
+        'name' => 'Other Rep Dealer',
+        'status' => 'active',
+    ]);
+
+    $instructions = (new DealershipAssistant(null, $this->user))->instructions();
+
+    expect($instructions)
+        ->toContain('My Active Dealer')
+        ->not->toContain('My Inactive Dealer')
+        ->not->toContain('Other Rep Dealer');
 });

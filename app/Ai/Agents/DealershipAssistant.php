@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Models\Dealership;
+use App\Models\User;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -18,7 +19,10 @@ class DealershipAssistant implements Agent, Conversational
 {
     use Promptable, RemembersConversations;
 
-    public function __construct(public ?Dealership $dealership = null) {}
+    public function __construct(
+        public ?Dealership $dealership = null,
+        public ?User $user = null,
+    ) {}
 
     public function instructions(): string
     {
@@ -33,11 +37,158 @@ Style:
 - If you don't have enough information, say so plainly and ask one focused question.
 TXT;
 
-        if (! $this->dealership) {
-            return $base."\n\nThe user has not selected a specific dealership. Answer general CRM questions or ask which dealership they want to discuss.";
+        $sections = [$base, $this->companyContext()];
+
+        $sections[] = $this->dealership
+            ? $this->dealershipContext()
+            : $this->userDealershipsContext();
+
+        return implode("\n\n", $sections);
+    }
+
+    protected function companyContext(): string
+    {
+        $company = config('company');
+
+        if (! is_array($company) || empty($company['name'])) {
+            return '';
         }
 
-        return $base."\n\n".$this->dealershipContext();
+        $valueProps = collect($company['value_props'] ?? [])
+            ->map(fn (string $line): string => '- '.$line)
+            ->implode("\n");
+
+        $regs = collect($company['regulatory_coverage'] ?? [])->implode(', ');
+
+        $guidelines = collect($company['email_guidelines'] ?? [])
+            ->map(fn (string $line): string => '- '.$line)
+            ->implode("\n");
+
+        $sections = [
+            'About the company you work for:',
+            '- Name: '.$company['name'].(
+                ! empty($company['short_name']) && ! str_contains($company['name'], $company['short_name'])
+                    ? " ({$company['short_name']})"
+                    : ''
+            ),
+            ! empty($company['website']) ? "- Website: {$company['website']}" : null,
+            ! empty($company['phone']) ? "- Phone: {$company['phone']}" : null,
+            ! empty($company['tagline']) ? "- What we do: {$company['tagline']}" : null,
+            ! empty($company['positioning']) ? "- Positioning: {$company['positioning']}" : null,
+            ! empty($company['offering']) ? "- Offering: {$company['offering']}" : null,
+            ! empty($company['audience']) ? "- Who we sell to: {$company['audience']}" : null,
+            ! empty($company['history']) ? "- History: {$company['history']}" : null,
+            ! empty($company['mission']) ? "- Mission: {$company['mission']}" : null,
+            $regs !== '' ? "- Regulatory areas covered: {$regs}" : null,
+        ];
+
+        $body = collect($sections)->filter()->implode("\n");
+
+        if ($valueProps !== '') {
+            $body .= "\n\nKey value propositions:\n{$valueProps}";
+        }
+
+        $products = $this->formatProducts($company['products'] ?? []);
+        if ($products !== '') {
+            $body .= "\n\nProducts:\n{$products}";
+        }
+
+        $packages = $this->formatPackages($company['packages'] ?? []);
+        if ($packages !== '') {
+            $body .= "\n\nPackages we sell:\n{$packages}";
+        }
+
+        if ($guidelines !== '') {
+            $body .= "\n\nWhen drafting emails or outreach on behalf of the rep, follow these rules:\n{$guidelines}";
+        }
+
+        return $body;
+    }
+
+    /**
+     * @param  array<string, array{name?: string, description?: string, capabilities?: array<int, string>}>  $products
+     */
+    protected function formatProducts(array $products): string
+    {
+        return collect($products)
+            ->filter(fn ($p) => is_array($p) && ! empty($p['name']))
+            ->map(function (array $p): string {
+                $block = "- {$p['name']}";
+                if (! empty($p['description'])) {
+                    $block .= ": {$p['description']}";
+                }
+                if (! empty($p['capabilities'])) {
+                    $caps = collect($p['capabilities'])
+                        ->map(fn (string $c): string => "    • {$c}")
+                        ->implode("\n");
+                    $block .= "\n{$caps}";
+                }
+
+                return $block;
+            })
+            ->implode("\n");
+    }
+
+    /**
+     * @param  array<int, array{name?: string, fit?: string, includes?: array<int, string>}>  $packages
+     */
+    protected function formatPackages(array $packages): string
+    {
+        return collect($packages)
+            ->filter(fn ($p) => is_array($p) && ! empty($p['name']))
+            ->map(function (array $p): string {
+                $block = "- {$p['name']}";
+                if (! empty($p['fit'])) {
+                    $block .= " — fit: {$p['fit']}";
+                }
+                if (! empty($p['includes'])) {
+                    $items = collect($p['includes'])
+                        ->map(fn (string $i): string => "    • {$i}")
+                        ->implode("\n");
+                    $block .= "\n{$items}";
+                }
+
+                return $block;
+            })
+            ->implode("\n");
+    }
+
+    protected function userDealershipsContext(): string
+    {
+        if (! $this->user) {
+            return 'The user has not selected a specific dealership. Answer general CRM questions or ask which dealership they want to discuss.';
+        }
+
+        $dealerships = Dealership::query()
+            ->forUser($this->user)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name', 'city', 'state', 'type', 'rating']);
+
+        if ($dealerships->isEmpty()) {
+            return 'The user has no active dealerships assigned to them. Ask which dealership they want to discuss, or suggest they check their assignments.';
+        }
+
+        $lines = $dealerships->map(fn ($d) => sprintf(
+            '- #%d %s — %s, %s | %s | rating: %s',
+            $d->id,
+            $d->name,
+            $d->city ?: '—',
+            $d->state ?: '—',
+            $d->type ?: '—',
+            $d->rating ?: '—',
+        ))->implode("\n");
+
+        $count = $dealerships->count();
+
+        return <<<TXT
+The user has not selected a specific dealership. Only reference the active dealerships assigned to them, listed below. You do not have visibility into any other dealerships in the system.
+
+Active dealerships assigned to this user ({$count}):
+{$lines}
+
+If the user asks about a dealership not in this list, say it isn't in their active assignments and ask them to open it to load full context.
+TXT;
     }
 
     protected function dealershipContext(): string

@@ -24,7 +24,7 @@ final class AiChatController extends Controller
             ? Dealership::query()->forUser($user)->find($data['dealership_id'])
             : null;
 
-        $agent = new DealershipAssistant($dealership);
+        $agent = new DealershipAssistant($dealership, $user);
 
         $response = isset($data['conversation_id'])
             ? $agent->continue($data['conversation_id'], as: $user)->prompt($data['message'])
