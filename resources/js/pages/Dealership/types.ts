@@ -1,4 +1,21 @@
-export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks' | 'opportunities';
+export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks' | 'opportunities' | 'activity';
+
+export interface ActivityFeedItem {
+    id: string;
+    category: string;
+    icon: string;
+    title: string;
+    description: string | null;
+    actor: { id: number; name: string } | null;
+    occurredAt: string;
+}
+
+export interface ActivityFeedMeta {
+    currentPage: number;
+    perPage: number;
+    total: number;
+    hasMore: boolean;
+}
 
 export interface User {
     id: number;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DealershipActivityTab from '@/components/dealership/show/DealershipActivityTab.vue';
 import DealershipContactsTab from '@/components/dealership/show/DealershipContactsTab.vue';
 import DealershipDetailsTab from '@/components/dealership/show/DealershipDetailsTab.vue';
 import DealershipOpportunitiesTab from '@/components/dealership/show/DealershipOpportunitiesTab.vue';
@@ -33,6 +34,7 @@ const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     contacts: 0,
     tasks: 0,
     opportunities: 0,
+    activity: 0,
 });
 
 function goBack(): void {
@@ -120,6 +122,11 @@ function setActiveTab(tab: DealershipShowTab): void {
 
         <DealershipOpportunitiesTab
             v-if="activeTab === 'opportunities'"
+            :dealership="dealership"
+        />
+
+        <DealershipActivityTab
+            v-if="activeTab === 'activity'"
             :dealership="dealership"
         />
     </div>

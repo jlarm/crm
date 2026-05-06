@@ -20,6 +20,7 @@ const emit = defineEmits<{
                     { tab: 'contacts', label: 'Contacts' },
                     { tab: 'tasks', label: 'Tasks' },
                     { tab: 'opportunities', label: 'Opportunities' },
+                    { tab: 'activity', label: 'Activity' },
                 ] as { tab: DealershipShowTab; label: string }[]"
                 :key="tab"
                 type="button"

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DealershipActivityController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\DealershipImportController;
@@ -50,6 +51,8 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
 
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
+
+    Route::get('dealerships/{dealership}/activities', [DealershipActivityController::class, 'index'])->name('dealerships.activities.index');
 
     Route::post('dealerships/{dealership}/opportunities', [DealershipOpportunityController::class, 'store'])->name('dealerships.opportunities.store');
     Route::put('dealerships/{dealership}/opportunities/{opportunity}', [DealershipOpportunityController::class, 'update'])->name('dealerships.opportunities.update');
