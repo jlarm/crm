@@ -15,6 +15,16 @@ export default defineConfig({
             checks: {
                 pluginTimings: false,
             },
+            output: {
+                advancedChunks: {
+                    groups: [
+                        {
+                            name: 'lucide',
+                            test: /[\\/]node_modules[\\/]lucide-vue-next[\\/]/,
+                        },
+                    ],
+                },
+            },
         },
     },
     plugins: [
