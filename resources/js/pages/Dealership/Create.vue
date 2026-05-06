@@ -112,7 +112,6 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <Input
                                             id="city"
                                             name="city"
-                                            required
                                             placeholder="City"
                                         />
                                         <InputError :message="errors.city" />
@@ -123,7 +122,6 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <Input
                                             id="state"
                                             name="state"
-                                            required
                                             placeholder="ST"
                                             maxlength="2"
                                         />

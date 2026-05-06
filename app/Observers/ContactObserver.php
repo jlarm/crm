@@ -14,6 +14,8 @@ use Spatie\MailcoachSdk\Facades\Mailcoach;
 
 class ContactObserver
 {
+    public static bool $syncMailcoach = true;
+
     /**
      * Handle the Contact "created" event.
      */
@@ -25,6 +27,10 @@ class ContactObserver
             $dealer->contacts()->where('id', '!=', $model->id)->update(['primary_contact' => false]);
         }
 
+        if (! self::$syncMailcoach) {
+            return;
+        }
+
         $this->handleSavedEvent($model);
 
         $actingUserName = auth()->user()?->name; // Safely access user name
@@ -33,6 +39,10 @@ class ContactObserver
 
     public function updated(Contact $model): void
     {
+        if (! self::$syncMailcoach) {
+            return;
+        }
+
         $this->handleSavedEvent($model);
 
         $actingUserName = auth()->user()?->name; // Safely access user name
@@ -44,6 +54,10 @@ class ContactObserver
      */
     public function deleted(Contact $model): void
     {
+        if (! self::$syncMailcoach) {
+            return;
+        }
+
         $list = Mailcoach::emailList($model->dealership->getListType());
         $sub = $list->subscriber($model->email);
         if ($sub) {

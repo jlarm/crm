@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTableFilters } from '@/composables/useTableFilters';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Plus } from 'lucide-vue-next';
+import { Plus, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface FilterOption2 {
@@ -174,6 +174,12 @@ const columns = createColumns(handleSort);
                     <Plus class="mr-1.5 h-4 w-4" />
                     New Task
                 </Button>
+                <Link href="/dealerships/import">
+                    <Button type="button" variant="outline">
+                        <Upload class="mr-1.5 h-4 w-4" />
+                        Import
+                    </Button>
+                </Link>
                 <Link href="/dealerships/create">
                     <Button type="button">New Dealership</Button>
                 </Link>

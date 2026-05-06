@@ -6,6 +6,7 @@ use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
+use App\Http\Controllers\DealershipImportController;
 use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunWebhookController;
@@ -41,6 +42,11 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
 
     Route::get('dealerships/create', [DealershipController::class, 'create'])->name('dealerships.create');
     Route::post('dealerships', [DealershipController::class, 'store'])->name('dealerships.store');
+
+    Route::get('dealerships/import', [DealershipImportController::class, 'create'])->name('dealerships.import.create');
+    Route::post('dealerships/import/preview', [DealershipImportController::class, 'preview'])->name('dealerships.import.preview');
+    Route::post('dealerships/import', [DealershipImportController::class, 'store'])->name('dealerships.import.store');
+
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
 

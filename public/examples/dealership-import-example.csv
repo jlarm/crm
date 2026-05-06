@@ -1,0 +1,8 @@
+row_type,dealership_ref,name,address,city,state,zip_code,phone,type,status,rating,current_solution_name,current_solution_use,notes,email,position,linkedin_link,primary_contact,user_emails
+dealership,,Prime Motors,123 Main St,Detroit,MI,48201,(555) 123-4567,Automotive,active,hot,Legacy CRM,Basic lead tracking,Interested in upgrading,,,,,jane.doe@example.com
+dealership,,Bayshore RV,9 Coastal Ave,Tampa,FL,33602,(555) 222-3344,RV,active,warm,,,Returning customer,,,,,
+store,Prime Motors,Prime Downtown,500 Broadway,Detroit,MI,48202,(555) 123-7000,,,,Existing lot tracker,Inventory only,,,,,,
+store,Prime Motors,Prime Westside,700 Western Hwy,Dearborn,MI,48126,,,,,,,,,,,,,
+contact,Prime Motors,Sarah Park,,,,,,,,,,,sarah.park@primemotors.com,General Manager,https://linkedin.com/in/sarahpark,1,
+contact,Prime Motors,Mike Lin,,,,,,,,,,,mike.lin@primemotors.com,Sales Manager,,0,
+contact,Bayshore RV,Casey Reed,,,,,,,,,,,casey@bayshorerv.com,Owner,,1,
