@@ -47,7 +47,7 @@ php artisan remove:users-by-state    # Remove users from dealerships by state
 
 ## Architecture Overview
 
-This is a Laravel 12 CRM application built with Filament v3 for the admin interface. The system manages dealerships, contacts, and email communications.
+This is a Laravel 13 CRM application using Inertia.js + Vue 3 for the frontend. The system manages dealerships, contacts, and email communications.
 
 ### Core Domain Models
 
@@ -63,21 +63,12 @@ This is a Laravel 12 CRM application built with Filament v3 for the admin interf
 
 ### Key Integrations
 
-- **Filament**: Primary admin interface with two panels (main + development)
+- **Inertia.js + Vue 3**: SPA frontend served from Laravel
+- **Laravel Fortify**: Headless authentication backend
 - **Spatie Activity Log**: Comprehensive activity logging across models
 - **Spatie Permission**: Role-based access control
 - **Mailcoach SDK**: Email marketing integration with contact tagging
-- **Laravel Jetstream**: Authentication scaffolding with teams
-- **Laravel Telescope**: Application debugging and monitoring
 - **Sentry**: Error tracking and performance monitoring
-
-### Filament Structure
-
-The application uses Filament v3 with:
-- Main admin panel for standard operations
-- Development panel (`app/Filament/Development/`) for development-specific resources
-- Custom widgets for dashboards and overviews
-- Extensive use of relation managers for nested data
 
 ### Email System Architecture
 
@@ -97,14 +88,14 @@ The email system uses a job-based approach:
 
 ### File Organization
 
-- `app/Filament/Resources/`: Main Filament resource classes
-- `app/Filament/Development/Resources/`: Development-specific resources  
+- `app/Http/Controllers/`: Inertia controllers returning Vue pages
 - `app/Models/`: Eloquent models with relationships and business logic
-- `app/Jobs/`: Background job classes for email sending
+- `app/Jobs/`: Background job classes for email sending and imports
 - `app/Mail/`: Mailable classes for various email types
 - `app/Listeners/`: Event listeners, particularly for Mailcoach integration
 - `app/Console/Commands/`: Custom Artisan commands for bulk operations
 - `app/Policies/`: Authorization policies for resource access
+- `resources/js/pages/`: Inertia Vue page components
 
 ### Database Design
 

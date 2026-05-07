@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/*',
+        ]);
+
         $middleware->alias([
             'auth' => Authenticate::class,
             'role' => Spatie\Permission\Middleware\RoleMiddleware::class,
