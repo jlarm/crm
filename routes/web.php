@@ -26,8 +26,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return redirect()->route(auth()->check() ? 'dashboard' : 'login');
+})->name('home');
 
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
     ->name('mailgun.webhook');
