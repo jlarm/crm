@@ -109,12 +109,20 @@ final class ImportDealershipRow
         }
 
         foreach ($rows as $row) {
-            if (! empty($row['errors']) || $row['row_type'] === 'dealership') {
+            if (! empty($row['errors'])) {
+                continue;
+            }
+
+            if ($row['row_type'] === 'dealership') {
                 continue;
             }
 
             $ref = $row['parent_ref'];
-            if (! is_string($ref) || $ref === '') {
+            if (! is_string($ref)) {
+                continue;
+            }
+
+            if ($ref === '') {
                 continue;
             }
 
@@ -179,10 +187,16 @@ final class ImportDealershipRow
             if (! is_array($extra)) {
                 continue;
             }
+
             foreach ($extra as $email) {
-                if (! is_string($email) || $email === '') {
+                if (! is_string($email)) {
                     continue;
                 }
+
+                if ($email === '') {
+                    continue;
+                }
+
                 $emails[mb_strtolower($email)] = true;
             }
         }
@@ -194,9 +208,7 @@ final class ImportDealershipRow
         $this->userIdByEmail = User::query()
             ->whereIn(DB::raw('LOWER(email)'), array_keys($emails))
             ->pluck('id', 'email')
-            ->mapWithKeys(function ($id, $email): array {
-                return [mb_strtolower(is_string($email) ? $email : '') => is_numeric($id) ? (int) $id : 0];
-            })
+            ->mapWithKeys(fn (mixed $id, mixed $email): array => [mb_strtolower(is_string($email) ? $email : '') => is_numeric($id) ? (int) $id : 0])
             ->all();
     }
 
@@ -241,6 +253,7 @@ final class ImportDealershipRow
                 $extraEmails[] = $email;
             }
         }
+
         $resolvedName = $resolved['name'] ?? null;
         $parentRef = $group['parent_ref'] ?? null;
         $name = is_string($resolvedName) ? $resolvedName : (is_string($parentRef) ? $parentRef : '');

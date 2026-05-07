@@ -64,7 +64,7 @@ final class SearchController extends Controller
         $tasks = Task::search($query)
             ->take(20)
             ->get()
-            ->when($userId, fn ($collection) => $collection->where('user_id', $userId))
+            ->when($userId, fn (\Illuminate\Database\Eloquent\Collection $collection) => $collection->where('user_id', $userId))
             ->take(5)
             ->load(['dealership', 'contact'])
             ->map(fn (Task $t): array => [

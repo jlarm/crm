@@ -19,12 +19,13 @@ use Illuminate\Support\Facades\Mail;
 
 class SendDealerEmail implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
-     *
-     * @return void
      */
     public function __construct(protected DealerEmail $dealerEmail) {}
 
@@ -92,8 +93,8 @@ class SendDealerEmail implements ShouldQueue
             $dealerEmail->last_sent = now();
             $dealerEmail->save();
 
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
+        } catch (Exception $exception) {
+            Log::error($exception->getMessage());
         }
     }
 }

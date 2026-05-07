@@ -33,6 +33,6 @@ class Tag extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Tag {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Tag '.$eventName);
     }
 }

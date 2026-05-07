@@ -38,10 +38,10 @@ class AssignUserToDealershipsByStateCommand extends Command
 
         foreach ($dealerships as $dealership) {
             if ($dryRun) {
-                $this->line("Would assign user ID {$user->id} to dealership ID {$dealership->id} ({$dealership->name})");
+                $this->line(sprintf('Would assign user ID %s to dealership ID %s (%s)', $user->id, $dealership->id, $dealership->name));
             } else {
                 $user->dealerships()->syncWithoutDetaching([$dealership->id]);
-                $this->line("Assigned user ID {$user->id} to dealership ID {$dealership->id} ({$dealership->name})");
+                $this->line(sprintf('Assigned user ID %s to dealership ID %s (%s)', $user->id, $dealership->id, $dealership->name));
             }
         }
 

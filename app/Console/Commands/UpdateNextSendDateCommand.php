@@ -17,11 +17,15 @@ class UpdateNextSendDateCommand extends Command
     {
         $emails = DealerEmail::query()
             ->where('frequency', '>', 0)
-            ->where('next_send_date', null)
+            ->where('next_send_date')
             ->get();
 
         foreach ($emails as $email) {
-            if ($email->last_sent === null || $email->frequency === null) {
+            if ($email->last_sent === null) {
+                continue;
+            }
+
+            if ($email->frequency === null) {
                 continue;
             }
 

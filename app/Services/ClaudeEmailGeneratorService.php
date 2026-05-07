@@ -21,6 +21,7 @@ class ClaudeEmailGeneratorService
     {
         $apiKey = config('services.claude.api_key');
         $this->apiKey = is_string($apiKey) ? $apiKey : null;
+
         $apiUrl = config('services.claude.api_url', 'https://api.anthropic.com/v1/messages');
         $this->apiUrl = is_string($apiUrl) ? $apiUrl : 'https://api.anthropic.com/v1/messages';
     }
@@ -49,7 +50,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 500);
 
-        return in_array($this->extractContent($response), [null, '', '0'], true) ? "Hi there! I wanted to reach out regarding your {$dealership->type} dealership." : $this->extractContent($response);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? sprintf('Hi there! I wanted to reach out regarding your %s dealership.', $dealership->type) : $this->extractContent($response);
     }
 
     /**
@@ -63,7 +64,7 @@ class ClaudeEmailGeneratorService
 
         $content = $this->extractContent($response);
 
-        if ($content === null || $content === '' || $content === '0') {
+        if (in_array($content, [null, '', '0'], true)) {
             return [
                 'Schedule a follow-up call',
                 'Send product information',
@@ -73,7 +74,7 @@ class ClaudeEmailGeneratorService
 
         // Parse numbered list or bullet points
         $suggestions = preg_split('/\n\d+\.|\n[-•]/', $content) ?: [];
-        $suggestions = array_map('trim', array_filter($suggestions));
+        $suggestions = array_map(trim(...), array_filter($suggestions));
 
         return array_slice($suggestions, 0, 5); // Limit to 5 suggestions
     }
@@ -121,7 +122,7 @@ class ClaudeEmailGeneratorService
 
     public function isConfigured(): bool
     {
-        return $this->apiKey !== null && $this->apiKey !== '' && $this->apiKey !== '0';
+        return ! in_array($this->apiKey, [null, '', '0'], true);
     }
 
     private function buildSubjectPrompt(Dealership $dealership, ?DealerEmailTemplate $template): string
@@ -205,21 +206,21 @@ Format as a numbered list. Return only the list items.";
 
     private function getDealershipContext(Dealership $dealership): string
     {
-        $context = "Name: {$dealership->name}\n";
-        $context .= "Type: {$dealership->type}\n";
-        $context .= "Location: {$dealership->city}, {$dealership->state}\n";
-        $context .= "Rating: {$dealership->rating}\n";
+        $context = sprintf('Name: %s%s', $dealership->name, PHP_EOL);
+        $context .= sprintf('Type: %s%s', $dealership->type, PHP_EOL);
+        $context .= sprintf('Location: %s, %s%s', $dealership->city, $dealership->state, PHP_EOL);
+        $context .= sprintf('Rating: %s%s', $dealership->rating, PHP_EOL);
 
         if ($dealership->current_solution_name) {
-            $context .= "Current Solution: {$dealership->current_solution_name}\n";
+            $context .= sprintf('Current Solution: %s%s', $dealership->current_solution_name, PHP_EOL);
         }
 
         if ($dealership->current_solution_use) {
-            $context .= "Current Usage: {$dealership->current_solution_use}\n";
+            $context .= sprintf('Current Usage: %s%s', $dealership->current_solution_use, PHP_EOL);
         }
 
         if ($dealership->notes) {
-            $context .= 'Notes: '.mb_substr($dealership->notes, 0, 200)."\n";
+            $context .= 'Notes: '.mb_substr((string) $dealership->notes, 0, 200)."\n";
         }
 
         return $context.'Development Status: '.($dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
@@ -253,9 +254,9 @@ Format as a numbered list. Return only the list items.";
             ]);
 
             return null;
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Claude API exception', [
-                'message' => $e->getMessage(),
+                'message' => $exception->getMessage(),
                 'prompt_length' => mb_strlen($prompt),
             ]);
 
@@ -429,11 +430,11 @@ Return only the email body content in HTML format.";
     private function getDefaultTemplateContent(string $context): string
     {
         $templates = [
-            "<p>Hello {{contact_name}},</p><p>I wanted to touch base about {$context}. Based on what I've seen in the industry, this is becoming increasingly important for dealerships looking to stay competitive.</p><p>Would you be interested in a brief conversation about your current approach?</p><p>Best,<br>Your Sales Team</p>",
+            sprintf("<p>Hello {{contact_name}},</p><p>I wanted to touch base about %s. Based on what I've seen in the industry, this is becoming increasingly important for dealerships looking to stay competitive.</p><p>Would you be interested in a brief conversation about your current approach?</p><p>Best,<br>Your Sales Team</p>", $context),
 
-            "<p>Hi {{contact_name}},</p><p>I hope you're doing well. I'm reaching out specifically about {$context}. We've been working with several dealerships on this exact topic recently.</p><p>I'd be happy to share some insights that might be relevant to your situation.</p><p>Best regards,<br>Your Sales Team</p>",
+            sprintf("<p>Hi {{contact_name}},</p><p>I hope you're doing well. I'm reaching out specifically about %s. We've been working with several dealerships on this exact topic recently.</p><p>I'd be happy to share some insights that might be relevant to your situation.</p><p>Best regards,<br>Your Sales Team</p>", $context),
 
-            "<p>Hello {{contact_name}},</p><p>I wanted to follow up on {$context}. This has been a hot topic among dealership owners lately, and I thought you might find some recent developments interesting.</p><p>Are you free for a quick call this week?</p><p>Thanks,<br>Your Sales Team</p>",
+            sprintf('<p>Hello {{contact_name}},</p><p>I wanted to follow up on %s. This has been a hot topic among dealership owners lately, and I thought you might find some recent developments interesting.</p><p>Are you free for a quick call this week?</p><p>Thanks,<br>Your Sales Team</p>', $context),
         ];
 
         return $templates[array_rand($templates)];
@@ -442,11 +443,11 @@ Return only the email body content in HTML format.";
     private function getDefaultPersonalizedContent(Dealership $dealership, string $context): string
     {
         $templates = [
-            "<p>Hello {{contact_name}},</p><p>I hope things are going well at {$dealership->name}. I wanted to reach out about {$context}, particularly as it relates to {$dealership->type} operations in {$dealership->state}.</p><p>I've been working with other {$dealership->type} dealerships on similar topics and thought this might be relevant to your current situation.</p><p>Would you have 15 minutes this week to discuss?</p><p>Best,<br>Your Sales Team</p>",
+            sprintf("<p>Hello {{contact_name}},</p><p>I hope things are going well at %s. I wanted to reach out about %s, particularly as it relates to %s operations in %s.</p><p>I've been working with other %s dealerships on similar topics and thought this might be relevant to your current situation.</p><p>Would you have 15 minutes this week to discuss?</p><p>Best,<br>Your Sales Team</p>", $dealership->name, $context, $dealership->type, $dealership->state, $dealership->type),
 
-            "<p>Hi {{contact_name}},</p><p>I hope you're having a great week. I'm reaching out specifically about {$context} for {$dealership->name}. Given your location in {$dealership->city}, {$dealership->state}, I think there might be some opportunities we should discuss.</p><p>When would be a good time for a brief conversation?</p><p>Thanks,<br>Your Sales Team</p>",
+            sprintf("<p>Hi {{contact_name}},</p><p>I hope you're having a great week. I'm reaching out specifically about %s for %s. Given your location in %s, %s, I think there might be some opportunities we should discuss.</p><p>When would be a good time for a brief conversation?</p><p>Thanks,<br>Your Sales Team</p>", $context, $dealership->name, $dealership->city, $dealership->state),
 
-            "<p>Hello {{contact_name}},</p><p>I wanted to follow up regarding {$context}. I know that managing a {$dealership->type} dealership comes with unique challenges, and this particular topic has been coming up frequently in my conversations with other owners.</p><p>I'd love to get your perspective and share what I've been seeing in the market.</p><p>Best regards,<br>Your Sales Team</p>",
+            sprintf("<p>Hello {{contact_name}},</p><p>I wanted to follow up regarding %s. I know that managing a %s dealership comes with unique challenges, and this particular topic has been coming up frequently in my conversations with other owners.</p><p>I'd love to get your perspective and share what I've been seeing in the market.</p><p>Best regards,<br>Your Sales Team</p>", $context, $dealership->type),
         ];
 
         return $templates[array_rand($templates)];

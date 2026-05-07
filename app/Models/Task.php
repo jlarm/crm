@@ -35,7 +35,9 @@ use Laravel\Scout\Searchable;
 class Task extends Model
 {
     /** @use HasFactory<\Database\Factories\TaskFactory> */
-    use HasFactory, Searchable;
+    use HasFactory;
+
+    use Searchable;
 
     protected $fillable = [
         'user_id',

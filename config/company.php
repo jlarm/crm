@@ -111,7 +111,7 @@ return [
     'email_guidelines' => [
         'Lead with a dealership-specific risk or compliance angle, not generic CRM/sales pitches.',
         'Reference relevant regulations by name when it fits (Safeguards Rule, CARS Rule, OFAC, OSHA, etc.).',
-        'When recommending a package, match it to the dealership\'s size and apparent maturity (Compliance Core for smaller single-rooftops, Total Defense Suite for groups).',
+        "When recommending a package, match it to the dealership's size and apparent maturity (Compliance Core for smaller single-rooftops, Total Defense Suite for groups).",
         'Use product names exactly as listed (Ridgeback Network Defense, Compliance Core, Total Defense Suite).',
         'Keep emails short: a hook tied to their world, one or two specifics, a low-friction CTA (15-minute call or quick demo).',
         'Avoid hype, fear-mongering, or absolute guarantees ("100% compliant", "eliminate all risk"). Do not invent pricing, features, certifications, or partners not listed in this config.',

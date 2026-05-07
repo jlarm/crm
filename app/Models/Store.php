@@ -14,7 +14,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Store extends Model
 {
     /** @use HasFactory<\Database\Factories\StoreFactory> */
-    use HasFactory, LogsActivity, Searchable;
+    use HasFactory;
+
+    use LogsActivity;
+    use Searchable;
 
     protected $fillable = [
         'user_id',
@@ -57,6 +60,6 @@ class Store extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Store {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Store '.$eventName);
     }
 }

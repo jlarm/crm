@@ -25,7 +25,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class DealerEmailTemplate extends Model
 {
     /** @use HasFactory<\Database\Factories\DealerEmailTemplateFactory> */
-    use HasFactory, LogsActivity;
+    use HasFactory;
+
+    use LogsActivity;
 
     protected $fillable = [
         'name',
@@ -55,6 +57,6 @@ class DealerEmailTemplate extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email Template {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Dealer Email Template '.$eventName);
     }
 }

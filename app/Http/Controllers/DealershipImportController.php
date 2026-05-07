@@ -21,9 +21,9 @@ use Inertia\Response;
 
 final class DealershipImportController extends Controller
 {
-    private const SYNC_THRESHOLD = 100;
+    private const int SYNC_THRESHOLD = 100;
 
-    private const CACHE_TTL_MINUTES = 30;
+    private const int CACHE_TTL_MINUTES = 30;
 
     public function create(): Response
     {
@@ -46,7 +46,7 @@ final class DealershipImportController extends Controller
 
         /** @var array<int, mixed> $rawIds */
         $rawIds = $request->validated('default_user_ids', []);
-        $defaultUserIds = array_values(array_unique(array_map(fn ($v): int => is_numeric($v) ? (int) $v : 0, $rawIds)));
+        $defaultUserIds = array_values(array_unique(array_map(fn (mixed $v): int => is_numeric($v) ? (int) $v : 0, $rawIds)));
 
         $options = [
             'sync_mailcoach' => (bool) $request->validated('sync_mailcoach', false),
@@ -64,7 +64,7 @@ final class DealershipImportController extends Controller
             $result = $validate($row, $defaults);
             $validated[] = $result;
 
-            if (! empty($result['errors'])) {
+            if ($result['errors'] !== []) {
                 $errorCount++;
 
                 continue;
@@ -84,7 +84,7 @@ final class DealershipImportController extends Controller
         $autoCreateCount = $this->countAutoCreatedDealerships($validated);
 
         $token = Str::uuid()->toString();
-        Cache::put("dealership-import:{$token}", [
+        Cache::put('dealership-import:'.$token, [
             'validated' => $validated,
             'options' => [
                 ...$options,
@@ -123,7 +123,7 @@ final class DealershipImportController extends Controller
         ImportDealershipRow $import,
     ): RedirectResponse {
         $token = is_string($t = $request->validated('token')) ? $t : '';
-        $cacheKey = "dealership-import:{$token}";
+        $cacheKey = 'dealership-import:'.$token;
         /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}}|null $payload */
         $payload = Cache::get($cacheKey);
 
@@ -204,7 +204,7 @@ final class DealershipImportController extends Controller
         $existingNames = Dealership::query()
             ->whereIn(DB::raw('LOWER(name)'), array_keys($orphans))
             ->pluck('name')
-            ->map(fn ($n): string => mb_strtolower(is_string($n) ? $n : ''))
+            ->map(fn (mixed $n): string => mb_strtolower(is_string($n) ? $n : ''))
             ->all();
 
         return count(array_diff_key($orphans, array_flip($existingNames)));

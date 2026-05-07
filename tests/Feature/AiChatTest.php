@@ -18,6 +18,22 @@ it('rejects an empty message', function () {
         ->assertJsonValidationErrors('message');
 });
 
+it('passes a dealership context when dealership_id is provided', function () {
+    DealershipAssistant::fake(['Hello with context.']);
+
+    $dealership = Dealership::factory()->create([
+        'user_id' => $this->user->id,
+        'name' => 'Forbidden Motors',
+    ]);
+
+    $this->postJson('/ai/chat', [
+        'message' => 'Tell me about this dealership',
+        'dealership_id' => $dealership->id,
+    ])->assertOk()->assertJson(['reply' => 'Hello with context.']);
+
+    DealershipAssistant::assertPrompted('Tell me about this dealership');
+});
+
 it('starts a new conversation when no id is provided', function () {
     DealershipAssistant::fake(['Hello from the assistant.']);
 
@@ -77,6 +93,25 @@ it('falls back to a generic prompt when no dealership and no user is set', funct
     $instructions = (new DealershipAssistant)->instructions();
 
     expect($instructions)->toContain('has not selected a specific dealership');
+});
+
+it('returns empty company context when company config is missing or has no name', function () {
+    config()->set('company', []);
+
+    $instructions = (new DealershipAssistant)->instructions();
+
+    expect($instructions)->toBeString()
+        ->not->toContain('About the company you work for');
+});
+
+it('returns empty dealership context when no dealership is set on the agent', function () {
+    $agent = new DealershipAssistant;
+
+    $reflection = new ReflectionClass($agent);
+    $method = $reflection->getMethod('dealershipContext');
+    $method->setAccessible(true);
+
+    expect($method->invoke($agent))->toBe('');
 });
 
 it('includes company context in the agent instructions', function () {

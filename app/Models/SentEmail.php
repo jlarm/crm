@@ -14,7 +14,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class SentEmail extends Model
 {
     /** @use HasFactory<\Database\Factories\SentEmailFactory> */
-    use HasFactory, LogsActivity;
+    use HasFactory;
+
+    use LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -102,6 +104,6 @@ class SentEmail extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Email {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Email '.$eventName);
     }
 }

@@ -72,6 +72,26 @@ describe('Task Index', function () {
             ->assertInertia(fn ($page) => $page->has('tasks.data', 1));
     });
 
+    it('filters by dealership_id when provided', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        $other = Dealership::factory()->create(['user_id' => $this->user->id]);
+
+        Task::factory()->create([
+            'user_id' => $this->user->id,
+            'created_by_user_id' => $this->user->id,
+            'dealership_id' => $dealership->id,
+        ]);
+        Task::factory()->create([
+            'user_id' => $this->user->id,
+            'created_by_user_id' => $this->user->id,
+            'dealership_id' => $other->id,
+        ]);
+
+        $this->get('/tasks?dealership_id='.$dealership->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->has('tasks.data', 1));
+    });
+
     it('filters overdue tasks', function () {
         Task::factory()->overdue()->create([
             'user_id' => $this->user->id,

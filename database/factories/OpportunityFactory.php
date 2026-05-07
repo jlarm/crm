@@ -48,7 +48,7 @@ class OpportunityFactory extends Factory
 
     public function won(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $closedAt = fake()->dateTimeBetween('-6 months', 'now');
 
             return [
@@ -62,7 +62,7 @@ class OpportunityFactory extends Factory
 
     public function lost(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'stage' => OpportunityStage::Lost->value,
             'lost_reason' => fake()->sentence(),
             'lost_reason_code' => fake()->randomElement(['price', 'competitor', 'no_budget', 'timing']),
@@ -72,7 +72,7 @@ class OpportunityFactory extends Factory
 
     public function open(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'stage' => fake()->randomElement(OpportunityStage::openValues()),
             'closed_at' => null,
         ]);

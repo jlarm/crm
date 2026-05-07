@@ -43,9 +43,9 @@ class EmailTrackingService
                     'sent_at' => now()->toISOString(),
                 ],
             ]);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Failed to record sent email', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'recipient' => $recipient,
                 'user_id' => $userId,
             ]);
@@ -112,8 +112,8 @@ class EmailTrackingService
 
             return 'laravel-'.md5($sender.$recipients.now()->timestamp);
 
-        } catch (Exception $e) {
-            Log::error('Error extracting message ID', ['error' => $e->getMessage()]);
+        } catch (Exception $exception) {
+            Log::error('Error extracting message ID', ['error' => $exception->getMessage()]);
 
             // Final fallback
             return 'fallback-'.uniqid().'-'.time();

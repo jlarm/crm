@@ -9,6 +9,7 @@ use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\SentEmail;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 
 class SendDealerEmailCommand extends Command
@@ -21,14 +22,14 @@ class SendDealerEmailCommand extends Command
     {
         $emails = DealerEmail::query()
             ->where('paused', false)
-            ->where(function ($query): void {
-                $query->where(function ($q): void {
+            ->where(function (Builder $query): void {
+                $query->where(function (Builder $q): void {
                     $q->where('frequency', '>', 0)
-                        ->where(function ($innerQ): void {
+                        ->where(function (Builder $innerQ): void {
                             $innerQ->whereNull('next_send_date')
                                 ->orWhere('next_send_date', '=', now()->format('Y-m-d'));
                         });
-                })->orWhere(function ($q): void {
+                })->orWhere(function (Builder $q): void {
                     $q->where('frequency', 0)
                         ->whereNull('last_sent');
                 });

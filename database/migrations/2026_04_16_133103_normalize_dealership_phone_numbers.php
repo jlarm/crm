@@ -14,7 +14,7 @@ return new class extends Migration
             ->where('phone', '!=', '')
             ->chunkById(200, function ($dealerships): void {
                 foreach ($dealerships as $dealership) {
-                    $digits = preg_replace('/\D/', '', $dealership->phone);
+                    $digits = preg_replace('/\D/', '', (string) $dealership->phone);
 
                     if ($digits !== $dealership->phone) {
                         DB::table('dealerships')

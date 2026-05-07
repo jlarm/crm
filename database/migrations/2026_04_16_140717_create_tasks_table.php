@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('tasks', function (Blueprint $table) {
+        Schema::create('tasks', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();

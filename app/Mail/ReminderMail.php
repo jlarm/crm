@@ -15,7 +15,8 @@ use Illuminate\Queue\SerializesModels;
 
 class ReminderMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(public readonly Reminder $reminder) {}
 

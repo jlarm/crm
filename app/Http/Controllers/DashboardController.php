@@ -59,7 +59,7 @@ final class DashboardController extends Controller
             ->pluck('type')
             ->filter()
             ->values()
-            ->map(fn ($type): array => [
+            ->map(fn (mixed $type): array => [
                 'value' => is_string($type) ? $type : '',
                 'label' => Str::headline(is_string($type) ? $type : ''),
             ])
@@ -74,7 +74,7 @@ final class DashboardController extends Controller
             ->withCount(['tasks as open_tasks_count' => fn (Builder $q) => $q->whereNull('completed_at')])
             ->paginate(15)
             ->withQueryString()
-            ->through(fn ($dealership) => DealershipResource::make($dealership)->resolve());
+            ->through(fn (Dealership $dealership): array => DealershipResource::make($dealership)->resolve());
 
         return Inertia::render('Dashboard', [
             'dealerships' => $dealerships,
@@ -109,11 +109,11 @@ final class DashboardController extends Controller
                     ->whereNot('status', 'imported')
                     ->orderBy('name')
                     ->get(),
-                'types' => collect(TaskType::cases())->map(fn ($case) => [
+                'types' => collect(TaskType::cases())->map(fn (TaskType $case): array => [
                     'value' => $case->value,
                     'label' => $case->label(),
                 ]),
-                'priorities' => collect(TaskPriority::cases())->map(fn ($case) => [
+                'priorities' => collect(TaskPriority::cases())->map(fn (TaskPriority $case): array => [
                     'value' => $case->value,
                     'label' => $case->label(),
                 ]),
@@ -152,7 +152,7 @@ final class DashboardController extends Controller
             ->orderBy('due_date')
             ->limit(10)
             ->get()
-            ->map(fn ($task) => TaskResource::make($task)->resolve())
+            ->map(fn (Task $task): array => TaskResource::make($task)->resolve())
             ->all();
     }
 }

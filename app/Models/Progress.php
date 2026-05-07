@@ -29,7 +29,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Progress extends Model
 {
     /** @use HasFactory<\Database\Factories\ProgressFactory> */
-    use HasFactory, LogsActivity;
+    use HasFactory;
+
+    use LogsActivity;
 
     protected $table = 'progresses';
 
@@ -82,6 +84,6 @@ class Progress extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Progress {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Progress '.$eventName);
     }
 }

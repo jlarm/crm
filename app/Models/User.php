@@ -133,6 +133,6 @@ class User extends Authenticatable
                 'two_factor_secret',
                 'email_verified_at',
             ])
-            ->setDescriptionForEvent(fn (string $eventName): string => "User {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'User '.$eventName);
     }
 }

@@ -40,14 +40,14 @@ class TaskFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'completed_at' => now(),
         ]);
     }
 
     public function overdue(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'due_date' => fake()->dateTimeBetween('-30 days', '-1 day'),
             'completed_at' => null,
         ]);
@@ -55,7 +55,7 @@ class TaskFactory extends Factory
 
     public function high(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'priority' => TaskPriority::High->value,
         ]);
     }

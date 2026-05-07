@@ -40,6 +40,6 @@ class PdfAttachment extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Attachment {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Attachment '.$eventName);
     }
 }

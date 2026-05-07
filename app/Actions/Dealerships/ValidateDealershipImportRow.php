@@ -8,18 +8,18 @@ use Illuminate\Support\Facades\Validator;
 
 final class ValidateDealershipImportRow
 {
-    private const DEALERSHIP_FIELDS = [
+    private const array DEALERSHIP_FIELDS = [
         'name', 'address', 'city', 'state', 'zip_code', 'phone',
         'type', 'status', 'rating', 'current_solution_name',
         'current_solution_use', 'notes',
     ];
 
-    private const STORE_FIELDS = [
+    private const array STORE_FIELDS = [
         'name', 'address', 'city', 'state', 'zip_code', 'phone',
         'current_solution_name', 'current_solution_use',
     ];
 
-    private const CONTACT_FIELDS = [
+    private const array CONTACT_FIELDS = [
         'name', 'email', 'phone', 'position', 'linkedin_link', 'primary_contact',
     ];
 
@@ -43,7 +43,7 @@ final class ValidateDealershipImportRow
                 'line' => $row['line'],
                 'row_type' => $type,
                 'resolved' => [],
-                'errors' => ['row_type' => ["Unknown row type: {$type}"]],
+                'errors' => ['row_type' => ['Unknown row type: '.$type]],
                 'parent_ref' => null,
                 'extra_user_emails' => [],
             ],

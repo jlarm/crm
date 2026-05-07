@@ -16,7 +16,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Contact extends Model
 {
     /** @use HasFactory<\Database\Factories\ContactFactory> */
-    use HasFactory, LogsActivity, Searchable;
+    use HasFactory;
+
+    use LogsActivity;
+    use Searchable;
 
     /**
      * The relationships that should touch the parent model when updated.
@@ -81,6 +84,6 @@ class Contact extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Contact {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Contact '.$eventName);
     }
 }

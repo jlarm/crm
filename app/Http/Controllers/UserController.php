@@ -8,6 +8,7 @@ use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,16 +25,16 @@ final class UserController extends Controller
 
         $users = User::query()
             ->with('roles:id,name')
-            ->when($filter === 'trashed', fn ($query) => $query->onlyTrashed())
-            ->when($filter === 'all', fn ($query) => $query->withTrashed())
-            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            ->when($filter === 'trashed', fn (Builder $query): Builder => $query->onlyTrashed())
+            ->when($filter === 'all', fn (Builder $query): Builder => $query->withTrashed())
+            ->when($search !== '', fn (Builder $query): Builder => $query->where(function (Builder $query) use ($search): void {
+                $query->where('name', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('email', 'like', sprintf('%%%s%%', $search));
             }))
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString()
-            ->through(fn ($user) => UserResource::make($user)->resolve());
+            ->through(fn (User $user): array => UserResource::make($user)->resolve());
 
         return Inertia::render('Users/Index', [
             'users' => $users,

@@ -12,7 +12,7 @@ final class ParseDealershipImportCsv
     /**
      * @var array<string, array<int, string>>
      */
-    private const ALIASES = [
+    private const array ALIASES = [
         'row_type' => ['row_type', 'rowtype', 'record_type', 'recordtype'],
         'name' => ['name', 'full_name', 'fullname', 'contact_name', 'contactname'],
         'first_name' => ['first_name', 'firstname', 'first', 'given_name', 'givenname'],
@@ -46,7 +46,7 @@ final class ParseDealershipImportCsv
 
         $rawHeaders = $reader->getHeader();
         $canonicalHeaders = array_map(
-            fn (string $h): ?string => $this->canonicalize($h),
+            $this->canonicalize(...),
             $rawHeaders
         );
 
@@ -80,7 +80,7 @@ final class ParseDealershipImportCsv
             if (! in_array($rowType, ['dealership', 'store', 'contact'], true)) {
                 $parseErrors[] = [
                     'line' => $line,
-                    'message' => "Unknown row_type \"{$rowType}\". Expected dealership, store, or contact.",
+                    'message' => sprintf('Unknown row_type "%s". Expected dealership, store, or contact.', $rowType),
                 ];
 
                 continue;
@@ -111,6 +111,7 @@ final class ParseDealershipImportCsv
             if ($canonical === null) {
                 continue;
             }
+
             $value = is_string($value) ? mb_trim($value) : $value;
             if ($value === '' || $value === null) {
                 $normalized[$canonical] = null;

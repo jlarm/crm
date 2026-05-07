@@ -14,17 +14,17 @@ class EmailTrackingEvent extends Model
     /** @use HasFactory<\Database\Factories\EmailTrackingEventFactory> */
     use HasFactory;
 
-    public const EVENT_DELIVERED = 'delivered';
+    public const string EVENT_DELIVERED = 'delivered';
 
-    public const EVENT_OPENED = 'opened';
+    public const string EVENT_OPENED = 'opened';
 
-    public const EVENT_CLICKED = 'clicked';
+    public const string EVENT_CLICKED = 'clicked';
 
-    public const EVENT_BOUNCED = 'bounced';
+    public const string EVENT_BOUNCED = 'bounced';
 
-    public const EVENT_COMPLAINED = 'complained';
+    public const string EVENT_COMPLAINED = 'complained';
 
-    public const EVENT_UNSUBSCRIBED = 'unsubscribed';
+    public const string EVENT_UNSUBSCRIBED = 'unsubscribed';
 
     protected $fillable = [
         'sent_email_id',

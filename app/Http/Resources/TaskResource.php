@@ -33,19 +33,19 @@ final class TaskResource extends JsonResource
             'completedAt' => $this->completed_at?->toIso8601String(),
             'isCompleted' => $this->isCompleted(),
             'isOverdue' => $this->isOverdue(),
-            'assignedTo' => $this->whenLoaded('user', fn () => [
+            'assignedTo' => $this->whenLoaded('user', fn (): array => [
                 'id' => $task->user->id,
                 'name' => $task->user->name,
             ]),
-            'createdBy' => $this->whenLoaded('createdBy', fn () => [
+            'createdBy' => $this->whenLoaded('createdBy', fn (): array => [
                 'id' => $task->createdBy->id,
                 'name' => $task->createdBy->name,
             ]),
-            'dealership' => $this->whenLoaded('dealership', fn () => $task->dealership ? [
+            'dealership' => $this->whenLoaded('dealership', fn (): ?array => $task->dealership ? [
                 'id' => $task->dealership->id,
                 'name' => $task->dealership->name,
             ] : null),
-            'contact' => $this->whenLoaded('contact', fn () => $task->contact ? [
+            'contact' => $this->whenLoaded('contact', fn (): ?array => $task->contact ? [
                 'id' => $task->contact->id,
                 'name' => $task->contact->name,
             ] : null),

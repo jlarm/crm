@@ -27,7 +27,7 @@ final class UserResource extends JsonResource
             'timezone' => $this->timezone,
             'createdAt' => $this->created_at?->toIso8601String(),
             'deletedAt' => $this->deleted_at?->toIso8601String(),
-            'roles' => $this->whenLoaded('roles', fn () => $this->roles->map(fn (Model $role) => [
+            'roles' => $this->whenLoaded('roles', fn () => $this->roles->map(fn (Model $role): array => [
                 'id' => $role->getKey(),
                 'name' => $role->getAttribute('name'),
             ])->values()),

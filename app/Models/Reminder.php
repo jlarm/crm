@@ -59,7 +59,7 @@ class Reminder extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Reminder {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Reminder '.$eventName);
     }
 
     protected static function booted(): void

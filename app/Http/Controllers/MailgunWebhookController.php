@@ -37,9 +37,9 @@ class MailgunWebhookController extends Controller
             $this->processEvent($eventData);
 
             return response('OK', 200);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Error processing Mailgun webhook', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'data' => $request->all(),
             ]);
 
@@ -88,10 +88,10 @@ class MailgunWebhookController extends Controller
                 ->header('Content-Type', 'image/png')
                 ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
                 ->header('Pragma', 'no-cache');
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Error tracking email open', [
                 'message_id' => $messageId,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             // Still return the pixel even if tracking fails
@@ -134,10 +134,10 @@ class MailgunWebhookController extends Controller
 
             // Redirect to the original URL
             return redirect($decodedUrl);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             Log::error('Error tracking email click', [
                 'message_id' => $messageId,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             // Redirect to the URL even if tracking fails
@@ -212,7 +212,7 @@ class MailgunWebhookController extends Controller
         // Map Mailgun events to our event types
         $eventType = $this->mapEventType($event);
 
-        if ($eventType === null || $eventType === '' || $eventType === '0') {
+        if (in_array($eventType, [null, '', '0'], true)) {
             Log::info('Unmapped event type', ['event' => $event]);
 
             return;

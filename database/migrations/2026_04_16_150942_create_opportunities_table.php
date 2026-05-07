@@ -14,7 +14,7 @@ return new class extends Migration
             return;
         }
 
-        Schema::create('opportunities', function (Blueprint $table) {
+        Schema::create('opportunities', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('dealership_id')->constrained()->cascadeOnDelete();
             $table->string('name');

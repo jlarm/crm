@@ -19,7 +19,7 @@ enum OpportunityStage: string
     public static function openValues(): array
     {
         return array_column(
-            array_filter(self::cases(), fn (self $s) => $s->isOpen()),
+            array_filter(self::cases(), fn (self $s): bool => $s->isOpen()),
             'value'
         );
     }

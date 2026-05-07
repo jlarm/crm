@@ -42,7 +42,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class DealerEmail extends Model
 {
     /** @use HasFactory<\Database\Factories\DealerEmailFactory> */
-    use HasFactory, LogsActivity;
+    use HasFactory;
+
+    use LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -109,7 +111,7 @@ class DealerEmail extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Dealer Email '.$eventName);
     }
 
     protected static function boot(): void

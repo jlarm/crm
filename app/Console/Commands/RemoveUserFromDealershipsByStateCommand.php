@@ -38,10 +38,10 @@ class RemoveUserFromDealershipsByStateCommand extends Command
 
         foreach ($dealerships as $dealership) {
             if ($dryRun) {
-                $this->line("Would remove user ID {$user->id} from dealership ID {$dealership->id} ({$dealership->name})");
+                $this->line(sprintf('Would remove user ID %s from dealership ID %s (%s)', $user->id, $dealership->id, $dealership->name));
             } else {
                 $user->dealerships()->detach($dealership->id);
-                $this->line("Removed user ID {$user->id} from dealership ID {$dealership->id} ({$dealership->name})");
+                $this->line(sprintf('Removed user ID %s from dealership ID %s (%s)', $user->id, $dealership->id, $dealership->name));
             }
         }
 

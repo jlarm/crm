@@ -49,7 +49,7 @@ final class TaskController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString()
-            ->through(fn ($task) => TaskResource::make($task)->resolve());
+            ->through(fn (Task $task): array => TaskResource::make($task)->resolve());
 
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks,
@@ -60,11 +60,11 @@ final class TaskController extends Controller
                 'dealership_id' => $request->input('dealership_id', ''),
             ],
             'filterOptions' => [
-                'types' => collect(TaskType::cases())->map(fn ($case) => [
+                'types' => collect(TaskType::cases())->map(fn (TaskType $case): array => [
                     'value' => $case->value,
                     'label' => $case->label(),
                 ]),
-                'priorities' => collect(TaskPriority::cases())->map(fn ($case) => [
+                'priorities' => collect(TaskPriority::cases())->map(fn (TaskPriority $case): array => [
                     'value' => $case->value,
                     'label' => $case->label(),
                 ]),

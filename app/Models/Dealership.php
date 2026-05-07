@@ -50,7 +50,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Dealership extends Model
 {
     /** @use HasFactory<\Database\Factories\DealershipFactory> */
-    use HasFactory, LogsActivity, Searchable;
+    use HasFactory;
+
+    use LogsActivity;
+    use Searchable;
 
     protected $fillable = [
         'user_id',
@@ -180,7 +183,7 @@ class Dealership extends Model
     {
         return LogOptions::defaults()
             ->logAll()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Dealership {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Dealership '.$eventName);
     }
 
     /**
@@ -193,8 +196,8 @@ class Dealership extends Model
         }
 
         $query->where(function (Builder $q) use ($search): void {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('city', 'like', "%{$search}%");
+            $q->where('name', 'like', sprintf('%%%s%%', $search))
+                ->orWhere('city', 'like', sprintf('%%%s%%', $search));
         });
     }
 
@@ -227,7 +230,7 @@ class Dealership extends Model
      */
     public function scopeForUser(Builder $query, ?User $user): void
     {
-        if (! $user) {
+        if (! $user instanceof User) {
             return;
         }
 

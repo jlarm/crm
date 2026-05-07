@@ -17,6 +17,17 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
+describe('Dealership Create page', function () {
+    it('renders the create page with allUsers prop', function () {
+        $this->get(route('dealerships.create'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dealership/Create')
+                ->has('allUsers')
+            );
+    });
+});
+
 describe('Dealership Creation', function () {
     it('can create a dealership with valid data', function () {
         $dealershipData = [

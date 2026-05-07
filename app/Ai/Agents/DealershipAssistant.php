@@ -20,7 +20,8 @@ use Laravel\Ai\Promptable;
 #[Timeout(90)]
 class DealershipAssistant implements Agent, Conversational
 {
-    use Promptable, RemembersConversations;
+    use Promptable;
+    use RemembersConversations;
 
     public function __construct(
         public ?Dealership $dealership = null,
@@ -42,7 +43,7 @@ TXT;
 
         $sections = [$base, $this->companyContext()];
 
-        $sections[] = $this->dealership
+        $sections[] = $this->dealership instanceof Dealership
             ? $this->dealershipContext()
             : $this->userDealershipsContext();
 
@@ -60,13 +61,13 @@ TXT;
         $get = fn (string $key): string => is_string($company[$key] ?? null) ? $company[$key] : '';
 
         $valueProps = collect((array) ($company['value_props'] ?? []))
-            ->map(fn ($line): string => '- '.(is_string($line) ? $line : ''))
+            ->map(fn (mixed $line): string => '- '.(is_string($line) ? $line : ''))
             ->implode("\n");
 
         $regs = collect((array) ($company['regulatory_coverage'] ?? []))->implode(', ');
 
         $guidelines = collect((array) ($company['email_guidelines'] ?? []))
-            ->map(fn ($line): string => '- '.(is_string($line) ? $line : ''))
+            ->map(fn (mixed $line): string => '- '.(is_string($line) ? $line : ''))
             ->implode("\n");
 
         $name = $get('name');
@@ -76,7 +77,7 @@ TXT;
             'About the company you work for:',
             '- Name: '.$name.(
                 $shortName !== '' && ! str_contains($name, $shortName)
-                    ? " ({$shortName})"
+                    ? sprintf(' (%s)', $shortName)
                     : ''
             ),
             $get('website') !== '' ? '- Website: '.$get('website') : null,
@@ -87,31 +88,43 @@ TXT;
             $get('audience') !== '' ? '- Who we sell to: '.$get('audience') : null,
             $get('history') !== '' ? '- History: '.$get('history') : null,
             $get('mission') !== '' ? '- Mission: '.$get('mission') : null,
-            $regs !== '' ? "- Regulatory areas covered: {$regs}" : null,
+            $regs !== '' ? '- Regulatory areas covered: '.$regs : null,
         ];
 
         $body = collect($sections)->filter()->implode("\n");
 
         if ($valueProps !== '') {
-            $body .= "\n\nKey value propositions:\n{$valueProps}";
+            $body .= '
+
+Key value propositions:
+'.$valueProps;
         }
 
         /** @var array<string, array{name?: string, description?: string, capabilities?: array<int, string>}> $productsRaw */
         $productsRaw = is_array($company['products'] ?? null) ? $company['products'] : [];
         $products = $this->formatProducts($productsRaw);
         if ($products !== '') {
-            $body .= "\n\nProducts:\n{$products}";
+            $body .= '
+
+Products:
+'.$products;
         }
 
         /** @var array<int, array{name?: string, fit?: string, includes?: array<int, string>}> $packagesRaw */
         $packagesRaw = is_array($company['packages'] ?? null) ? $company['packages'] : [];
         $packages = $this->formatPackages($packagesRaw);
         if ($packages !== '') {
-            $body .= "\n\nPackages we sell:\n{$packages}";
+            $body .= '
+
+Packages we sell:
+'.$packages;
         }
 
         if ($guidelines !== '') {
-            $body .= "\n\nWhen drafting emails or outreach on behalf of the rep, follow these rules:\n{$guidelines}";
+            $body .= '
+
+When drafting emails or outreach on behalf of the rep, follow these rules:
+'.$guidelines;
         }
 
         return $body;
@@ -123,17 +136,18 @@ TXT;
     protected function formatProducts(array $products): string
     {
         return collect($products)
-            ->filter(fn (array $p) => ! empty($p['name']))
+            ->filter(fn (array $p): bool => isset($p['name']) && ($p['name'] !== '' && $p['name'] !== '0'))
             ->map(function (array $p): string {
-                $block = "- {$p['name']}";
-                if (! empty($p['description'])) {
-                    $block .= ": {$p['description']}";
+                $block = '- '.$p['name'];
+                if (isset($p['description']) && ($p['description'] !== '' && $p['description'] !== '0')) {
+                    $block .= ': '.$p['description'];
                 }
-                if (! empty($p['capabilities'])) {
+
+                if (isset($p['capabilities']) && $p['capabilities'] !== []) {
                     $caps = collect($p['capabilities'])
-                        ->map(fn (string $c): string => "    • {$c}")
+                        ->map(fn (string $c): string => '    • '.$c)
                         ->implode("\n");
-                    $block .= "\n{$caps}";
+                    $block .= PHP_EOL.$caps;
                 }
 
                 return $block;
@@ -147,17 +161,18 @@ TXT;
     protected function formatPackages(array $packages): string
     {
         return collect($packages)
-            ->filter(fn (array $p) => ! empty($p['name']))
+            ->filter(fn (array $p): bool => isset($p['name']) && ($p['name'] !== '' && $p['name'] !== '0'))
             ->map(function (array $p): string {
-                $block = "- {$p['name']}";
-                if (! empty($p['fit'])) {
-                    $block .= " — fit: {$p['fit']}";
+                $block = '- '.$p['name'];
+                if (isset($p['fit']) && ($p['fit'] !== '' && $p['fit'] !== '0')) {
+                    $block .= ' — fit: '.$p['fit'];
                 }
-                if (! empty($p['includes'])) {
+
+                if (isset($p['includes']) && $p['includes'] !== []) {
                     $items = collect($p['includes'])
-                        ->map(fn (string $i): string => "    • {$i}")
+                        ->map(fn (string $i): string => '    • '.$i)
                         ->implode("\n");
-                    $block .= "\n{$items}";
+                    $block .= PHP_EOL.$items;
                 }
 
                 return $block;
@@ -167,7 +182,7 @@ TXT;
 
     protected function userDealershipsContext(): string
     {
-        if (! $this->user) {
+        if (! $this->user instanceof User) {
             return 'The user has not selected a specific dealership. Answer general CRM questions or ask which dealership they want to discuss.';
         }
 
@@ -181,7 +196,7 @@ TXT;
             return 'The user has no active dealerships assigned to them. Ask which dealership they want to discuss, or suggest they check their assignments.';
         }
 
-        $lines = $dealerships->map(fn (Dealership $d) => sprintf(
+        $lines = $dealerships->map(fn (Dealership $d): string => sprintf(
             '- #%d %s — %s, %s | %s | rating: %s',
             $d->id,
             $d->name,
@@ -205,7 +220,7 @@ TXT;
 
     protected function dealershipContext(): string
     {
-        if ($this->dealership === null) {
+        if (! $this->dealership instanceof Dealership) {
             return '';
         }
 
@@ -221,7 +236,7 @@ TXT;
             'users:id,name',
         ]);
 
-        $progressLines = $d->progresses->map(fn (Progress $p) => sprintf(
+        $progressLines = $d->progresses->map(fn (Progress $p): string => sprintf(
             '- %s | %s | %s: %s',
             $p->date?->format('Y-m-d') ?? '—',
             $p->user?->name ?? 'Unknown', // @phpstan-ignore nullsafe.neverNull
@@ -229,7 +244,7 @@ TXT;
             str((string) $p->details)->limit(280)->value(),
         ))->implode("\n") ?: '- (no recent activity)';
 
-        $oppLines = $d->opportunities->map(fn (Opportunity $o) => sprintf(
+        $oppLines = $d->opportunities->map(fn (Opportunity $o): string => sprintf(
             '- #%d %s — stage: %s%s',
             $o->id,
             $o->name,
@@ -237,7 +252,7 @@ TXT;
             $o->expected_close_date ? ' (close '.$o->expected_close_date->format('Y-m-d').')' : '',
         ))->implode("\n") ?: '- (no opportunities)';
 
-        $taskLines = $d->tasks->map(fn (Task $t) => sprintf(
+        $taskLines = $d->tasks->map(fn (Task $t): string => sprintf(
             '- [%s] %s | %s priority | %s | assigned: %s%s',
             $t->completed_at ? 'x' : ' ',
             $t->title,

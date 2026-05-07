@@ -72,7 +72,7 @@ class ContactObserver
     protected function handleSavedEvent(Contact $model): void
     {
         if (! $model->dealership) {
-            Log::warning("[ContactObserver] No dealership found for contact ID {$model->id}. Skipping Mailcoach sync.");
+            Log::warning(sprintf('[ContactObserver] No dealership found for contact ID %s. Skipping Mailcoach sync.', $model->id));
 
             return;
         }
@@ -80,13 +80,13 @@ class ContactObserver
         $listUuid = null;
 
         try {
-            Log::debug("[ContactObserver] Processing contact ID {$model->id}, Email: {$model->email}, Dealership ID: {$model->dealership_id}");
+            Log::debug(sprintf('[ContactObserver] Processing contact ID %s, Email: %s, Dealership ID: %s', $model->id, $model->email, $model->dealership_id));
 
             $listUuid = $model->dealership->getListType();
-            Log::debug("[ContactObserver] Dealership getListType() for contact ID {$model->id} (Dealership ID: {$model->dealership_id}) returned: ".$listUuid);
+            Log::debug(sprintf('[ContactObserver] Dealership getListType() for contact ID %s (Dealership ID: %s) returned: ', $model->id, $model->dealership_id).$listUuid);
 
             if ($listUuid === 'default_value') {
-                Log::warning("[ContactObserver] Dealership type for contact ID {$model->id} (Dealership ID: {$model->dealership_id}) resulted in 'default_value' for list UUID. Skipping Mailcoach sync.");
+                Log::warning(sprintf("[ContactObserver] Dealership type for contact ID %s (Dealership ID: %s) resulted in 'default_value' for list UUID. Skipping Mailcoach sync.", $model->id, $model->dealership_id));
 
                 return;
             }
@@ -95,7 +95,7 @@ class ContactObserver
             $list = Mailcoach::emailList($listUuid); // @phpstan-ignore staticMethod.notFound
 
             if (empty($model->email)) {
-                Log::warning("[ContactObserver] Empty email for contact ID {$model->id}. Skipping Mailcoach sync.");
+                Log::warning(sprintf('[ContactObserver] Empty email for contact ID %s. Skipping Mailcoach sync.', $model->id));
 
                 return;
             }
@@ -119,7 +119,7 @@ class ContactObserver
                         'last_name' => $last_name,
                     ]
                 );
-                Log::info("[ContactObserver] Updated Mailcoach subscriber for contact ID {$model->id}, Email: {$model->email}.");
+                Log::info(sprintf('[ContactObserver] Updated Mailcoach subscriber for contact ID %s, Email: %s.', $model->id, $model->email));
 
                 return;
             }
@@ -133,14 +133,14 @@ class ContactObserver
                     'email' => $model->email,
                 ]
             );
-            Log::info("[ContactObserver] Created Mailcoach subscriber for contact ID {$model->id}, Email: {$model->email}.");
+            Log::info(sprintf('[ContactObserver] Created Mailcoach subscriber for contact ID %s, Email: %s.', $model->id, $model->email));
 
         } catch (ResourceNotFound $e) {
-            Log::error("[ContactObserver] ResourceNotFound for contact ID {$model->id}. List UUID used: ".($listUuid ?? 'unknown').'. Error: '.$e->getMessage(), ['exception' => $e, 'contact_id' => $model->id, 'dealership_id' => $model->dealership_id, 'email' => $model->email]);
+            Log::error(sprintf('[ContactObserver] ResourceNotFound for contact ID %s. List UUID used: ', $model->id).($listUuid ?? 'unknown').'. Error: '.$e->getMessage(), ['exception' => $e, 'contact_id' => $model->id, 'dealership_id' => $model->dealership_id, 'email' => $model->email]);
 
             return;
         } catch (Exception $e) {
-            Log::error("[ContactObserver] Exception for contact ID {$model->id}. Error: ".$e->getMessage(), ['exception' => $e, 'contact_id' => $model->id, 'dealership_id' => $model->dealership_id, 'email' => $model->email]);
+            Log::error(sprintf('[ContactObserver] Exception for contact ID %s. Error: ', $model->id).$e->getMessage(), ['exception' => $e, 'contact_id' => $model->id, 'dealership_id' => $model->dealership_id, 'email' => $model->email]);
 
             return;
         }

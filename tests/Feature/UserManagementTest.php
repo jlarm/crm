@@ -192,3 +192,53 @@ describe('User Restore', function () {
         expect($target->refresh()->trashed())->toBeFalse();
     });
 });
+
+describe('User Create page', function () {
+    it('renders the create page with available roles', function () {
+        $admin = superAdmin();
+
+        $this->actingAs($admin)
+            ->get('/users/create')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Users/Create')
+                ->has('roles')
+            );
+    });
+});
+
+describe('User Edit page', function () {
+    it('renders the edit page for a user with their roles', function () {
+        $admin = superAdmin();
+        $target = User::factory()->create();
+        $target->assignRole('Admin');
+
+        $this->actingAs($admin)
+            ->get("/users/{$target->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Users/Edit')
+                ->has('user')
+                ->has('roles')
+            );
+    });
+});
+
+describe('User Update with password', function () {
+    it('changes the password when one is provided', function () {
+        $admin = superAdmin();
+        $target = User::factory()->create();
+        $oldHash = $target->password;
+
+        $this->actingAs($admin)
+            ->put("/users/{$target->id}", [
+                'name' => $target->name,
+                'email' => $target->email,
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'NewPassword123!',
+            ])
+            ->assertRedirect();
+
+        expect($target->refresh()->password)->not->toBe($oldHash);
+    });
+});

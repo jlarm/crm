@@ -56,7 +56,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             }
 
             // Use actingUserName from the event
-            if (! empty($event->actingUserName)) {
+            if (! in_array($event->actingUserName, [null, '', '0'], true)) {
                 $tags[] = $event->actingUserName;
             }
 
@@ -72,7 +72,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
                 ]);
             }
 
-            $tags = array_map(fn ($tag): ?string => preg_replace('/[^a-zA-Z0-9 -]/', '', is_string($tag) ? $tag : ''), $tags);
+            $tags = array_map(fn (mixed $tag): ?string => preg_replace('/[^a-zA-Z0-9 -]/', '', is_string($tag) ? $tag : ''), $tags);
             $tags = array_unique(array_filter($tags));
 
             $subscriber = $list->subscriber($model->email);

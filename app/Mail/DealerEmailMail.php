@@ -15,9 +15,8 @@ use Illuminate\Queue\SerializesModels;
 
 class DealerEmailMail extends Mailable
 {
-    use Queueable, SerializesModels;
-
-    public $subject;
+    use Queueable;
+    use SerializesModels;
 
     public mixed $body;
 
@@ -25,15 +24,8 @@ class DealerEmailMail extends Mailable
 
     public ?string $attachmentName = null;
 
-    /**
-     * @var string|null
-     */
-    public $trackingId;
-
-    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, ?string $trackingId = null)
+    public function __construct(private readonly DealerEmail $dealerEmail, private readonly ?string $name, public ?string $trackingId = null)
     {
-        $this->trackingId = $trackingId;
-
         if ($dealerEmail->template) {
 
             if ($this->dealerEmail->customize_email) {

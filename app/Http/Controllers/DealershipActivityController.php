@@ -10,6 +10,7 @@ use App\Models\Opportunity;
 use App\Models\OpportunityActivity;
 use App\Models\Progress;
 use App\Models\Store;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
@@ -28,24 +29,24 @@ final class DealershipActivityController extends Controller
 
         $logged = Activity::query()
             ->with('causer:id,name')
-            ->where(function ($query) use ($dealership, $contactIds, $storeIds, $opportunityIds): void {
-                $query->where(function ($q) use ($dealership): void {
+            ->where(function (Builder $query) use ($dealership, $contactIds, $storeIds, $opportunityIds): void {
+                $query->where(function (Builder $q) use ($dealership): void {
                     $q->where('subject_type', Dealership::class)
                         ->where('subject_id', $dealership->id);
                 })
-                    ->orWhere(function ($q) use ($contactIds): void {
+                    ->orWhere(function (Builder $q) use ($contactIds): void {
                         $q->where('subject_type', Contact::class)
                             ->whereIn('subject_id', $contactIds);
                     })
-                    ->orWhere(function ($q) use ($storeIds): void {
+                    ->orWhere(function (Builder $q) use ($storeIds): void {
                         $q->where('subject_type', Store::class)
                             ->whereIn('subject_id', $storeIds);
                     })
-                    ->orWhere(function ($q) use ($opportunityIds): void {
+                    ->orWhere(function (Builder $q) use ($opportunityIds): void {
                         $q->where('subject_type', Opportunity::class)
                             ->whereIn('subject_id', $opportunityIds);
                     })
-                    ->orWhere(function ($q) use ($dealership): void {
+                    ->orWhere(function (Builder $q) use ($dealership): void {
                         $q->where('subject_type', Progress::class)
                             ->whereIn('subject_id', Progress::where('dealership_id', $dealership->id)->pluck('id'));
                     });
@@ -54,7 +55,7 @@ final class DealershipActivityController extends Controller
             ->orderByDesc('id')
             ->limit(200)
             ->get()
-            ->map(fn (Activity $a) => $this->mapLoggedActivity($a));
+            ->map(fn (Activity $a): ?array => $this->mapLoggedActivity($a));
 
         $opportunityActivities = OpportunityActivity::query()
             ->with(['user:id,name', 'opportunity:id,name'])
@@ -63,7 +64,7 @@ final class DealershipActivityController extends Controller
             ->orderByDesc('id')
             ->limit(200)
             ->get()
-            ->map(fn (OpportunityActivity $a) => [
+            ->map(fn (OpportunityActivity $a): array => [
                 'id' => 'opp_act_'.$a->id,
                 'category' => 'opportunity_activity',
                 'icon' => $a->type->value,
@@ -81,6 +82,7 @@ final class DealershipActivityController extends Controller
 
         $page = (int) $request->integer('page', 1);
         $page = max($page, 1);
+
         $total = $items->count();
         $paged = $items->slice(($page - 1) * $perPage, $perPage)->values();
 
@@ -128,15 +130,15 @@ final class DealershipActivityController extends Controller
 
         $title = match ($event) {
             'created' => $name !== null
-                ? "{$subjectLabel} {$name} created"
-                : "{$subjectLabel} created",
+                ? sprintf('%s %s created', $subjectLabel, $name)
+                : $subjectLabel.' created',
             'updated' => $name !== null
-                ? "{$subjectLabel} {$name} updated"
-                : "{$subjectLabel} updated",
+                ? sprintf('%s %s updated', $subjectLabel, $name)
+                : $subjectLabel.' updated',
             'deleted' => $name !== null
-                ? "{$subjectLabel} {$name} deleted"
-                : "{$subjectLabel} deleted",
-            default => $activity->description ?? "{$subjectLabel} {$event}",
+                ? sprintf('%s %s deleted', $subjectLabel, $name)
+                : $subjectLabel.' deleted',
+            default => $activity->description ?? sprintf('%s %s', $subjectLabel, $event),
         };
 
         $description = $this->describeChanges($attributes, $old);
@@ -158,7 +160,7 @@ final class DealershipActivityController extends Controller
      */
     private function describeChanges(array $attributes, array $old): ?string
     {
-        if (empty($old) || empty($attributes)) {
+        if ($old === [] || $attributes === []) {
             return null;
         }
 
