@@ -4,11 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Contact;
+use App\Models\Dealership;
+use App\Models\Opportunity;
+use App\Models\OpportunityActivity;
+use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Dealership
+ */
 final class DealershipShowResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -24,7 +36,7 @@ final class DealershipShowResource extends JsonResource
             'currentSolutionUse' => $this->current_solution_use,
             'status' => $this->status,
             'rating' => $this->rating,
-            'stores' => $this->whenLoaded('stores', fn () => $this->stores->map(fn ($store) => [
+            'stores' => $this->whenLoaded('stores', fn () => $this->stores->map(fn (Store $store) => [
                 'id' => $store->id,
                 'name' => $store->name,
                 'address' => $store->address,
@@ -34,8 +46,8 @@ final class DealershipShowResource extends JsonResource
                 'phone' => $store->phone,
                 'currentSolutionName' => $store->current_solution_name,
                 'currentSolutionUse' => $store->current_solution_use,
-            ])),
-            'contacts' => $this->whenLoaded('contacts', fn () => $this->contacts->map(fn ($contact) => [
+            ])->all()),
+            'contacts' => $this->whenLoaded('contacts', fn () => $this->contacts->map(fn (Contact $contact) => [
                 'id' => $contact->id,
                 'name' => $contact->name,
                 'email' => $contact->email,
@@ -43,12 +55,12 @@ final class DealershipShowResource extends JsonResource
                 'position' => $contact->position,
                 'linkedinLink' => $contact->linkedin_link,
                 'primaryContact' => (bool) $contact->primary_contact,
-            ])),
-            'users' => $this->whenLoaded('users', fn () => $this->users->map(fn ($user) => [
+            ])->all()),
+            'users' => $this->whenLoaded('users', fn () => $this->users->map(fn (User $user) => [
                 'id' => $user->id,
                 'name' => $user->name,
-            ])),
-            'opportunities' => $this->whenLoaded('opportunities', fn () => $this->opportunities->map(fn ($o) => [
+            ])->all()),
+            'opportunities' => $this->whenLoaded('opportunities', fn () => $this->opportunities->map(fn (Opportunity $o) => [
                 'id' => $o->id,
                 'name' => $o->name,
                 'stage' => $o->stage->value,
@@ -57,7 +69,7 @@ final class DealershipShowResource extends JsonResource
                 'probability' => $o->probability,
                 'expectedCloseDate' => $o->expected_close_date?->format('Y-m-d'),
                 'nextAction' => $o->next_action,
-                'activities' => $o->relationLoaded('activities') ? $o->activities->map(fn ($a) => [
+                'activities' => $o->relationLoaded('activities') ? $o->activities->map(fn (OpportunityActivity $a) => [
                     'id' => $a->id,
                     'type' => $a->type->value,
                     'typeLabel' => $a->type->label(),
@@ -65,8 +77,8 @@ final class DealershipShowResource extends JsonResource
                     'occurredAt' => $a->occurred_at?->format('Y-m-d'),
                     'createdAt' => $a->created_at->format('Y-m-d'),
                     'user' => ['id' => $a->user->id, 'name' => $a->user->name],
-                ]) : [],
-            ])),
+                ])->all() : [],
+            ])->all()),
         ];
     }
 }

@@ -32,7 +32,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -45,7 +45,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -63,36 +63,57 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsToMany<Dealership, $this>
+     */
     public function dealerships(): BelongsToMany
     {
         return $this->belongsToMany(Dealership::class);
     }
 
+    /**
+     * @return HasMany<Progress, $this>
+     */
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);
     }
 
+    /**
+     * @return HasMany<Reminder, $this>
+     */
     public function reminders(): HasMany
     {
         return $this->hasMany(Reminder::class);
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * @return HasMany<DealerEmail, $this>
+     */
     public function dealerEmails(): HasMany
     {
         return $this->hasMany(DealerEmail::class);
     }
 
+    /**
+     * @return HasMany<SentEmail, $this>
+     */
     public function sentEmails(): HasMany
     {
         return $this->hasMany(SentEmail::class);
     }
 
+    /**
+     * @return MorphMany<Activity, $this>
+     */
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');

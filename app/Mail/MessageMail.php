@@ -22,7 +22,10 @@ class MessageMail extends Mailable implements ShouldQueue
      */
     public $dealer;
 
-    public function __construct(Dealership $dealer, public $sender, public $subject, public $message)
+    /**
+     * @param  string  $subject
+     */
+    public function __construct(Dealership $dealer, public mixed $sender, public $subject, public mixed $message)
     {
         $this->dealer = $dealer;
     }

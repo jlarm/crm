@@ -196,12 +196,6 @@ final class ImportDealershipRow
     {
         $dealership = $this->upsertDealership($group, $options, $stats);
 
-        if (! $dealership) {
-            $stats['skipped']++;
-
-            return;
-        }
-
         foreach ($group['stores'] as $row) {
             $this->upsertStore($dealership, $row, $options, $stats);
         }
@@ -216,7 +210,7 @@ final class ImportDealershipRow
      * @param  array<string, mixed>  $options
      * @param  array<string, mixed>  $stats
      */
-    private function upsertDealership(array $group, array $options, array &$stats): ?Dealership
+    private function upsertDealership(array $group, array $options, array &$stats): Dealership
     {
         $parent = $group['parent'];
         $name = $parent['resolved']['name'] ?? $group['parent_ref'];

@@ -69,7 +69,7 @@ final class DealershipActivityController extends Controller
                 'icon' => $a->type->value,
                 'title' => sprintf('%s logged on %s', $a->type->label(), $a->opportunity->name ?? 'opportunity'),
                 'description' => $a->details,
-                'actor' => $a->user ? ['id' => $a->user->id, 'name' => $a->user->name] : null,
+                'actor' => ['id' => $a->user->id, 'name' => $a->user->name],
                 'occurredAt' => ($a->occurred_at ?? $a->created_at)->toIso8601String(),
             ]);
 
@@ -144,7 +144,7 @@ final class DealershipActivityController extends Controller
             'icon' => $this->iconFor($subjectClass, $event),
             'title' => $title,
             'description' => $description,
-            'actor' => $causer ? ['id' => $causer->id, 'name' => $causer->name] : null,
+            'actor' => $causer ? ['id' => $causer->getKey(), 'name' => $causer->getAttribute('name')] : null,
             'occurredAt' => $activity->created_at->toIso8601String(),
         ];
     }

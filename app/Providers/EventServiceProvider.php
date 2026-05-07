@@ -23,23 +23,9 @@ use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event to listener mappings for the application.
-     *
-     * @var array<class-string, array<int, class-string>>
-     */
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-        ],
-        Login::class => [
-            [LogAuthenticationEvents::class, 'handleLogin'],
-        ],
-        Logout::class => [
-            [LogAuthenticationEvents::class, 'handleLogout'],
-        ],
-        Failed::class => [
-            [LogAuthenticationEvents::class, 'handleFailed'],
         ],
         ContactTagSync::class => [
             SyncContactTagsWithMailcoach::class,
@@ -51,6 +37,12 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        parent::boot();
+
+        Event::listen(Login::class, [LogAuthenticationEvents::class, 'handleLogin']);
+        Event::listen(Logout::class, [LogAuthenticationEvents::class, 'handleLogout']);
+        Event::listen(Failed::class, [LogAuthenticationEvents::class, 'handleFailed']);
+
         Contact::observe(ContactObserver::class);
         DealerEmail::observe(DealerEmailObserver::class);
         DealerEmailTemplate::observe(DealerEmailTemplateObserver::class);

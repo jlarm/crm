@@ -30,7 +30,7 @@ enum OpportunityStage: string
         return [self::Won->value, self::Lost->value];
     }
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Prospect => 'Prospect',
@@ -44,7 +44,7 @@ enum OpportunityStage: string
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::Prospect => 'gray',

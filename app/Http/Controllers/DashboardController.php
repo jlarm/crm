@@ -32,6 +32,7 @@ final class DashboardController extends Controller
         $status = $request->input('status');
 
         $applyFilters = function (Builder $query) use ($request, $scope, $includeImported, $status): void {
+            /** @var Builder<Dealership> $query */
             if ($scope === 'mine') {
                 $query->forUser($request->user());
             }

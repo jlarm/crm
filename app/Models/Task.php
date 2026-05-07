@@ -10,8 +10,28 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $created_by_user_id
+ * @property int|null $dealership_id
+ * @property int|null $contact_id
+ * @property string $title
+ * @property string|null $description
+ * @property TaskType $type
+ * @property TaskPriority $priority
+ * @property Carbon|null $due_date
+ * @property Carbon|null $completed_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read User $user
+ * @property-read User $createdBy
+ * @property-read Dealership|null $dealership
+ * @property-read Contact|null $contact
+ */
 class Task extends Model
 {
     /** @use HasFactory<\Database\Factories\TaskFactory> */
@@ -30,21 +50,33 @@ class Task extends Model
         'completed_at',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    /**
+     * @return BelongsTo<Dealership, $this>
+     */
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);

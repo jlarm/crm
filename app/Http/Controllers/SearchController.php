@@ -71,7 +71,7 @@ final class SearchController extends Controller
                 'type' => 'task',
                 'id' => $t->id,
                 'label' => $t->title,
-                'subtitle' => $t->dealership?->name ?? $t->contact?->name,
+                'subtitle' => $t->dealership?->name ?? $t->contact?->name, // @phpstan-ignore nullsafe.neverNull
                 'meta' => $t->isCompleted() ? 'Completed' : ($t->due_date?->format('M j, Y')),
                 'url' => route('tasks.index', ['highlight' => $t->id]),
             ]);

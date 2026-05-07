@@ -89,7 +89,7 @@ class SendDealerEmail implements ShouldQueue
                 }
             }
 
-            $dealerEmail->last_sent = now()->format('Y-m-d');
+            $dealerEmail->last_sent = now();
             $dealerEmail->save();
 
         } catch (Exception $e) {

@@ -28,16 +28,25 @@ class SentEmail extends Model
         'tracking_data' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Dealership, $this>
+     */
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
     }
 
+    /**
+     * @return HasMany<EmailTrackingEvent, $this>
+     */
     public function trackingEvents(): HasMany
     {
         return $this->hasMany(EmailTrackingEvent::class);

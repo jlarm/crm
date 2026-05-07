@@ -39,7 +39,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
 
         try {
             $listUuid = $model->dealership->getListType();
-            $list = Mailcoach::emailList($listUuid);
+            $list = Mailcoach::emailList($listUuid); // @phpstan-ignore staticMethod.notFound
 
             if (empty($model->email)) {
                 return;

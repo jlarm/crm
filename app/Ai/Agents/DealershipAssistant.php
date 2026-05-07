@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Ai\Agents;
 
 use App\Models\Dealership;
+use App\Models\Opportunity;
+use App\Models\Progress;
+use App\Models\Task;
 use App\Models\User;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
@@ -111,7 +114,7 @@ TXT;
     protected function formatProducts(array $products): string
     {
         return collect($products)
-            ->filter(fn ($p) => is_array($p) && ! empty($p['name']))
+            ->filter(fn (array $p) => ! empty($p['name']))
             ->map(function (array $p): string {
                 $block = "- {$p['name']}";
                 if (! empty($p['description'])) {
@@ -135,7 +138,7 @@ TXT;
     protected function formatPackages(array $packages): string
     {
         return collect($packages)
-            ->filter(fn ($p) => is_array($p) && ! empty($p['name']))
+            ->filter(fn (array $p) => ! empty($p['name']))
             ->map(function (array $p): string {
                 $block = "- {$p['name']}";
                 if (! empty($p['fit'])) {
@@ -169,7 +172,7 @@ TXT;
             return 'The user has no active dealerships assigned to them. Ask which dealership they want to discuss, or suggest they check their assignments.';
         }
 
-        $lines = $dealerships->map(fn ($d) => sprintf(
+        $lines = $dealerships->map(fn (Dealership $d) => sprintf(
             '- #%d %s — %s, %s | %s | rating: %s',
             $d->id,
             $d->name,
@@ -205,29 +208,29 @@ TXT;
             'users:id,name',
         ]);
 
-        $progressLines = $d->progresses->map(fn ($p) => sprintf(
+        $progressLines = $d->progresses->map(fn (Progress $p) => sprintf(
             '- %s | %s | %s: %s',
-            optional($p->date)->format('Y-m-d') ?? '—',
-            $p->user?->name ?? 'Unknown',
-            $p->category?->name ?? 'Note',
-            str($p->details)->limit(280)->value(),
+            $p->date?->format('Y-m-d') ?? '—',
+            $p->user?->name ?? 'Unknown', // @phpstan-ignore nullsafe.neverNull
+            $p->category?->name ?? 'Note', // @phpstan-ignore nullsafe.neverNull
+            str((string) $p->details)->limit(280)->value(),
         ))->implode("\n") ?: '- (no recent activity)';
 
-        $oppLines = $d->opportunities->map(fn ($o) => sprintf(
+        $oppLines = $d->opportunities->map(fn (Opportunity $o) => sprintf(
             '- #%d %s — stage: %s%s',
             $o->id,
-            $o->name ?? 'Opportunity',
-            $o->stage?->value ?? '—',
+            $o->name,
+            $o->stage->value,
             $o->expected_close_date ? ' (close '.$o->expected_close_date->format('Y-m-d').')' : '',
         ))->implode("\n") ?: '- (no opportunities)';
 
-        $taskLines = $d->tasks->map(fn ($t) => sprintf(
+        $taskLines = $d->tasks->map(fn (Task $t) => sprintf(
             '- [%s] %s | %s priority | %s | assigned: %s%s',
             $t->completed_at ? 'x' : ' ',
             $t->title,
-            $t->priority?->value ?? '—',
+            $t->priority->value,
             $t->due_date ? 'due '.$t->due_date->format('Y-m-d') : 'no due date',
-            $t->user?->name ?? 'unassigned',
+            $t->user->name,
             $t->description ? ' — '.str($t->description)->limit(160)->value() : '',
         ))->implode("\n") ?: '- (no tasks)';
 

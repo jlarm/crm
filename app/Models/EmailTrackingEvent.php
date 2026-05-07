@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,28 +42,43 @@ class EmailTrackingEvent extends Model
         'event_timestamp' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<SentEmail, $this>
+     */
     public function sentEmail(): BelongsTo
     {
         return $this->belongsTo(SentEmail::class);
     }
 
-    public function scopeOpened($query)
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeOpened(Builder $query): void
     {
-        return $query->where('event_type', self::EVENT_OPENED);
+        $query->where('event_type', self::EVENT_OPENED);
     }
 
-    public function scopeClicked($query)
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeClicked(Builder $query): void
     {
-        return $query->where('event_type', self::EVENT_CLICKED);
+        $query->where('event_type', self::EVENT_CLICKED);
     }
 
-    public function scopeDelivered($query)
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeDelivered(Builder $query): void
     {
-        return $query->where('event_type', self::EVENT_DELIVERED);
+        $query->where('event_type', self::EVENT_DELIVERED);
     }
 
-    public function scopeBounced($query)
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeBounced(Builder $query): void
     {
-        return $query->where('event_type', self::EVENT_BOUNCED);
+        $query->where('event_type', self::EVENT_BOUNCED);
     }
 }

@@ -28,6 +28,9 @@ class Store extends Model
         'current_solution_use',
     ];
 
+    /**
+     * @return BelongsTo<Dealership, $this>
+     */
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);

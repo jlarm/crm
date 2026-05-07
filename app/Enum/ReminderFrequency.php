@@ -16,7 +16,7 @@ enum ReminderFrequency: int
     case Quarterly = 90;
     case Yearly = 365;
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Immediate => 'Send Immediately',

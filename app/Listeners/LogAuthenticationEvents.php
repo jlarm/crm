@@ -7,6 +7,7 @@ namespace App\Listeners;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Database\Eloquent\Model;
 
 class LogAuthenticationEvents
 {
@@ -18,7 +19,7 @@ class LogAuthenticationEvents
         $user = $event->user;
 
         activity()
-            ->causedBy($user)
+            ->causedBy($user instanceof Model ? $user : null)
             ->withProperties([
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
@@ -31,9 +32,11 @@ class LogAuthenticationEvents
      */
     public function handleLogout(Logout $event): void
     {
-        if ($event->user) {
+        $user = $event->user;
+
+        if ($user instanceof Model) {
             activity()
-                ->causedBy($event->user)
+                ->causedBy($user)
                 ->withProperties([
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),

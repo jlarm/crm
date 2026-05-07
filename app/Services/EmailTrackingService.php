@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 class EmailTrackingService
 {
@@ -23,7 +24,7 @@ class EmailTrackingService
             // Extract message ID from the sent message
             $messageId = $this->extractMessageId($sentMessage);
 
-            if ($messageId === null || $messageId === '' || $messageId === '0') {
+            if ($messageId === '' || $messageId === '0') {
                 Log::warning('Could not extract message ID from sent email', [
                     'recipient' => $recipient,
                     'subject' => $subject,
@@ -40,7 +41,6 @@ class EmailTrackingService
                 'subject' => $subject,
                 'tracking_data' => [
                     'sent_at' => now()->toISOString(),
-                    'transport' => $sentMessage->getSymfonySentMessage()?->getTransport()?->__toString(),
                 ],
             ]);
         } catch (Exception $e) {
@@ -97,29 +97,20 @@ class EmailTrackingService
             // Try to get from the original message first
             $originalMessage = $sentMessage->getOriginalMessage();
 
-            if ($originalMessage && $originalMessage->getHeaders()->has('Message-ID')) {
-                $messageId = $originalMessage->getHeaders()->get('Message-ID')->getBody();
+            if ($originalMessage instanceof Email && $originalMessage->getHeaders()->has('Message-ID')) {
+                $header = $originalMessage->getHeaders()->get('Message-ID');
+                $messageId = $header?->getBodyAsString() ?? '';
 
                 return mb_trim($messageId, '<>'); // Remove angle brackets if present
             }
 
             // Try to get from Symfony sent message
             $symphonyMessage = $sentMessage->getSymfonySentMessage();
+            $envelope = $symphonyMessage->getEnvelope();
+            $sender = $envelope->getSender()->getAddress();
+            $recipients = implode(',', array_map(fn (Address $r): string => $r->getAddress(), $envelope->getRecipients()));
 
-            if ($symphonyMessage) {
-                // For Mailgun, we can try to get it from the envelope or debug info
-                $envelope = $symphonyMessage->getEnvelope();
-                if ($envelope) {
-                    // Generate a unique ID based on envelope data
-                    $sender = $envelope->getSender()->getAddress();
-                    $recipients = implode(',', array_map(fn (Address $r): string => $r->getAddress(), $envelope->getRecipients()));
-
-                    return 'laravel-'.md5($sender.$recipients.now()->timestamp);
-                }
-            }
-
-            // Fallback: generate a unique ID
-            return 'laravel-'.uniqid().'-'.time();
+            return 'laravel-'.md5($sender.$recipients.now()->timestamp);
 
         } catch (Exception $e) {
             Log::error('Error extracting message ID', ['error' => $e->getMessage()]);

@@ -6,14 +6,47 @@ namespace App\Models;
 
 use App\Enum\DevStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property string $name
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $zip_code
+ * @property string|null $phone
+ * @property string|null $email
+ * @property string|null $current_solution_name
+ * @property string|null $current_solution_use
+ * @property string|null $notes
+ * @property string|null $status
+ * @property string|null $rating
+ * @property string|null $type
+ * @property bool $in_development
+ * @property DevStatus|null $dev_status
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Collection<int, Store> $stores
+ * @property-read Collection<int, Contact> $contacts
+ * @property-read Collection<int, Task> $tasks
+ * @property-read Collection<int, Progress> $progresses
+ * @property-read Collection<int, Opportunity> $opportunities
+ * @property-read Collection<int, DealerEmail> $dealerEmails
+ * @property-read Collection<int, SentEmail> $sentEmails
+ * @property-read Collection<int, User> $users
+ * @property-read int|null $open_tasks_count
+ * @property-read int $total_store_count
+ */
 class Dealership extends Model
 {
     use HasFactory, LogsActivity, Searchable;
@@ -42,41 +75,65 @@ class Dealership extends Model
         'dev_status' => DevStatus::class,
     ];
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
 
+    /**
+     * @return HasMany<Store, $this>
+     */
     public function stores(): HasMany
     {
         return $this->hasMany(Store::class);
     }
 
+    /**
+     * @return HasMany<Contact, $this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class);
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * @return HasMany<Progress, $this>
+     */
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);
     }
 
+    /**
+     * @return HasMany<Opportunity, $this>
+     */
     public function opportunities(): HasMany
     {
         return $this->hasMany(Opportunity::class);
     }
 
+    /**
+     * @return HasMany<DealerEmail, $this>
+     */
     public function dealerEmails(): HasMany
     {
         return $this->hasMany(DealerEmail::class);
     }
 
+    /**
+     * @return HasMany<SentEmail, $this>
+     */
     public function sentEmails(): HasMany
     {
         return $this->hasMany(SentEmail::class);

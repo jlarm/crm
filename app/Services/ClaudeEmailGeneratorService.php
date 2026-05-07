@@ -38,7 +38,7 @@ class ClaudeEmailGeneratorService
 
         $response = $this->callClaudeApi($prompt, 1000);
 
-        return in_array($this->extractContent($response), [null, '', '0'], true) ? $template?->body ?? 'Thank you for your time. Looking forward to connecting soon.' : $this->extractContent($response);
+        return in_array($this->extractContent($response), [null, '', '0'], true) ? $template?->body ?? 'Thank you for your time. Looking forward to connecting soon.' : $this->extractContent($response); // @phpstan-ignore nullsafe.neverNull
     }
 
     public function generatePersonalizedMessage(Dealership $dealership, string $context = ''): string
@@ -217,7 +217,7 @@ Format as a numbered list. Return only the list items.";
             $context .= 'Notes: '.mb_substr($dealership->notes, 0, 200)."\n";
         }
 
-        return $context.('Development Status: '.$dealership->in_development !== '' ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
+        return $context.'Development Status: '.($dealership->in_development ? 'In Development ('.($dealership->dev_status?->getLabel() ?? 'Unknown').')' : 'Not in development');
     }
 
     private function callClaudeApi(string $prompt, int $maxTokens = 500): ?Response

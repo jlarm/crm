@@ -92,8 +92,8 @@ final class SalesDashboardController extends Controller
                 'stage' => $stage->value,
                 'label' => $stage->getLabel(),
                 'color' => $stage->getColor(),
-                'count' => (int) ($row?->count ?? 0),
-                'value' => (float) ($row?->value ?? 0),
+                'count' => (int) ($row?->getAttribute('count') ?? 0),
+                'value' => (float) ($row?->getAttribute('value') ?? 0),
             ];
         }, OpportunityStage::cases());
     }
@@ -119,15 +119,15 @@ final class SalesDashboardController extends Controller
             ->orderByDesc(DB::raw('COUNT(o.id)'))
             ->get()
             ->map(function (User $rep): array {
-                $total = (int) $rep->total_deals;
-                $won = (int) $rep->won_count;
+                $total = (int) $rep->getAttribute('total_deals');
+                $won = (int) $rep->getAttribute('won_count');
 
                 return [
                     'name' => $rep->name,
                     'total' => $total,
                     'won' => $won,
-                    'lost' => (int) $rep->lost_count,
-                    'pipeline' => (float) $rep->open_pipeline,
+                    'lost' => (int) $rep->getAttribute('lost_count'),
+                    'pipeline' => (float) $rep->getAttribute('open_pipeline'),
                     'winRate' => $total > 0 ? (int) round(($won / $total) * 100) : 0,
                 ];
             })

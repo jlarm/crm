@@ -38,16 +38,25 @@ class Contact extends Model
         'primary_contact' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Dealership, $this>
+     */
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
     }
 
+    /**
+     * @return HasMany<Progress, $this>
+     */
     public function progresses(): HasMany
     {
         return $this->hasMany(Progress::class);
     }
 
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);

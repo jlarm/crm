@@ -58,7 +58,7 @@ class ContactObserver
             return;
         }
 
-        $list = Mailcoach::emailList($model->dealership->getListType());
+        $list = Mailcoach::emailList($model->dealership->getListType()); // @phpstan-ignore staticMethod.notFound
         $sub = $list->subscriber($model->email);
         if ($sub) {
             $sub->delete();
@@ -90,7 +90,7 @@ class ContactObserver
                 return;
             }
 
-            $list = Mailcoach::emailList($listUuid);
+            $list = Mailcoach::emailList($listUuid); // @phpstan-ignore staticMethod.notFound
 
             if (empty($model->email)) {
                 Log::warning("[ContactObserver] Empty email for contact ID {$model->id}. Skipping Mailcoach sync.");
@@ -101,7 +101,7 @@ class ContactObserver
             $subscriber = $list->subscriber($model->email);
 
             $name_parts = explode(' ', mb_trim($model->name ?? ''));
-            $first_name = $name_parts[0] ?? '';
+            $first_name = $name_parts[0];
             $last_name = ''; // Initialize last_name
 
             if (count($name_parts) > 1) {
@@ -109,6 +109,7 @@ class ContactObserver
             }
 
             if ($subscriber) {
+                /** @phpstan-ignore staticMethod.notFound */
                 Mailcoach::updateSubscriber(
                     subscriberUuid: $subscriber->uuid,
                     attributes: [
@@ -121,6 +122,7 @@ class ContactObserver
                 return;
             }
 
+            /** @phpstan-ignore staticMethod.notFound */
             Mailcoach::createSubscriber(
                 emailListUuid: $listUuid,
                 attributes: [

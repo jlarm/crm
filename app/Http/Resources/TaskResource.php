@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Task
+ */
 final class TaskResource extends JsonResource
 {
     /**
@@ -27,20 +31,20 @@ final class TaskResource extends JsonResource
             'isCompleted' => $this->isCompleted(),
             'isOverdue' => $this->isOverdue(),
             'assignedTo' => $this->whenLoaded('user', fn () => [
-                'id' => $this->user->id,
-                'name' => $this->user->name,
+                'id' => $this->resource->user->id,
+                'name' => $this->resource->user->name,
             ]),
             'createdBy' => $this->whenLoaded('createdBy', fn () => [
-                'id' => $this->createdBy->id,
-                'name' => $this->createdBy->name,
+                'id' => $this->resource->createdBy->id,
+                'name' => $this->resource->createdBy->name,
             ]),
-            'dealership' => $this->whenLoaded('dealership', fn () => $this->dealership ? [
-                'id' => $this->dealership->id,
-                'name' => $this->dealership->name,
+            'dealership' => $this->whenLoaded('dealership', fn () => $this->resource->dealership ? [
+                'id' => $this->resource->dealership->id,
+                'name' => $this->resource->dealership->name,
             ] : null),
-            'contact' => $this->whenLoaded('contact', fn () => $this->contact ? [
-                'id' => $this->contact->id,
-                'name' => $this->contact->name,
+            'contact' => $this->whenLoaded('contact', fn () => $this->resource->contact ? [
+                'id' => $this->resource->contact->id,
+                'name' => $this->resource->contact->name,
             ] : null),
             'dealershipId' => $this->dealership_id,
             'contactId' => $this->contact_id,

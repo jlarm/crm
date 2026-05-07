@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Carbon::macro('inApplicationTimezone', fn () => $this->tz(config('app.timezone_display')));
-        Carbon::macro('inUserTimezone', fn () => $this->tz(auth()->user()?->timezone ?? config('app.timezone_display')));
+        Carbon::macro('inUserTimezone', fn () => $this->tz(auth()->user()?->timezone ?? config('app.timezone_display'))); // @phpstan-ignore nullsafe.neverNull
     }
 
     protected function configureDefaults(): void

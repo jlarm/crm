@@ -6,10 +6,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $file_name
+ * @property string $file_path
+ */
 class PdfAttachment extends Model
 {
     use HasFactory;
@@ -17,14 +22,20 @@ class PdfAttachment extends Model
 
     protected $fillable = ['file_name', 'file_path'];
 
-    public function attachable(): MorphMany
+    /**
+     * @return MorphToMany<DealerEmail, $this>
+     */
+    public function attachable(): MorphToMany
     {
-        return $this->morphByMany(DealerEmail::class, 'attachable');
+        return $this->morphedByMany(DealerEmail::class, 'attachable');
     }
 
-    public function attachableTemplate(): MorphMany
+    /**
+     * @return MorphToMany<DealerEmailTemplate, $this>
+     */
+    public function attachableTemplate(): MorphToMany
     {
-        return $this->morphByMany(DealerEmailTemplate::class, 'attachable');
+        return $this->morphedByMany(DealerEmailTemplate::class, 'attachable');
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -23,7 +23,7 @@ class DealershipFactory extends Factory
             'name' => $this->faker->company().' '.$this->faker->randomElement(['Motors', 'Auto', 'RV', 'Marine']),
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
+            'state' => $this->faker->stateAbbr(), // @phpstan-ignore method.notFound
             'zip_code' => $this->faker->postcode(),
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->companyEmail(),

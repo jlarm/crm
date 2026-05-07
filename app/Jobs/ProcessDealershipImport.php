@@ -38,7 +38,7 @@ class ProcessDealershipImport implements ShouldQueue
     public function failed(?Throwable $e): void
     {
         Log::error('[ProcessDealershipImport] Import job failed.', [
-            'importer_id' => $this->options['importer_id'] ?? null,
+            'importer_id' => $this->options['importer_id'],
             'row_count' => count($this->validatedRows),
             'exception' => $e,
         ]);
