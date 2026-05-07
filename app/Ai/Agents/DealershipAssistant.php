@@ -57,13 +57,13 @@ TXT;
             return '';
         }
 
-        $valueProps = collect($company['value_props'] ?? [])
+        $valueProps = collect((array) ($company['value_props'] ?? []))
             ->map(fn (string $line): string => '- '.$line)
             ->implode("\n");
 
-        $regs = collect($company['regulatory_coverage'] ?? [])->implode(', ');
+        $regs = collect((array) ($company['regulatory_coverage'] ?? []))->implode(', ');
 
-        $guidelines = collect($company['email_guidelines'] ?? [])
+        $guidelines = collect((array) ($company['email_guidelines'] ?? []))
             ->map(fn (string $line): string => '- '.$line)
             ->implode("\n");
 

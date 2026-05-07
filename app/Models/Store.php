@@ -13,6 +13,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Store extends Model
 {
+    /** @use HasFactory<\Database\Factories\StoreFactory> */
     use HasFactory, LogsActivity, Searchable;
 
     protected $fillable = [

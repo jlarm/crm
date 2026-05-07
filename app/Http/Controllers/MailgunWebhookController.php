@@ -149,6 +149,9 @@ class MailgunWebhookController extends Controller
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $eventData
+     */
     private function processEvent(array $eventData): void
     {
         $messageId = $eventData['message']['headers']['message-id'] ?? null;

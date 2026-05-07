@@ -21,6 +21,9 @@ class Tag extends Model
         'name' => 'string',
     ];
 
+    /**
+     * @return BelongsToMany<Contact, $this>
+     */
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class);

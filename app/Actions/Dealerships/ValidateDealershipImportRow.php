@@ -53,6 +53,7 @@ final class ValidateDealershipImportRow
     /**
      * @param  array<string, string|null>  $raw
      * @param  array{status: string, rating: string, type: string}  $defaults
+     * @return array<string, mixed>
      */
     private function validateDealership(int $line, array $raw, array $defaults): array
     {
@@ -90,6 +91,7 @@ final class ValidateDealershipImportRow
 
     /**
      * @param  array<string, string|null>  $raw
+     * @return array<string, mixed>
      */
     private function validateStore(int $line, array $raw): array
     {
@@ -125,6 +127,7 @@ final class ValidateDealershipImportRow
 
     /**
      * @param  array<string, string|null>  $raw
+     * @return array<string, mixed>
      */
     private function validateContact(int $line, array $raw): array
     {

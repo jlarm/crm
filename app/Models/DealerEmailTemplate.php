@@ -24,6 +24,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class DealerEmailTemplate extends Model
 {
+    /** @use HasFactory<\Database\Factories\DealerEmailTemplateFactory> */
     use HasFactory, LogsActivity;
 
     protected $fillable = [

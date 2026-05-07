@@ -8,6 +8,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class DealershipUpdateRequest extends FormRequest
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

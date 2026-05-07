@@ -75,21 +75,33 @@ class Opportunity extends Model
         return $this->hasMany(OpportunityActivity::class)->orderByDesc('occurred_at')->orderByDesc('id');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWon(Builder $query): void
     {
         $query->where('stage', OpportunityStage::Won->value);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeLost(Builder $query): void
     {
         $query->where('stage', OpportunityStage::Lost->value);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeOpen(Builder $query): void
     {
         $query->whereNotIn('stage', OpportunityStage::closedValues());
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeClosingThisMonth(Builder $query): void
     {
         $query->whereNotIn('stage', OpportunityStage::closedValues())
@@ -98,6 +110,9 @@ class Opportunity extends Model
             ->whereYear('expected_close_date', now()->year);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWonLastMonth(Builder $query): void
     {
         $query->where('stage', OpportunityStage::Won->value)

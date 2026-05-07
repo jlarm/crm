@@ -50,6 +50,9 @@ class ClaudeEmailGeneratorService
         return in_array($this->extractContent($response), [null, '', '0'], true) ? "Hi there! I wanted to reach out regarding your {$dealership->type} dealership." : $this->extractContent($response);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function generateFollowUpSuggestions(Dealership $dealership): array
     {
         $prompt = $this->buildFollowUpPrompt($dealership);

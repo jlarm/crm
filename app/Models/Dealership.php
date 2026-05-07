@@ -49,6 +49,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Dealership extends Model
 {
+    /** @use HasFactory<\Database\Factories\DealershipFactory> */
     use HasFactory, LogsActivity, Searchable;
 
     protected $fillable = [
@@ -180,6 +181,9 @@ class Dealership extends Model
             ->setDescriptionForEvent(fn (string $eventName): string => "Dealership {$eventName}");
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeSearch(Builder $query, ?string $search): void
     {
         if (! $search) {
@@ -192,6 +196,9 @@ class Dealership extends Model
         });
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWithRating(Builder $query, ?string $rating): void
     {
         if (! $rating) {
@@ -201,6 +208,9 @@ class Dealership extends Model
         $query->where('rating', $rating);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWithType(Builder $query, ?string $type): void
     {
         if (! $type) {
@@ -210,6 +220,9 @@ class Dealership extends Model
         $query->where('type', $type);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeForUser(Builder $query, ?User $user): void
     {
         if (! $user) {
@@ -222,6 +235,9 @@ class Dealership extends Model
         });
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeSortBy(Builder $query, ?string $sort, ?string $direction = 'asc'): void
     {
         if (! $sort) {

@@ -39,6 +39,9 @@ class ClientMail extends Mailable implements ShouldQueue
         );
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public function attachments(): array
     {
         return [];

@@ -15,12 +15,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Contact extends Model
 {
+    /** @use HasFactory<\Database\Factories\ContactFactory> */
     use HasFactory, LogsActivity, Searchable;
 
     /**
      * The relationships that should touch the parent model when updated.
      *
-     * @var array
+     * @var list<string>
      */
     protected $touches = ['tags'];
 

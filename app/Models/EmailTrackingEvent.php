@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailTrackingEvent extends Model
 {
+    /** @use HasFactory<\Database\Factories\EmailTrackingEventFactory> */
     use HasFactory;
 
     public const EVENT_DELIVERED = 'delivered';

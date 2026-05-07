@@ -106,16 +106,25 @@ class Task extends Model
             && ! $this->isCompleted();
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeIncomplete(Builder $query): void
     {
         $query->whereNull('completed_at');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeCompleted(Builder $query): void
     {
         $query->whereNotNull('completed_at');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeOverdue(Builder $query): void
     {
         $query->whereNull('completed_at')
@@ -123,17 +132,26 @@ class Task extends Model
             ->whereDate('due_date', '<', now());
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeDueToday(Builder $query): void
     {
         $query->whereNull('completed_at')
             ->whereDate('due_date', today());
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeForUser(Builder $query, User $user): void
     {
         $query->where('user_id', $user->id);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWithPriority(Builder $query, ?string $priority): void
     {
         if (! $priority) {
@@ -143,6 +161,9 @@ class Task extends Model
         $query->where('priority', $priority);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeWithType(Builder $query, ?string $type): void
     {
         if (! $type) {

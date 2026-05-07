@@ -28,6 +28,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Progress extends Model
 {
+    /** @use HasFactory<\Database\Factories\ProgressFactory> */
     use HasFactory, LogsActivity;
 
     protected $table = 'progresses';

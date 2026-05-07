@@ -21,9 +21,9 @@ class DealerEmailMail extends Mailable
 
     public mixed $body;
 
-    public $attachment;
+    public mixed $attachment = null;
 
-    public $attachmentName;
+    public ?string $attachmentName = null;
 
     /**
      * @var string|null
@@ -79,7 +79,7 @@ class DealerEmailMail extends Mailable
     }
 
     /**
-     * @return list
+     * @return list<Attachment>
      */
     public function attachments(): array
     {

@@ -13,6 +13,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class SentEmail extends Model
 {
+    /** @use HasFactory<\Database\Factories\SentEmailFactory> */
     use HasFactory, LogsActivity;
 
     protected $fillable = [
