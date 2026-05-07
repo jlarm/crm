@@ -14,18 +14,17 @@ class DealerEmailObserver
 {
     public function created(DealerEmail $dealerEmail): void
     {
-        // Check if frequency is 0 and start_date is today
-        $isFrequencyZero = $dealerEmail->frequency->value === 0;
+        $frequencyValue = $dealerEmail->frequency?->value;
+        $isFrequencyZero = $frequencyValue === 0;
         $isStartDateToday = Carbon::parse($dealerEmail->start_date)->isToday();
 
         if ($isFrequencyZero && $isStartDateToday) {
-            // Dispatch the job to handle email sending
             Log::info('Sending one off email');
             SendDealerEmail::dispatch($dealerEmail);
         } else {
             Log::info('Conditions not met for immediate sending', [
                 'id' => $dealerEmail->id,
-                'frequency' => $dealerEmail->frequency->value,
+                'frequency' => $frequencyValue,
                 'start_date' => $dealerEmail->start_date,
                 'current_date' => now()->toDateString(),
             ]);

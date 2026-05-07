@@ -145,7 +145,7 @@ final class DealershipActivityController extends Controller
             'title' => $title,
             'description' => $description,
             'actor' => $causer ? ['id' => $causer->getKey(), 'name' => $causer->getAttribute('name')] : null,
-            'occurredAt' => $activity->created_at->toIso8601String(),
+            'occurredAt' => $activity->created_at?->toIso8601String(),
         ];
     }
 

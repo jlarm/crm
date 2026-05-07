@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Ai\Agents\DealershipAssistant;
 use App\Models\Dealership;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,7 @@ final class AiChatController extends Controller
             'dealership_id' => ['nullable', 'integer', 'exists:dealerships,id'],
         ]);
 
+        /** @var User $user */
         $user = $request->user();
         $dealership = isset($data['dealership_id'])
             ? Dealership::query()->forUser($user)->whereKey($data['dealership_id'])->first()

@@ -88,7 +88,7 @@ class EmailTrackingService
             ]);
 
             return 'href="'.$trackingUrl.'"';
-        }, $emailContent);
+        }, $emailContent) ?? $emailContent;
     }
 
     private function extractMessageId(SentMessage $sentMessage): string

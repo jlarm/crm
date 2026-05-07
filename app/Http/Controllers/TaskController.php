@@ -21,9 +21,12 @@ final class TaskController extends Controller
 {
     public function index(Request $request): Response
     {
+        /** @var User $user */
+        $user = $request->user();
+
         $query = Task::query()
             ->with(['user', 'createdBy', 'dealership', 'contact'])
-            ->forUser($request->user());
+            ->forUser($user);
 
         $filter = $request->input('filter', 'incomplete');
 
@@ -73,18 +76,21 @@ final class TaskController extends Controller
                 ->orderBy('name')
                 ->get(),
             'summary' => [
-                'incomplete' => Task::forUser($request->user())->incomplete()->count(),
-                'overdue' => Task::forUser($request->user())->overdue()->count(),
-                'dueToday' => Task::forUser($request->user())->dueToday()->count(),
+                'incomplete' => Task::forUser($user)->incomplete()->count(),
+                'overdue' => Task::forUser($user)->overdue()->count(),
+                'dueToday' => Task::forUser($user)->dueToday()->count(),
             ],
         ]);
     }
 
     public function store(TaskStoreRequest $request): RedirectResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+
         Task::create([
             ...$request->validated(),
-            'created_by_user_id' => $request->user()->id,
+            'created_by_user_id' => $user->id,
         ]);
 
         return back()->with('success', 'Task created successfully.');

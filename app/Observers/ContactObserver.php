@@ -54,7 +54,7 @@ class ContactObserver
      */
     public function deleted(Contact $model): void
     {
-        if (! self::$syncMailcoach) {
+        if (! self::$syncMailcoach || $model->dealership === null) {
             return;
         }
 

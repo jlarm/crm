@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,10 @@ class ProfileController extends Controller
 
     public function update(Request $request, UpdateUserProfileInformation $updater): RedirectResponse
     {
-        $updater->update($request->user(), $request->all());
+        /** @var User $user */
+        $user = $request->user();
+
+        $updater->update($user, $request->all());
 
         return to_route('settings.profile.edit')->with('status', 'profile-updated');
     }
@@ -33,6 +37,7 @@ class ProfileController extends Controller
     {
         $request->validate(['password' => ['required', 'current_password']]);
 
+        /** @var User $user */
         $user = $request->user();
         auth()->logout();
         $user->delete();

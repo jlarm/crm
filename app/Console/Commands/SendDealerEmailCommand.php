@@ -36,7 +36,7 @@ class SendDealerEmailCommand extends Command
             ->get();
 
         foreach ($emails as $email) {
-            foreach ($email->recipients as $recipient) {
+            foreach ($email->recipients ?? [] as $recipient) {
                 $name = Contact::where('email', $recipient)->first()?->name ?? ''; // @phpstan-ignore nullsafe.neverNull
                 Mail::to($recipient)->send(new DealerEmailMail($email, $name));
                 SentEmail::create([
@@ -46,9 +46,11 @@ class SendDealerEmailCommand extends Command
                 ]);
             }
 
+            $frequencyValue = $email->frequency?->value ?? 0; // @phpstan-ignore nullsafe.neverNull
+
             $email->update([
                 'last_sent' => now()->format('Y-m-d'),
-                'next_send_date' => $email->frequency->value > 0 ? now()->addDays($email->frequency->value)->format('Y-m-d') : null,
+                'next_send_date' => $frequencyValue > 0 ? now()->addDays($frequencyValue)->format('Y-m-d') : null,
             ]);
         }
     }

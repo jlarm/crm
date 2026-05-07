@@ -25,6 +25,10 @@ class SendReminderCommand extends Command
             ->get();
 
         foreach ($reminders as $reminder) {
+            if ($reminder->user === null) {
+                continue;
+            }
+
             Mail::to($reminder->user->email)->send(new ReminderMail($reminder));
         }
     }

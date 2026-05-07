@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dealership;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,9 +25,12 @@ final class DealershipStoreController extends Controller
             'current_solution_use' => ['nullable', 'string', 'max:255'],
         ]);
 
+        /** @var User $user */
+        $user = $request->user();
+
         $dealership->stores()->create([
             ...$data,
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
         ]);
 
         return back()->with('success', 'Store created successfully.');

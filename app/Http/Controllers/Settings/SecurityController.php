@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,12 +16,15 @@ class SecurityController extends Controller
 {
     public function edit(Request $request): Response
     {
+        /** @var User $user */
+        $user = $request->user();
+
         return Inertia::render('settings/Security', [
             'canManageTwoFactor' => true,
             'requiresConfirmation' => config('fortify.confirmPasswordBeforeEnabling2FA', false),
-            'twoFactorEnabled' => ! is_null($request->user()->two_factor_secret),
-            'recoveryCodes' => $request->user()->two_factor_recovery_codes
-                ? json_decode(decrypt($request->user()->two_factor_recovery_codes), true)
+            'twoFactorEnabled' => ! is_null($user->two_factor_secret),
+            'recoveryCodes' => $user->two_factor_recovery_codes
+                ? json_decode(decrypt($user->two_factor_recovery_codes), true)
                 : [],
             'status' => session('status'),
         ]);
@@ -28,7 +32,10 @@ class SecurityController extends Controller
 
     public function update(Request $request, UpdateUserPassword $updater): RedirectResponse
     {
-        $updater->update($request->user(), $request->all());
+        /** @var User $user */
+        $user = $request->user();
+
+        $updater->update($user, $request->all());
 
         return to_route('settings.security.edit')->with('status', 'password-updated');
     }

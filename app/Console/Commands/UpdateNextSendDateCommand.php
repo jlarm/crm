@@ -21,6 +21,10 @@ class UpdateNextSendDateCommand extends Command
             ->get();
 
         foreach ($emails as $email) {
+            if ($email->last_sent === null || $email->frequency === null) {
+                continue;
+            }
+
             $email->update([
                 'next_send_date' => $email->last_sent->addDays($email->frequency->value)->format('Y-m-d'),
             ]);

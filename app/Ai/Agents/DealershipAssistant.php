@@ -196,6 +196,10 @@ TXT;
 
     protected function dealershipContext(): string
     {
+        if ($this->dealership === null) {
+            return '';
+        }
+
         $d = $this->dealership->loadMissing([
             'progresses' => fn ($q) => $q->with(['user:id,name', 'category:id,name'])->latest('date')->limit(20),
             'opportunities' => fn ($q) => $q->latest()->limit(10),

@@ -21,6 +21,7 @@ final class DashboardController extends Controller
 {
     public function index(DealershipIndexRequest $request): Response
     {
+        /** @var User $user */
         $user = $request->user();
 
         $scope = $request->input('scope');

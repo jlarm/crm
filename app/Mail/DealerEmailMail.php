@@ -37,17 +37,17 @@ class DealerEmailMail extends Mailable
         if ($dealerEmail->template) {
 
             if ($this->dealerEmail->customize_email) {
-                $this->subject = $dealerEmail->subject;
+                $this->subject = $dealerEmail->subject ?? '';
                 $this->body = $dealerEmail->message;
             } else {
-                $this->subject = $dealerEmail->template->subject;
+                $this->subject = $dealerEmail->template->subject ?? '';
                 $this->body = $dealerEmail->template->body;
             }
 
-            $this->body = str_replace('{{contact_name}}', $this->name, $this->body);
+            $this->body = str_replace('{{contact_name}}', (string) $this->name, (string) $this->body);
 
         } else {
-            $this->subject = $dealerEmail->subject;
+            $this->subject = $dealerEmail->subject ?? '';
             $this->body = $dealerEmail->message;
         }
 
@@ -55,8 +55,11 @@ class DealerEmailMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $user = $this->dealerEmail->user;
+
         return new Envelope(
-            from: new Address($this->dealerEmail->user->email, $this->dealerEmail->user->name.' from ARMP'),
+            /** @phpstan-ignore nullsafe.neverNull, nullsafe.neverNull */
+            from: new Address($user?->email ?? '', ($user?->name ?? '').' from ARMP'),
             subject: $this->subject,
             tags: ['dealer-email', 'campaign-'.$this->dealerEmail->id],
             metadata: [
