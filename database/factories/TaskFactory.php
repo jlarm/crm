@@ -21,6 +21,8 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         $userId = User::factory();
+        $types = TaskType::cases();
+        $priorities = TaskPriority::cases();
 
         return [
             'user_id' => $userId,
@@ -29,8 +31,8 @@ class TaskFactory extends Factory
             'contact_id' => null,
             'title' => fake()->sentence(4),
             'description' => fake()->optional()->paragraph(),
-            'type' => fake()->randomElement(TaskType::cases())->value,
-            'priority' => fake()->randomElement(TaskPriority::cases())->value,
+            'type' => $types[array_rand($types)]->value,
+            'priority' => $priorities[array_rand($priorities)]->value,
             'due_date' => fake()->optional()->dateTimeBetween('now', '+30 days'),
             'completed_at' => null,
         ];

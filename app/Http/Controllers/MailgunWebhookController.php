@@ -27,12 +27,13 @@ class MailgunWebhookController extends Controller
 
             $eventData = $request->input('event-data');
 
-            if (! $eventData) {
+            if (! is_array($eventData) || $eventData === []) {
                 Log::warning('No event-data in Mailgun webhook', ['data' => $request->all()]);
 
                 return response('Bad Request', 400);
             }
 
+            /** @var array<string, mixed> $eventData */
             $this->processEvent($eventData);
 
             return response('OK', 200);
@@ -154,10 +155,13 @@ class MailgunWebhookController extends Controller
      */
     private function processEvent(array $eventData): void
     {
-        $messageId = $eventData['message']['headers']['message-id'] ?? null;
-        $event = $eventData['event'] ?? null;
-        $timestamp = $eventData['timestamp'] ?? now()->timestamp;
-        $recipient = $eventData['recipient'] ?? null;
+        $message = is_array($eventData['message'] ?? null) ? $eventData['message'] : [];
+        $headers = is_array($message['headers'] ?? null) ? $message['headers'] : [];
+        $messageId = is_string($headers['message-id'] ?? null) ? $headers['message-id'] : null;
+        $event = is_string($eventData['event'] ?? null) ? $eventData['event'] : null;
+        $timestampRaw = $eventData['timestamp'] ?? now()->timestamp;
+        $timestamp = is_numeric($timestampRaw) || is_string($timestampRaw) ? $timestampRaw : now()->timestamp;
+        $recipient = is_string($eventData['recipient'] ?? null) ? $eventData['recipient'] : null;
 
         if (! $messageId || ! $event || ! $recipient) {
             Log::warning('Missing required data in Mailgun event', ['eventData' => $eventData]);
@@ -250,25 +254,24 @@ class MailgunWebhookController extends Controller
 
     private function verifySignature(Request $request): bool
     {
-        // Get webhook signing key from config
         $signingKey = config('services.mailgun.webhook_signing_key');
 
-        if (! $signingKey) {
+        if (! is_string($signingKey) || $signingKey === '') {
             // If no signing key configured, skip verification
             return true;
         }
 
         $signature = $request->input('signature');
 
-        if (! $signature) {
+        if (! is_array($signature)) {
             return false;
         }
 
-        $timestamp = $signature['timestamp'] ?? '';
-        $token = $signature['token'] ?? '';
-        $providedSignature = $signature['signature'] ?? '';
+        $timestamp = is_string($signature['timestamp'] ?? null) ? $signature['timestamp'] : '';
+        $token = is_string($signature['token'] ?? null) ? $signature['token'] : '';
+        $providedSignature = is_string($signature['signature'] ?? null) ? $signature['signature'] : '';
 
-        $expectedSignature = hash_hmac('sha256', $timestamp.$token, (string) $signingKey);
+        $expectedSignature = hash_hmac('sha256', $timestamp.$token, $signingKey);
 
         return hash_equals($expectedSignature, $providedSignature);
     }

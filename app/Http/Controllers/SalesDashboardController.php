@@ -92,8 +92,8 @@ final class SalesDashboardController extends Controller
                 'stage' => $stage->value,
                 'label' => $stage->getLabel(),
                 'color' => $stage->getColor(),
-                'count' => (int) ($row?->getAttribute('count') ?? 0),
-                'value' => (float) ($row?->getAttribute('value') ?? 0),
+                'count' => is_numeric($row?->getAttribute('count')) ? (int) $row->getAttribute('count') : 0,
+                'value' => is_numeric($row?->getAttribute('value')) ? (float) $row->getAttribute('value') : 0.0,
             ];
         }, OpportunityStage::cases());
     }
@@ -119,15 +119,17 @@ final class SalesDashboardController extends Controller
             ->orderByDesc(DB::raw('COUNT(o.id)'))
             ->get()
             ->map(function (User $rep): array {
-                $total = (int) $rep->getAttribute('total_deals');
-                $won = (int) $rep->getAttribute('won_count');
+                $total = (int) (is_numeric($rep->getAttribute('total_deals')) ? $rep->getAttribute('total_deals') : 0);
+                $won = (int) (is_numeric($rep->getAttribute('won_count')) ? $rep->getAttribute('won_count') : 0);
+                $lost = (int) (is_numeric($rep->getAttribute('lost_count')) ? $rep->getAttribute('lost_count') : 0);
+                $pipeline = (float) (is_numeric($rep->getAttribute('open_pipeline')) ? $rep->getAttribute('open_pipeline') : 0);
 
                 return [
                     'name' => $rep->name,
                     'total' => $total,
                     'won' => $won,
-                    'lost' => (int) $rep->getAttribute('lost_count'),
-                    'pipeline' => (float) $rep->getAttribute('open_pipeline'),
+                    'lost' => $lost,
+                    'pipeline' => $pipeline,
                     'winRate' => $total > 0 ? (int) round(($won / $total) * 100) : 0,
                 ];
             })

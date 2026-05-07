@@ -59,7 +59,7 @@ final class UserController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make(is_string($data['password']) ? $data['password'] : ''),
             'phone' => $data['phone'] ?? null,
             'timezone' => $data['timezone'] ?? null,
             'email_verified_at' => now(),
@@ -93,7 +93,7 @@ final class UserController extends Controller
         ]);
 
         if (! empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
+            $user->password = Hash::make(is_string($data['password']) ? $data['password'] : '');
         }
 
         $user->save();

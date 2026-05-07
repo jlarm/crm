@@ -42,9 +42,9 @@ final class DashboardController extends Controller
                 $query->whereNot('status', 'imported');
             }
 
-            $query->search($request->input('search'))
-                ->withRating($request->input('rating'))
-                ->withType($request->input('type'));
+            $query->search($request->string('search')->toString() ?: null)
+                ->withRating($request->string('rating')->toString() ?: null)
+                ->withType($request->string('type')->toString() ?: null);
 
             if ($status) {
                 $query->where('status', $status);
@@ -59,9 +59,9 @@ final class DashboardController extends Controller
             ->pluck('type')
             ->filter()
             ->values()
-            ->map(fn (string $type): array => [
-                'value' => $type,
-                'label' => Str::headline($type),
+            ->map(fn ($type): array => [
+                'value' => is_string($type) ? $type : '',
+                'label' => Str::headline(is_string($type) ? $type : ''),
             ])
             ->all();
 
@@ -69,7 +69,7 @@ final class DashboardController extends Controller
         $applyFilters($query);
 
         $dealerships = $query
-            ->sortBy($request->input('sort'), $request->input('direction'))
+            ->sortBy($request->string('sort')->toString() ?: null, $request->string('direction', 'asc')->toString())
             ->select('id', 'name', 'city', 'state', 'status', 'rating')
             ->withCount(['tasks as open_tasks_count' => fn (Builder $q) => $q->whereNull('completed_at')])
             ->paginate(15)

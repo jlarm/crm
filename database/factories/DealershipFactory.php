@@ -18,9 +18,11 @@ class DealershipFactory extends Factory
      */
     public function definition(): array
     {
+        $suffixes = ['Motors', 'Auto', 'RV', 'Marine'];
+
         return [
             'user_id' => 1,
-            'name' => $this->faker->company().' '.$this->faker->randomElement(['Motors', 'Auto', 'RV', 'Marine']),
+            'name' => $this->faker->company().' '.$suffixes[array_rand($suffixes)],
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(), // @phpstan-ignore method.notFound

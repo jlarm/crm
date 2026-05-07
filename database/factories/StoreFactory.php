@@ -18,10 +18,12 @@ class StoreFactory extends Factory
      */
     public function definition(): array
     {
+        $suffixes = ['Store', 'Location', 'Branch', 'Outlet'];
+
         return [
             'user_id' => 1,
             'dealership_id' => \App\Models\Dealership::factory(),
-            'name' => $this->faker->company().' '.$this->faker->randomElement(['Store', 'Location', 'Branch', 'Outlet']),
+            'name' => $this->faker->company().' '.$suffixes[array_rand($suffixes)],
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(), // @phpstan-ignore method.notFound

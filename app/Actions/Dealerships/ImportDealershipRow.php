@@ -68,7 +68,7 @@ final class ImportDealershipRow
                             'exception' => $e,
                         ]);
                         $stats['errors'][] = [
-                            'line' => $group['parent']['line'] ?? 0,
+                            'line' => is_int($group['parent']['line'] ?? null) ? $group['parent']['line'] : 0,
                             'message' => $e->getMessage(),
                         ];
                     }
@@ -96,10 +96,12 @@ final class ImportDealershipRow
             }
 
             if ($row['row_type'] === 'dealership') {
-                $key = mb_strtolower((string) $row['resolved']['name']);
+                $resolved = is_array($row['resolved']) ? $row['resolved'] : [];
+                $name = is_string($resolved['name'] ?? null) ? $resolved['name'] : '';
+                $key = mb_strtolower($name);
                 $groups[$key] = [
                     'parent' => $row,
-                    'parent_ref' => $row['resolved']['name'],
+                    'parent_ref' => $name,
                     'stores' => [],
                     'contacts' => [],
                 ];
@@ -112,7 +114,7 @@ final class ImportDealershipRow
             }
 
             $ref = $row['parent_ref'];
-            if ($ref === null) {
+            if (! is_string($ref) || $ref === '') {
                 continue;
             }
 
@@ -146,8 +148,9 @@ final class ImportDealershipRow
     {
         $names = [];
         foreach ($groups as $group) {
-            if ($group['parent_ref']) {
-                $names[mb_strtolower($group['parent_ref'])] = true;
+            $ref = $group['parent_ref'] ?? null;
+            if (is_string($ref) && $ref !== '') {
+                $names[mb_strtolower($ref)] = true;
             }
         }
 
@@ -172,7 +175,14 @@ final class ImportDealershipRow
     {
         $emails = [];
         foreach ($rows as $row) {
-            foreach ($row['extra_user_emails'] ?? [] as $email) {
+            $extra = $row['extra_user_emails'] ?? [];
+            if (! is_array($extra)) {
+                continue;
+            }
+            foreach ($extra as $email) {
+                if (! is_string($email) || $email === '') {
+                    continue;
+                }
                 $emails[mb_strtolower($email)] = true;
             }
         }
@@ -184,13 +194,15 @@ final class ImportDealershipRow
         $this->userIdByEmail = User::query()
             ->whereIn(DB::raw('LOWER(email)'), array_keys($emails))
             ->pluck('id', 'email')
-            ->mapWithKeys(fn (int $id, string $email): array => [mb_strtolower($email) => $id])
+            ->mapWithKeys(function ($id, $email): array {
+                return [mb_strtolower(is_string($email) ? $email : '') => is_numeric($id) ? (int) $id : 0];
+            })
             ->all();
     }
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array<string, mixed>  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -211,7 +223,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array<string, mixed>  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -220,14 +232,24 @@ final class ImportDealershipRow
     private function upsertDealership(array $group, array $options, array &$stats): Dealership
     {
         $parent = $group['parent'];
-        $name = $parent['resolved']['name'] ?? $group['parent_ref'];
-        $key = mb_strtolower((string) $name);
+        $resolved = is_array($parent['resolved'] ?? null) ? $parent['resolved'] : [];
+        $extraEmailsRaw = is_array($parent['extra_user_emails'] ?? null) ? $parent['extra_user_emails'] : [];
+        $extraEmails = [];
+        foreach ($extraEmailsRaw as $email) {
+            if (is_string($email) && $email !== '') {
+                $extraEmails[] = $email;
+            }
+        }
+        $resolvedName = $resolved['name'] ?? null;
+        $parentRef = $group['parent_ref'] ?? null;
+        $name = is_string($resolvedName) ? $resolvedName : (is_string($parentRef) ? $parentRef : '');
+        $key = mb_strtolower($name);
         $existing = $this->existingByName[$key] ?? null;
 
         if ($existing) {
             if ($parent && $options['update_existing']) {
-                $existing->update($parent['resolved']);
-                $this->syncUsers($existing, $parent['extra_user_emails'] ?? [], $options);
+                $existing->update($resolved);
+                $this->syncUsers($existing, $extraEmails, $options);
                 $stats['updated']['dealerships']++;
             } elseif ($parent) {
                 $stats['skipped']++;
@@ -237,7 +259,7 @@ final class ImportDealershipRow
         }
 
         $attributes = $parent
-            ? [...$parent['resolved'], 'user_id' => $options['importer_id']]
+            ? [...$resolved, 'user_id' => $options['importer_id']]
             : [
                 'name' => $name,
                 'status' => $options['defaults']['status'],
@@ -251,7 +273,7 @@ final class ImportDealershipRow
         $dealership->setRelation('contacts', new Collection);
         $this->existingByName[$key] = $dealership;
 
-        $this->syncUsers($dealership, $parent['extra_user_emails'] ?? [], $options);
+        $this->syncUsers($dealership, $extraEmails, $options);
         $stats['created']['dealerships']++;
 
         return $dealership;
@@ -259,24 +281,25 @@ final class ImportDealershipRow
 
     /**
      * @param  array<int, string>  $extraEmails
-     * @param  array<string, mixed>  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      */
     private function syncUsers(Dealership $dealership, array $extraEmails, array $options): void
     {
         $ids = array_unique(array_merge([$options['importer_id']], $options['default_user_ids']));
 
         foreach ($extraEmails as $email) {
-            if (isset($this->userIdByEmail[mb_strtolower($email)])) {
-                $ids[] = $this->userIdByEmail[mb_strtolower($email)];
+            $key = mb_strtolower($email);
+            if (isset($this->userIdByEmail[$key])) {
+                $ids[] = $this->userIdByEmail[$key];
             }
         }
 
-        $dealership->users()->syncWithoutDetaching(array_unique($ids));
+        $dealership->users()->syncWithoutDetaching(array_values(array_unique($ids)));
     }
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array<string, mixed>  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -284,14 +307,15 @@ final class ImportDealershipRow
      */
     private function upsertStore(Dealership $dealership, array $row, array $options, array &$stats): void
     {
-        $name = (string) $row['resolved']['name'];
+        $resolved = is_array($row['resolved'] ?? null) ? $row['resolved'] : [];
+        $name = is_string($resolved['name'] ?? null) ? $resolved['name'] : '';
         $existing = $dealership->stores->first(
             fn (Store $s): bool => mb_strtolower($s->name) === mb_strtolower($name)
         );
 
         if ($existing) {
             if ($options['update_existing']) {
-                $existing->update($row['resolved']);
+                $existing->update($resolved);
                 $stats['updated']['stores']++;
             } else {
                 $stats['skipped']++;
@@ -301,7 +325,7 @@ final class ImportDealershipRow
         }
 
         $store = Store::create([
-            ...$row['resolved'],
+            ...$resolved,
             'dealership_id' => $dealership->id,
             'user_id' => $options['importer_id'],
         ]);
@@ -311,7 +335,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array<string, mixed>  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -319,7 +343,8 @@ final class ImportDealershipRow
      */
     private function upsertContact(Dealership $dealership, array $row, array $options, array &$stats): void
     {
-        $email = $row['resolved']['email'] ?? null;
+        $resolved = is_array($row['resolved'] ?? null) ? $row['resolved'] : [];
+        $email = $resolved['email'] ?? null;
 
         $existing = $email
             ? $dealership->contacts->firstWhere('email', $email)
@@ -327,7 +352,7 @@ final class ImportDealershipRow
 
         if ($existing) {
             if ($options['update_existing']) {
-                $existing->update($row['resolved']);
+                $existing->update($resolved);
                 $stats['updated']['contacts']++;
             } else {
                 $stats['skipped']++;
@@ -337,7 +362,7 @@ final class ImportDealershipRow
         }
 
         $contact = Contact::create([
-            ...$row['resolved'],
+            ...$resolved,
             'dealership_id' => $dealership->id,
         ]);
         $dealership->contacts->push($contact);

@@ -18,8 +18,10 @@ class DealerEmailTemplateFactory extends Factory
      */
     public function definition(): array
     {
+        $names = ['Introduction', 'Follow-up', 'Product Demo', 'Partnership Proposal'];
+
         return [
-            'name' => $this->faker->randomElement(['Introduction', 'Follow-up', 'Product Demo', 'Partnership Proposal']).' Email Template',
+            'name' => $names[array_rand($names)].' Email Template',
             'subject' => $this->faker->sentence(4),
             'body' => '<p>Hello {{contact_name}},</p><p>'.$this->faker->paragraph().'</p><p>Best regards,<br>Sales Team</p>',
             'attachment_path' => null,

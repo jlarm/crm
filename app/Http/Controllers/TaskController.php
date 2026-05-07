@@ -36,8 +36,8 @@ final class TaskController extends Controller
             default => $query->incomplete(),
         };
 
-        $query->withPriority($request->input('priority'))
-            ->withType($request->input('type'));
+        $query->withPriority($request->string('priority')->toString() ?: null)
+            ->withType($request->string('type')->toString() ?: null);
 
         if ($request->filled('dealership_id')) {
             $query->where('dealership_id', $request->integer('dealership_id'));

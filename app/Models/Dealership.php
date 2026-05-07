@@ -154,7 +154,9 @@ class Dealership extends Model
             'Maritime' => config('services.mailcoach.lists.maritime'),
         ];
 
-        return $types[$this->type] ?? 'default_value';
+        $value = $types[$this->type] ?? null;
+
+        return is_string($value) ? $value : 'default_value';
     }
 
     /**

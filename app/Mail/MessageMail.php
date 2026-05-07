@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Models\Dealership;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -25,7 +26,7 @@ class MessageMail extends Mailable implements ShouldQueue
     /**
      * @param  string  $subject
      */
-    public function __construct(Dealership $dealer, public mixed $sender, public $subject, public mixed $message)
+    public function __construct(Dealership $dealer, public User $sender, public $subject, public mixed $message)
     {
         $this->dealer = $dealer;
     }

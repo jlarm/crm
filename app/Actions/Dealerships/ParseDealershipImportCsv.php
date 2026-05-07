@@ -111,7 +111,13 @@ final class ParseDealershipImportCsv
                 continue;
             }
             $value = is_string($value) ? mb_trim($value) : $value;
-            $normalized[$canonical] = ($value === '' || $value === null) ? null : (string) $value;
+            if ($value === '' || $value === null) {
+                $normalized[$canonical] = null;
+            } elseif (is_scalar($value)) {
+                $normalized[$canonical] = (string) $value;
+            } else {
+                $normalized[$canonical] = null;
+            }
         }
 
         return $normalized;

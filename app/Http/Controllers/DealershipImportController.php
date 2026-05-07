@@ -39,15 +39,14 @@ final class DealershipImportController extends Controller
         ValidateDealershipImportRow $validate,
     ): Response {
         $defaults = [
-            'status' => $request->validated('default_status'),
-            'rating' => $request->validated('default_rating'),
-            'type' => $request->validated('default_type'),
+            'status' => is_string($s = $request->validated('default_status')) ? $s : '',
+            'rating' => is_string($r = $request->validated('default_rating')) ? $r : '',
+            'type' => is_string($t = $request->validated('default_type')) ? $t : '',
         ];
 
-        $defaultUserIds = array_values(array_unique(array_map(
-            'intval',
-            $request->validated('default_user_ids', [])
-        )));
+        /** @var array<int, mixed> $rawIds */
+        $rawIds = $request->validated('default_user_ids', []);
+        $defaultUserIds = array_values(array_unique(array_map(fn ($v): int => is_numeric($v) ? (int) $v : 0, $rawIds)));
 
         $options = [
             'sync_mailcoach' => (bool) $request->validated('sync_mailcoach', false),
@@ -123,8 +122,9 @@ final class DealershipImportController extends Controller
         DealershipImportConfirmRequest $request,
         ImportDealershipRow $import,
     ): RedirectResponse {
-        $token = $request->validated('token');
+        $token = is_string($t = $request->validated('token')) ? $t : '';
         $cacheKey = "dealership-import:{$token}";
+        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}}|null $payload */
         $payload = Cache::get($cacheKey);
 
         if (! $payload) {
@@ -182,13 +182,16 @@ final class DealershipImportController extends Controller
             }
 
             if ($row['row_type'] === 'dealership') {
-                $dealershipNames[mb_strtolower((string) $row['resolved']['name'])] = true;
+                $resolved = is_array($row['resolved']) ? $row['resolved'] : [];
+                $name = is_string($resolved['name'] ?? null) ? $resolved['name'] : '';
+                $dealershipNames[mb_strtolower($name)] = true;
 
                 continue;
             }
 
-            if (! empty($row['parent_ref'])) {
-                $orphanRefs[mb_strtolower($row['parent_ref'])] = $row['parent_ref'];
+            $parentRef = $row['parent_ref'] ?? null;
+            if (is_string($parentRef) && $parentRef !== '') {
+                $orphanRefs[mb_strtolower($parentRef)] = $parentRef;
             }
         }
 
@@ -201,7 +204,7 @@ final class DealershipImportController extends Controller
         $existingNames = Dealership::query()
             ->whereIn(DB::raw('LOWER(name)'), array_keys($orphans))
             ->pluck('name')
-            ->map(fn (string $n): string => mb_strtolower($n))
+            ->map(fn ($n): string => mb_strtolower(is_string($n) ? $n : ''))
             ->all();
 
         return count(array_diff_key($orphans, array_flip($existingNames)));

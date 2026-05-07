@@ -32,10 +32,12 @@ final class DealershipController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        /** @var array<int, int> $userIds */
         $userIds = $request->validated('user_ids', []);
+        $authId = auth()->id();
 
-        if (! in_array(auth()->id(), $userIds, true)) {
-            $userIds[] = auth()->id();
+        if ($authId !== null && ! in_array($authId, $userIds, true)) {
+            $userIds[] = (int) $authId;
         }
 
         $dealership->users()->sync($userIds);
@@ -82,7 +84,9 @@ final class DealershipController extends Controller
         $dealership->update($request->safe()->except(['user_ids']));
 
         if ($request->has('user_ids')) {
-            $dealership->users()->sync($request->validated('user_ids', []));
+            /** @var array<int, int> $userIds */
+            $userIds = $request->validated('user_ids', []);
+            $dealership->users()->sync($userIds);
         }
 
         return back()->with('success', 'Dealership updated successfully.');

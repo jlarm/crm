@@ -109,8 +109,10 @@ final class DealershipActivityController extends Controller
 
         $causer = $activity->causer;
         $properties = $activity->properties ?? collect();
-        $attributes = $properties['attributes'] ?? [];
-        $old = $properties['old'] ?? [];
+        /** @var array<string, mixed> $attributes */
+        $attributes = is_array($properties['attributes'] ?? null) ? $properties['attributes'] : [];
+        /** @var array<string, mixed> $old */
+        $old = is_array($properties['old'] ?? null) ? $properties['old'] : [];
 
         $subjectLabel = match ($subjectClass) {
             Dealership::class => 'Dealership',
@@ -121,16 +123,17 @@ final class DealershipActivityController extends Controller
             default => class_basename($subjectClass),
         };
 
-        $name = $attributes['name'] ?? $old['name'] ?? null;
+        $nameRaw = $attributes['name'] ?? $old['name'] ?? null;
+        $name = is_string($nameRaw) ? $nameRaw : null;
 
         $title = match ($event) {
-            'created' => $name
+            'created' => $name !== null
                 ? "{$subjectLabel} {$name} created"
                 : "{$subjectLabel} created",
-            'updated' => $name
+            'updated' => $name !== null
                 ? "{$subjectLabel} {$name} updated"
                 : "{$subjectLabel} updated",
-            'deleted' => $name
+            'deleted' => $name !== null
                 ? "{$subjectLabel} {$name} deleted"
                 : "{$subjectLabel} deleted",
             default => $activity->description ?? "{$subjectLabel} {$event}",
@@ -195,6 +198,10 @@ final class DealershipActivityController extends Controller
 
         if (is_array($value)) {
             return json_encode($value) ?: '—';
+        }
+
+        if (! is_scalar($value)) {
+            return '—';
         }
 
         $string = (string) $value;

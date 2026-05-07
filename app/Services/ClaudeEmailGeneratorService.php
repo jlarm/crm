@@ -19,8 +19,10 @@ class ClaudeEmailGeneratorService
 
     public function __construct()
     {
-        $this->apiKey = config('services.claude.api_key');
-        $this->apiUrl = config('services.claude.api_url', 'https://api.anthropic.com/v1/messages');
+        $apiKey = config('services.claude.api_key');
+        $this->apiKey = is_string($apiKey) ? $apiKey : null;
+        $apiUrl = config('services.claude.api_url', 'https://api.anthropic.com/v1/messages');
+        $this->apiUrl = is_string($apiUrl) ? $apiUrl : 'https://api.anthropic.com/v1/messages';
     }
 
     public function generateEmailSubject(Dealership $dealership, ?DealerEmailTemplate $template = null): string
@@ -268,14 +270,17 @@ Format as a numbered list. Return only the list items.";
         }
 
         $data = $response->json();
+        $content = is_array($data) && is_array($data['content'] ?? null) ? $data['content'] : null;
+        $first = is_array($content[0] ?? null) ? $content[0] : null;
+        $text = is_array($first) ? ($first['text'] ?? null) : null;
 
-        if (! isset($data['content'][0]['text'])) {
+        if (! is_string($text)) {
             Log::warning('Unexpected Claude API response structure', ['data' => $data]);
 
             return null;
         }
 
-        return mb_trim($data['content'][0]['text']);
+        return mb_trim($text);
     }
 
     private function buildSubjectPromptWithContext(string $context): string

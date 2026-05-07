@@ -15,12 +15,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class OpportunityActivityFactory extends Factory
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
+        $types = ActivityType::cases();
+
         return [
             'opportunity_id' => Opportunity::factory(),
             'user_id' => User::factory(),
-            'type' => fake()->randomElement(ActivityType::cases())->value,
+            'type' => $types[array_rand($types)]->value,
             'details' => fake()->paragraph(),
             'occurred_at' => fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
         ];

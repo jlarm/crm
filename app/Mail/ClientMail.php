@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -19,7 +20,7 @@ class ClientMail extends Mailable implements ShouldQueue
     /**
      * @param  string  $subject
      */
-    public function __construct(public mixed $sender, public $subject, public mixed $message) {}
+    public function __construct(public User $sender, public $subject, public mixed $message) {}
 
     public function envelope(): Envelope
     {

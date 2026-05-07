@@ -11,8 +11,9 @@ class DealerEmailTemplateObserver
 {
     public function updated(DealerEmailTemplate $dealerEmailTemplate): void
     {
-        if ($dealerEmailTemplate->isDirty('attachment_path')) {
-            Storage::disk('public')->delete($dealerEmailTemplate->getOriginal('attachment'));
+        $original = $dealerEmailTemplate->getOriginal('attachment');
+        if ($dealerEmailTemplate->isDirty('attachment_path') && is_string($original)) {
+            Storage::disk('public')->delete($original);
         }
     }
 

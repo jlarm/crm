@@ -33,8 +33,9 @@ class DealerEmailObserver
 
     public function updated(DealerEmail $dealerEmail): void
     {
-        if ($dealerEmail->isDirty('attachment') && ! is_null($dealerEmail->getOriginal('attachment'))) {
-            Storage::disk('public')->delete($dealerEmail->getOriginal('attachment'));
+        $original = $dealerEmail->getOriginal('attachment');
+        if ($dealerEmail->isDirty('attachment') && is_string($original)) {
+            Storage::disk('public')->delete($original);
         }
     }
 

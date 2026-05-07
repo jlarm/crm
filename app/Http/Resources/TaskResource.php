@@ -18,6 +18,9 @@ final class TaskResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var Task $task */
+        $task = $this->resource;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -31,20 +34,20 @@ final class TaskResource extends JsonResource
             'isCompleted' => $this->isCompleted(),
             'isOverdue' => $this->isOverdue(),
             'assignedTo' => $this->whenLoaded('user', fn () => [
-                'id' => $this->resource->user->id,
-                'name' => $this->resource->user->name,
+                'id' => $task->user->id,
+                'name' => $task->user->name,
             ]),
             'createdBy' => $this->whenLoaded('createdBy', fn () => [
-                'id' => $this->resource->createdBy->id,
-                'name' => $this->resource->createdBy->name,
+                'id' => $task->createdBy->id,
+                'name' => $task->createdBy->name,
             ]),
-            'dealership' => $this->whenLoaded('dealership', fn () => $this->resource->dealership ? [
-                'id' => $this->resource->dealership->id,
-                'name' => $this->resource->dealership->name,
+            'dealership' => $this->whenLoaded('dealership', fn () => $task->dealership ? [
+                'id' => $task->dealership->id,
+                'name' => $task->dealership->name,
             ] : null),
-            'contact' => $this->whenLoaded('contact', fn () => $this->resource->contact ? [
-                'id' => $this->resource->contact->id,
-                'name' => $this->resource->contact->name,
+            'contact' => $this->whenLoaded('contact', fn () => $task->contact ? [
+                'id' => $task->contact->id,
+                'name' => $task->contact->name,
             ] : null),
             'dealershipId' => $this->dealership_id,
             'contactId' => $this->contact_id,

@@ -19,7 +19,8 @@ class OpportunityFactory extends Factory
      */
     public function definition(): array
     {
-        $stage = fake()->randomElement(OpportunityStage::cases());
+        $stages = OpportunityStage::cases();
+        $stage = $stages[array_rand($stages)];
         $createdAt = fake()->dateTimeBetween('-12 months', 'now');
 
         return [

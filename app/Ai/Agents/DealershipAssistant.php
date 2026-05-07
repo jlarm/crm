@@ -57,31 +57,36 @@ TXT;
             return '';
         }
 
+        $get = fn (string $key): string => is_string($company[$key] ?? null) ? $company[$key] : '';
+
         $valueProps = collect((array) ($company['value_props'] ?? []))
-            ->map(fn (string $line): string => '- '.$line)
+            ->map(fn ($line): string => '- '.(is_string($line) ? $line : ''))
             ->implode("\n");
 
         $regs = collect((array) ($company['regulatory_coverage'] ?? []))->implode(', ');
 
         $guidelines = collect((array) ($company['email_guidelines'] ?? []))
-            ->map(fn (string $line): string => '- '.$line)
+            ->map(fn ($line): string => '- '.(is_string($line) ? $line : ''))
             ->implode("\n");
+
+        $name = $get('name');
+        $shortName = $get('short_name');
 
         $sections = [
             'About the company you work for:',
-            '- Name: '.$company['name'].(
-                ! empty($company['short_name']) && ! str_contains($company['name'], $company['short_name'])
-                    ? " ({$company['short_name']})"
+            '- Name: '.$name.(
+                $shortName !== '' && ! str_contains($name, $shortName)
+                    ? " ({$shortName})"
                     : ''
             ),
-            ! empty($company['website']) ? "- Website: {$company['website']}" : null,
-            ! empty($company['phone']) ? "- Phone: {$company['phone']}" : null,
-            ! empty($company['tagline']) ? "- What we do: {$company['tagline']}" : null,
-            ! empty($company['positioning']) ? "- Positioning: {$company['positioning']}" : null,
-            ! empty($company['offering']) ? "- Offering: {$company['offering']}" : null,
-            ! empty($company['audience']) ? "- Who we sell to: {$company['audience']}" : null,
-            ! empty($company['history']) ? "- History: {$company['history']}" : null,
-            ! empty($company['mission']) ? "- Mission: {$company['mission']}" : null,
+            $get('website') !== '' ? '- Website: '.$get('website') : null,
+            $get('phone') !== '' ? '- Phone: '.$get('phone') : null,
+            $get('tagline') !== '' ? '- What we do: '.$get('tagline') : null,
+            $get('positioning') !== '' ? '- Positioning: '.$get('positioning') : null,
+            $get('offering') !== '' ? '- Offering: '.$get('offering') : null,
+            $get('audience') !== '' ? '- Who we sell to: '.$get('audience') : null,
+            $get('history') !== '' ? '- History: '.$get('history') : null,
+            $get('mission') !== '' ? '- Mission: '.$get('mission') : null,
             $regs !== '' ? "- Regulatory areas covered: {$regs}" : null,
         ];
 
@@ -91,12 +96,16 @@ TXT;
             $body .= "\n\nKey value propositions:\n{$valueProps}";
         }
 
-        $products = $this->formatProducts($company['products'] ?? []);
+        /** @var array<string, array{name?: string, description?: string, capabilities?: array<int, string>}> $productsRaw */
+        $productsRaw = is_array($company['products'] ?? null) ? $company['products'] : [];
+        $products = $this->formatProducts($productsRaw);
         if ($products !== '') {
             $body .= "\n\nProducts:\n{$products}";
         }
 
-        $packages = $this->formatPackages($company['packages'] ?? []);
+        /** @var array<int, array{name?: string, fit?: string, includes?: array<int, string>}> $packagesRaw */
+        $packagesRaw = is_array($company['packages'] ?? null) ? $company['packages'] : [];
+        $packages = $this->formatPackages($packagesRaw);
         if ($packages !== '') {
             $body .= "\n\nPackages we sell:\n{$packages}";
         }
