@@ -48,7 +48,7 @@ describe('Progress Creation', function () {
         expect($progress->details)->toBe('Factory created progress entry')
             ->and($progress->user_id)->not->toBeNull()
             ->and($progress->dealership_id)->not->toBeNull()
-            ->and($progress->date)->toBeInstanceOf(Carbon\Carbon::class);
+            ->and($progress->date)->toBeInstanceOf(Carbon\CarbonImmutable::class);
     });
 
     it('can create progress entries with factory states', function () {
@@ -86,7 +86,7 @@ describe('Progress Attributes', function () {
             'date' => '2024-06-15',
         ]);
 
-        expect($progress->date)->toBeInstanceOf(Carbon\Carbon::class)
+        expect($progress->date)->toBeInstanceOf(Carbon\CarbonImmutable::class)
             ->and($progress->date->format('Y-m-d'))->toBe('2024-06-15');
     });
 
@@ -352,7 +352,7 @@ describe('Progress Validation and Edge Cases', function () {
 
         // Update with different format
         $progress->update(['date' => now()]);
-        expect($progress->date)->toBeInstanceOf(Carbon\Carbon::class);
+        expect($progress->date)->toBeInstanceOf(Carbon\CarbonImmutable::class);
     });
 
     it('handles missing related records gracefully', function () {

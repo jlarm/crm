@@ -486,8 +486,8 @@ describe('Store Model Attributes', function () {
 
         expect($store->created_at)->not->toBeNull()
             ->and($store->updated_at)->not->toBeNull()
-            ->and($store->created_at)->toBeInstanceOf(Illuminate\Support\Carbon::class)
-            ->and($store->updated_at)->toBeInstanceOf(Illuminate\Support\Carbon::class);
+            ->and($store->created_at)->toBeInstanceOf(Carbon\CarbonImmutable::class)
+            ->and($store->updated_at)->toBeInstanceOf(Carbon\CarbonImmutable::class);
     });
 
     it('updates timestamp on modification', function () {

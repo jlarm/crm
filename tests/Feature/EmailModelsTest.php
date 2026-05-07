@@ -132,10 +132,10 @@ describe('DealerEmail Model', function () {
             'paused' => 0,
         ]);
 
-        expect($dealerEmail->start_date)->toBeInstanceOf(Carbon\Carbon::class)
+        expect($dealerEmail->start_date)->toBeInstanceOf(Carbon\CarbonImmutable::class)
             ->and($dealerEmail->start_date->format('Y-m-d'))->toBe('2024-01-15')
-            ->and($dealerEmail->last_sent)->toBeInstanceOf(Carbon\Carbon::class)
-            ->and($dealerEmail->next_send_date)->toBeInstanceOf(Carbon\Carbon::class)
+            ->and($dealerEmail->last_sent)->toBeInstanceOf(Carbon\CarbonImmutable::class)
+            ->and($dealerEmail->next_send_date)->toBeInstanceOf(Carbon\CarbonImmutable::class)
             ->and($dealerEmail->recipients)->toBeArray()
             ->and($dealerEmail->recipients)->toHaveCount(2)
             ->and($dealerEmail->customize_email)->toBeTrue()
@@ -342,7 +342,7 @@ describe('EmailTrackingEvent Model', function () {
             ->and($event->message_id)->toBe('msg-12345@mailgun.example.com')
             ->and($event->recipient_email)->toBe('contact@dealership.com')
             ->and($event->mailgun_data)->toBeArray()
-            ->and($event->event_timestamp)->toBeInstanceOf(Carbon\Carbon::class);
+            ->and($event->event_timestamp)->toBeInstanceOf(Carbon\CarbonImmutable::class);
     });
 
     it('can create tracking events using factory', function () {
@@ -351,7 +351,7 @@ describe('EmailTrackingEvent Model', function () {
         expect($event->sent_email_id)->not->toBeNull()
             ->and($event->event_type)->toBeString()
             ->and($event->mailgun_data)->toBeArray()
-            ->and($event->event_timestamp)->toBeInstanceOf(Carbon\Carbon::class);
+            ->and($event->event_timestamp)->toBeInstanceOf(Carbon\CarbonImmutable::class);
     });
 
     it('can create events with factory states', function () {
