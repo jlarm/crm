@@ -35,7 +35,9 @@ class SecurityController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $updater->update($user, $request->all());
+        /** @var array<string, string> $input */
+        $input = $request->all();
+        $updater->update($user, $input);
 
         return to_route('settings.security.edit')->with('status', 'password-updated');
     }

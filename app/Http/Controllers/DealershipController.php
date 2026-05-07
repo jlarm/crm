@@ -27,8 +27,11 @@ final class DealershipController extends Controller
 
     public function store(DealershipStoreRequest $request): RedirectResponse
     {
+        /** @var array<string, mixed> $data */
+        $data = $request->safe()->except(['user_ids']);
+
         $dealership = Dealership::create([
-            ...$request->safe()->except(['user_ids']),
+            ...$data,
             'user_id' => auth()->id(),
         ]);
 
@@ -49,10 +52,10 @@ final class DealershipController extends Controller
     public function show(Dealership $dealership): Response
     {
         $dealership->load([
-            'users' => fn ($query) => $query->select('id', 'name'),
+            'users' => fn (\Illuminate\Database\Eloquent\Relations\Relation $query) => $query->select('id', 'name'),
             'stores',
             'contacts',
-            'opportunities' => fn ($query) => $query->with(['activities.user'])->orderBy('created_at', 'desc'),
+            'opportunities' => fn (\Illuminate\Database\Eloquent\Relations\Relation $query) => $query->with(['activities.user'])->orderBy('created_at', 'desc'),
         ]);
 
         $tasks = $dealership->tasks()
@@ -81,7 +84,9 @@ final class DealershipController extends Controller
 
     public function update(DealershipUpdateRequest $request, Dealership $dealership): RedirectResponse
     {
-        $dealership->update($request->safe()->except(['user_ids']));
+        /** @var array<string, mixed> $data */
+        $data = $request->safe()->except(['user_ids']);
+        $dealership->update($data);
 
         if ($request->has('user_ids')) {
             /** @var array<int, int> $userIds */

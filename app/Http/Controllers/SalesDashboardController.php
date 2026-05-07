@@ -55,19 +55,22 @@ final class SalesDashboardController extends Controller
 
         $wonLastMonth = Opportunity::wonLastMonth()->count();
 
-        $closedCount = (int) ($totals->closed_count ?? 0);
-        $wonCount = (int) ($totals->won_count ?? 0);
+        $toInt = fn (mixed $v): int => is_numeric($v) ? (int) $v : 0;
+        $toFloat = fn (mixed $v): float => is_numeric($v) ? (float) $v : 0.0;
+
+        $closedCount = $toInt($totals?->getAttribute('closed_count'));
+        $wonCount = $toInt($totals?->getAttribute('won_count'));
 
         return [
-            'pipelineValue' => (float) ($totals->pipeline_value ?? 0),
-            'openCount' => (int) ($totals->open_count ?? 0),
+            'pipelineValue' => $toFloat($totals?->getAttribute('pipeline_value')),
+            'openCount' => $toInt($totals?->getAttribute('open_count')),
             'wonCount' => $wonCount,
             'closedCount' => $closedCount,
             'winRate' => $closedCount > 0 ? round(($wonCount / $closedCount) * 100) : 0,
-            'avgDealSize' => (float) ($totals->avg_deal_size ?? 0),
-            'avgDaysToClose' => (int) round((float) ($totals->avg_days ?? 0)),
-            'closingThisMonthCount' => (int) ($closingThisMonth->count ?? 0),
-            'closingThisMonthValue' => (float) ($closingThisMonth->value ?? 0),
+            'avgDealSize' => $toFloat($totals?->getAttribute('avg_deal_size')),
+            'avgDaysToClose' => (int) round($toFloat($totals?->getAttribute('avg_days'))),
+            'closingThisMonthCount' => $toInt($closingThisMonth?->getAttribute('count')),
+            'closingThisMonthValue' => $toFloat($closingThisMonth?->getAttribute('value')),
             'wonLastMonthCount' => $wonLastMonth,
             'lastMonthLabel' => now()->subMonth()->format('M Y'),
         ];

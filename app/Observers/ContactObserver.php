@@ -54,10 +54,11 @@ class ContactObserver
      */
     public function deleted(Contact $model): void
     {
-        if (! self::$syncMailcoach || $model->dealership === null) {
+        if (! self::$syncMailcoach || $model->dealership === null || $model->email === null) {
             return;
         }
 
+        /** @var \Spatie\MailcoachSdk\Resources\EmailList $list */
         $list = Mailcoach::emailList($model->dealership->getListType()); // @phpstan-ignore staticMethod.notFound
         $sub = $list->subscriber($model->email);
         if ($sub) {
@@ -90,6 +91,7 @@ class ContactObserver
                 return;
             }
 
+            /** @var \Spatie\MailcoachSdk\Resources\EmailList $list */
             $list = Mailcoach::emailList($listUuid); // @phpstan-ignore staticMethod.notFound
 
             if (empty($model->email)) {

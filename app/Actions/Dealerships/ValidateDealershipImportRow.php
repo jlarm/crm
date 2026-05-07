@@ -77,7 +77,7 @@ final class ValidateDealershipImportRow
             'notes' => ['nullable', 'string'],
         ];
 
-        $errors = Validator::make($resolved, $rules)->errors()->toArray();
+        $errors = array_map(array_values(...), Validator::make($resolved, $rules)->errors()->toArray());
 
         return [
             'line' => $line,
@@ -109,7 +109,7 @@ final class ValidateDealershipImportRow
             'current_solution_use' => ['nullable', 'string', 'max:255'],
         ];
 
-        $errors = Validator::make($resolved, $rules)->errors()->toArray();
+        $errors = array_map(array_values(...), Validator::make($resolved, $rules)->errors()->toArray());
 
         if ($parentRef === null || $parentRef === '') {
             $errors['dealership_ref'] = ['A dealership_ref is required for store rows.'];
@@ -153,7 +153,7 @@ final class ValidateDealershipImportRow
             'primary_contact' => ['nullable', 'boolean'],
         ];
 
-        $errors = Validator::make($resolved, $rules)->errors()->toArray();
+        $errors = array_map(array_values(...), Validator::make($resolved, $rules)->errors()->toArray());
 
         if ($parentRef === null || $parentRef === '') {
             $errors['dealership_ref'] = ['A dealership_ref is required for contact rows.'];

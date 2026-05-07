@@ -112,12 +112,13 @@ class DealerEmail extends Model
             ->setDescriptionForEvent(fn (string $eventName): string => "Dealer Email {$eventName}");
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($dealerEmail): void {
-            $dealerEmail->user_id = auth()->id();
+        static::creating(function (DealerEmail $dealerEmail): void {
+            $authId = auth()->id();
+            $dealerEmail->user_id = $authId === null ? null : (int) $authId;
         });
     }
 }

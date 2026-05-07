@@ -22,10 +22,12 @@ class OpportunityFactory extends Factory
         $stages = OpportunityStage::cases();
         $stage = $stages[array_rand($stages)];
         $createdAt = fake()->dateTimeBetween('-12 months', 'now');
+        /** @var array<int, string> $words */
+        $words = fake()->words(3);
 
         return [
             'dealership_id' => Dealership::factory(),
-            'name' => fake()->company().' - '.implode(' ', (array) fake()->words(3)),
+            'name' => fake()->company().' - '.implode(' ', $words),
             'stage' => $stage->value,
             'stage_entered_at' => $createdAt,
             'probability' => fake()->numberBetween(10, 90),

@@ -232,6 +232,7 @@ final class ImportDealershipRow
     private function upsertDealership(array $group, array $options, array &$stats): Dealership
     {
         $parent = $group['parent'];
+        /** @var array<string, mixed> $resolved */
         $resolved = is_array($parent['resolved'] ?? null) ? $parent['resolved'] : [];
         $extraEmailsRaw = is_array($parent['extra_user_emails'] ?? null) ? $parent['extra_user_emails'] : [];
         $extraEmails = [];
@@ -307,6 +308,7 @@ final class ImportDealershipRow
      */
     private function upsertStore(Dealership $dealership, array $row, array $options, array &$stats): void
     {
+        /** @var array<string, mixed> $resolved */
         $resolved = is_array($row['resolved'] ?? null) ? $row['resolved'] : [];
         $name = is_string($resolved['name'] ?? null) ? $resolved['name'] : '';
         $existing = $dealership->stores->first(
@@ -343,6 +345,7 @@ final class ImportDealershipRow
      */
     private function upsertContact(Dealership $dealership, array $row, array $options, array &$stats): void
     {
+        /** @var array<string, mixed> $resolved */
         $resolved = is_array($row['resolved'] ?? null) ? $row['resolved'] : [];
         $email = $resolved['email'] ?? null;
 

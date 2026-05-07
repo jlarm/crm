@@ -210,9 +210,9 @@ TXT;
         }
 
         $d = $this->dealership->loadMissing([
-            'progresses' => fn ($q) => $q->with(['user:id,name', 'category:id,name'])->latest('date')->limit(20),
-            'opportunities' => fn ($q) => $q->latest()->limit(10),
-            'tasks' => fn ($q) => $q->with('user:id,name')
+            'progresses' => fn (\Illuminate\Database\Eloquent\Relations\Relation $q) => $q->with(['user:id,name', 'category:id,name'])->latest('date')->limit(20),
+            'opportunities' => fn (\Illuminate\Database\Eloquent\Relations\Relation $q) => $q->latest()->limit(10),
+            'tasks' => fn (\Illuminate\Database\Eloquent\Relations\Relation $q) => $q->with('user:id,name')
                 ->orderByRaw('completed_at IS NULL DESC')
                 ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
                 ->orderBy('due_date')

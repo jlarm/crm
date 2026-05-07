@@ -13,6 +13,7 @@ final class DealershipContactController extends Controller
 {
     public function store(Request $request, Dealership $dealership): RedirectResponse
     {
+        /** @var array<string, mixed> $data */
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
@@ -34,6 +35,7 @@ final class DealershipContactController extends Controller
     {
         abort_unless($contact->dealership_id === $dealership->id, 404);
 
+        /** @var array<string, mixed> $data */
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],

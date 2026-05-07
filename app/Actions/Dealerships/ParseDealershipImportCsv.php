@@ -61,6 +61,7 @@ final class ParseDealershipImportCsv
 
         foreach ($reader->getRecords() as $offset => $record) {
             $line = (int) $offset + 1;
+            /** @var array<string, mixed> $record */
             $normalized = $this->normalizeRecord($record);
 
             if (($normalized['name'] ?? null) === null) {

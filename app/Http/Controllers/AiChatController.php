@@ -14,6 +14,7 @@ final class AiChatController extends Controller
 {
     public function send(Request $request): JsonResponse
     {
+        /** @var array{message: string, conversation_id?: string|null, dealership_id?: int|null} $data */
         $data = $request->validate([
             'message' => ['required', 'string', 'max:4000'],
             'conversation_id' => ['nullable', 'string', 'size:36'],

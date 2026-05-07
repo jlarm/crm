@@ -39,6 +39,7 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
 
         try {
             $listUuid = $model->dealership->getListType();
+            /** @var \Spatie\MailcoachSdk\Resources\EmailList $list */
             $list = Mailcoach::emailList($listUuid); // @phpstan-ignore staticMethod.notFound
 
             if (empty($model->email)) {
@@ -79,15 +80,13 @@ class SyncContactTagsWithMailcoach implements ShouldQueue
             if ($subscriber) {
                 try {
                     // Revert to addTags/removeTags as syncTags is not available on EmailList
-                    $currentMailcoachTagsRaw = $subscriber->tags ?? [];
+                    $currentMailcoachTagsRaw = $subscriber->tags;
                     $currentMailcoachTags = [];
-                    if (is_iterable($currentMailcoachTagsRaw)) {
-                        foreach ($currentMailcoachTagsRaw as $tagObjectOrString) {
-                            if (is_object($tagObjectOrString) && isset($tagObjectOrString->name)) {
-                                $currentMailcoachTags[] = (string) $tagObjectOrString->name;
-                            } elseif (is_string($tagObjectOrString)) {
-                                $currentMailcoachTags[] = $tagObjectOrString;
-                            }
+                    foreach ($currentMailcoachTagsRaw as $tagObjectOrString) {
+                        if (is_object($tagObjectOrString) && isset($tagObjectOrString->name) && is_scalar($tagObjectOrString->name)) {
+                            $currentMailcoachTags[] = (string) $tagObjectOrString->name;
+                        } elseif (is_string($tagObjectOrString)) {
+                            $currentMailcoachTags[] = $tagObjectOrString;
                         }
                     }
 
