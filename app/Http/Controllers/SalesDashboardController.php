@@ -103,7 +103,7 @@ final class SalesDashboardController extends Controller
      */
     private function buildRepPerformance(): array
     {
-        return User::query()
+        $rows = User::query()
             ->select(['users.id', 'users.name'])
             ->selectRaw('COUNT(o.id) as total_deals')
             ->selectRaw('SUM(CASE WHEN o.stage = ? THEN 1 ELSE 0 END) as won_count', [OpportunityStage::Won->value])
@@ -132,5 +132,7 @@ final class SalesDashboardController extends Controller
                 ];
             })
             ->all();
+
+        return array_values($rows);
     }
 }

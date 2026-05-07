@@ -27,12 +27,13 @@ final class ImportDealershipRow
     private array $userIdByEmail = [];
 
     /**
-     * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: ?string, extra_user_emails: array<int, string>}>  $validatedRows
+     * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>  $validatedRows
      * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      * @return array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}
      */
     public function __invoke(array $validatedRows, array $options): array
     {
+        /** @var array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats */
         $stats = [
             'created' => ['dealerships' => 0, 'stores' => 0, 'contacts' => 0],
             'updated' => ['dealerships' => 0, 'stores' => 0, 'contacts' => 0],
@@ -190,7 +191,10 @@ final class ImportDealershipRow
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
      * @param  array<string, mixed>  $options
-     * @param  array<string, mixed>  $stats
+     *
+     * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
+     *
+     * @param  array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}  $stats
      */
     private function processGroup(array $group, array $options, array &$stats): void
     {
@@ -208,7 +212,10 @@ final class ImportDealershipRow
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
      * @param  array<string, mixed>  $options
-     * @param  array<string, mixed>  $stats
+     *
+     * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
+     *
+     * @param  array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}  $stats
      */
     private function upsertDealership(array $group, array $options, array &$stats): Dealership
     {
@@ -270,7 +277,10 @@ final class ImportDealershipRow
     /**
      * @param  array<string, mixed>  $row
      * @param  array<string, mixed>  $options
-     * @param  array<string, mixed>  $stats
+     *
+     * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
+     *
+     * @param  array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}  $stats
      */
     private function upsertStore(Dealership $dealership, array $row, array $options, array &$stats): void
     {
@@ -302,7 +312,10 @@ final class ImportDealershipRow
     /**
      * @param  array<string, mixed>  $row
      * @param  array<string, mixed>  $options
-     * @param  array<string, mixed>  $stats
+     *
+     * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
+     *
+     * @param  array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}  $stats
      */
     private function upsertContact(Dealership $dealership, array $row, array $options, array &$stats): void
     {

@@ -24,7 +24,7 @@ class OpportunityFactory extends Factory
 
         return [
             'dealership_id' => Dealership::factory(),
-            'name' => fake()->company().' - '.fake()->words(3, true),
+            'name' => fake()->company().' - '.implode(' ', (array) fake()->words(3)),
             'stage' => $stage->value,
             'stage_entered_at' => $createdAt,
             'probability' => fake()->numberBetween(10, 90),

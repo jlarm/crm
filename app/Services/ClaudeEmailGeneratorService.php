@@ -70,7 +70,7 @@ class ClaudeEmailGeneratorService
         }
 
         // Parse numbered list or bullet points
-        $suggestions = preg_split('/\n\d+\.|\n[-•]/', $content);
+        $suggestions = preg_split('/\n\d+\.|\n[-•]/', $content) ?: [];
         $suggestions = array_map('trim', array_filter($suggestions));
 
         return array_slice($suggestions, 0, 5); // Limit to 5 suggestions

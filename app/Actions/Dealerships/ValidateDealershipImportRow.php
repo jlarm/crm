@@ -28,7 +28,7 @@ final class ValidateDealershipImportRow
      *
      * @param  array{line: int, row_type: string, raw: array<string, string|null>}  $row
      * @param  array{status: string, rating: string, type: string}  $defaults
-     * @return array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: ?string, extra_user_emails: array<int, string>}
+     * @return array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}
      */
     public function __invoke(array $row, array $defaults): array
     {
@@ -53,7 +53,7 @@ final class ValidateDealershipImportRow
     /**
      * @param  array<string, string|null>  $raw
      * @param  array{status: string, rating: string, type: string}  $defaults
-     * @return array<string, mixed>
+     * @return array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}
      */
     private function validateDealership(int $line, array $raw, array $defaults): array
     {
@@ -91,7 +91,7 @@ final class ValidateDealershipImportRow
 
     /**
      * @param  array<string, string|null>  $raw
-     * @return array<string, mixed>
+     * @return array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}
      */
     private function validateStore(int $line, array $raw): array
     {
@@ -127,7 +127,7 @@ final class ValidateDealershipImportRow
 
     /**
      * @param  array<string, string|null>  $raw
-     * @return array<string, mixed>
+     * @return array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}
      */
     private function validateContact(int $line, array $raw): array
     {

@@ -194,7 +194,7 @@ final class DealershipActivityController extends Controller
         }
 
         if (is_array($value)) {
-            return json_encode($value);
+            return json_encode($value) ?: '—';
         }
 
         $string = (string) $value;

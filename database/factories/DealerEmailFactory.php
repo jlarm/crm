@@ -29,7 +29,7 @@ class DealerEmailFactory extends Factory
                 fake()->safeEmail(),
             ],
             'attachment' => fake()->optional()->filePath(),
-            'attachment_name' => fake()->optional()->words(2, true).'.pdf',
+            'attachment_name' => fake()->optional()->word().'.pdf',
             'subject' => fake()->sentence(4),
             'message' => fake()->paragraphs(3, true),
             'start_date' => fake()->dateTimeBetween('-1 month', '+1 week'),

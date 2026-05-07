@@ -21,7 +21,7 @@ final class AiChatController extends Controller
 
         $user = $request->user();
         $dealership = isset($data['dealership_id'])
-            ? Dealership::query()->forUser($user)->find($data['dealership_id'])
+            ? Dealership::query()->forUser($user)->whereKey($data['dealership_id'])->first()
             : null;
 
         $agent = new DealershipAssistant($dealership, $user);

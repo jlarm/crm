@@ -22,7 +22,7 @@ class ProcessDealershipImport implements ShouldQueue
     public int $timeout = 600;
 
     /**
-     * @param  array<int, array<string, mixed>>  $validatedRows
+     * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>  $validatedRows
      * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
      */
     public function __construct(
