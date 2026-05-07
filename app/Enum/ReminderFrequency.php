@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-use Filament\Support\Contracts\HasLabel;
-
-enum ReminderFrequency: int implements HasLabel
+enum ReminderFrequency: int
 {
     case Immediate = -1;
     case Once = 0;

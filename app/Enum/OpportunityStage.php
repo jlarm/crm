@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-use Filament\Support\Contracts\HasColor;
-use Filament\Support\Contracts\HasLabel;
-
-enum OpportunityStage: string implements HasColor, HasLabel
+enum OpportunityStage: string
 {
     case Prospect = 'prospect';
     case Contacted = 'contacted';

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
-use App\Filament\Resources\DealershipResource;
 use App\Models\Dealership;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,7 +42,7 @@ class MessageMail extends Mailable implements ShouldQueue
             with: [
                 'dealership' => $this->dealer,
                 'message' => $this->message,
-                'link' => DealershipResource::getUrl('edit', ['record' => $this->dealer]),
+                'link' => route('dealerships.show', $this->dealer),
             ]
         );
     }

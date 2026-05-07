@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
-use Filament\Support\Contracts\HasLabel;
-
-enum DevStatus: string implements HasLabel
+enum DevStatus: string
 {
     case NO_CONTACT = 'no_contact';
     case REACHED_OUT = 'reached_out';
