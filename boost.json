@@ -13,10 +13,8 @@
         "ai-sdk-development",
         "fortify-development",
         "laravel-best-practices",
-        "pulse-development",
         "scout-development",
         "wayfinder-development",
-        "livewire-development",
         "pest-testing",
         "inertia-vue-development",
         "tailwindcss-development"
