@@ -29,6 +29,9 @@ Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
 })->name('home');
 
+Route::redirect('/admin', '/dashboard');
+Route::get('/admin/{any}', fn () => redirect('/dashboard'))->where('any', '.*');
+
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
     ->name('mailgun.webhook');
 
