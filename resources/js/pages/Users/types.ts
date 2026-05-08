@@ -11,5 +11,6 @@ export interface UserListItem {
     timezone: string | null;
     createdAt: string | null;
     deletedAt: string | null;
+    lastLoginAt: string | null;
     roles: UserRole[];
 }

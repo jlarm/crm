@@ -112,6 +112,19 @@ function restoreUser(user: UserListItem): void {
 function formatRole(name: string): string {
     return name.replace(/_/g, ' ');
 }
+
+function formatLastLogin(iso: string | null): string {
+    if (!iso) {
+        return 'Never';
+    }
+    return new Date(iso).toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    });
+}
 </script>
 
 <template>
@@ -158,13 +171,14 @@ function formatRole(name: string): string {
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Roles</TableHead>
+                        <TableHead>Last login</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead class="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     <TableRow v-if="users.data.length === 0">
-                        <TableCell colspan="5" class="py-12 text-center text-sm text-slate-400">
+                        <TableCell colspan="6" class="py-12 text-center text-sm text-slate-400">
                             No users found.
                         </TableCell>
                     </TableRow>
@@ -188,6 +202,11 @@ function formatRole(name: string): string {
                                     No roles
                                 </span>
                             </div>
+                        </TableCell>
+                        <TableCell class="text-sm text-slate-600">
+                            <span :class="{ 'text-slate-400': !user.lastLoginAt }">
+                                {{ formatLastLogin(user.lastLoginAt) }}
+                            </span>
                         </TableCell>
                         <TableCell>
                             <Badge v-if="user.deletedAt" variant="destructive">Deleted</Badge>
