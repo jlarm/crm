@@ -29,9 +29,9 @@
         }
     </style>
 
-    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
-    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="/img/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/img/logo.png">
 
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="https://fonts.bunny.net/bebas-neue/files/bebas-neue-latin-400-normal.woff2" crossorigin>
