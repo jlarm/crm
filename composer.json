@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "armp/error-tracker": "^1.0",
         "guzzlehttp/guzzle": "^7.2",
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/ai": "^0.6.6",
@@ -104,6 +105,9 @@
             "php-http/discovery": true
         }
     },
+    "repositories": [
+        { "type": "vcs", "url": "git@github.com:jlarm/error-tracker.git" }
+    ],
     "minimum-stability": "beta",
     "prefer-stable": true
 }
