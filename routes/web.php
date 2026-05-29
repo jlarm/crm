@@ -29,8 +29,6 @@ Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
 })->name('home');
 
-Route::get('/__throw2', fn () => throw new \LogicException('different'));
-
 Route::redirect('/admin', '/dashboard');
 Route::get('/admin/{any}', fn () => redirect('/dashboard'))->where('any', '.*');
 
