@@ -29,10 +29,6 @@ Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
 })->name('home');
 
-Route::get('/__throw', function () {
-    throw new RuntimeException('Smoke test from '.gethostname());
-})->middleware('auth');
-
 Route::redirect('/admin', '/dashboard');
 Route::get('/admin/{any}', fn () => redirect('/dashboard'))->where('any', '.*');
 
