@@ -23,7 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
+            /**
+             * Capped deliberately. This middleware emits one "Link" header listing every
+             * preloaded Vite asset, and an unbounded list overflows nginx's fastcgi
+             * buffers on the origin, which answers with a 502 instead of the page.
+             */
+            AddLinkHeadersForPreloadedAssets::using(5),
             RecordLastLogin::class,
         ]);
 
