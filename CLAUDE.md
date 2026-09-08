@@ -68,7 +68,6 @@ This is a Laravel 13 CRM application using Inertia.js + Vue 3 for the frontend. 
 - **Spatie Activity Log**: Comprehensive activity logging across models
 - **Spatie Permission**: Role-based access control
 - **Mailcoach SDK**: Email marketing integration with contact tagging
-- **Sentry**: Error tracking and performance monitoring
 
 ### Email System Architecture
 
