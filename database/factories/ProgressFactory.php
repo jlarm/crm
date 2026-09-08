@@ -28,10 +28,15 @@ class ProgressFactory extends Factory
         ];
     }
 
+    /**
+     * The date column holds a date, not a datetime, so a value generated inside
+     * the boundary hour of "-1 week" truncates to midnight and lands before it.
+     * Generating from -6 days keeps the state inside the window it claims.
+     */
     public function recent(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'date' => fake()->dateTimeBetween('-1 week', 'now')->format('Y-m-d'),
+            'date' => fake()->dateTimeBetween('-6 days', 'now')->format('Y-m-d'),
         ]);
     }
 
