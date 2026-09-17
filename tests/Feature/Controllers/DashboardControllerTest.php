@@ -34,6 +34,16 @@ describe('Dashboard index', function () {
                 ->has('taskFormData.allDealerships')
                 ->has('taskFormData.types')
                 ->has('taskFormData.priorities')
+                ->has('bookSummary.total')
+                ->has('bookSummary.hot')
+                ->has('bookSummary.warm')
+                ->has('bookSummary.cold')
+                ->has('goingQuiet')
+                ->has('pipeline.openValue')
+                ->has('pipeline.stages', 6)
+                ->has('activity.thisWeek')
+                ->has('activity.lastWeek')
+                ->has('activity.recent')
             );
     });
 

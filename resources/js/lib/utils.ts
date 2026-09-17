@@ -11,17 +11,17 @@ export function toUrl(url: string | { url: string }): string {
 }
 
 const statusClasses: Record<string, string> = {
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    inactive: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    active: 'bg-success/12 text-success',
+    inactive: 'bg-muted text-muted-foreground',
 };
 
 const ratingClasses: Record<string, string> = {
-    hot: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    warm: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    cold: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    hot: 'bg-destructive/12 text-destructive',
+    warm: 'bg-warning/15 text-warning',
+    cold: 'bg-info/12 text-info',
 };
 
-const fallbackClass = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+const fallbackClass = 'bg-muted text-muted-foreground';
 
 export function statusClass(status: string): string {
     return statusClasses[status] ?? fallbackClass;

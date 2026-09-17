@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { ratingClass, statusClass } from '@/lib/utils';
 import { Link } from '@inertiajs/vue3';
 import type { ColumnDef } from '@tanstack/vue-table';
-import { ArrowUpDown, ChevronRight } from 'lucide-vue-next';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
 import { h } from 'vue';
 
 export interface Dealership {
@@ -10,6 +10,7 @@ export interface Dealership {
     name: string;
     city: string;
     state: string;
+    type: string;
     status: string;
     statusLabel: string;
     rating: string;
@@ -17,27 +18,46 @@ export interface Dealership {
     openTasksCount: number;
 }
 
+type SortState = () => { column: string; direction: 'asc' | 'desc' };
+
+function sortHeader(label: string, column: string, onSort: (column: string) => void, sortState?: SortState) {
+    return () => {
+        const state = sortState?.();
+        const isSorted = state?.column === column;
+        const icon = !isSorted ? ArrowUpDown : state?.direction === 'desc' ? ArrowDown : ArrowUp;
+
+        return h(
+            'button',
+            {
+                type: 'button',
+                class: `inline-flex items-center gap-1.5 uppercase tracking-[0.06em] transition-colors hover:text-foreground ${isSorted ? 'text-foreground' : ''}`,
+                'aria-label': `Sort by ${label}`,
+                onClick: () => onSort(column),
+            },
+            [label, h(icon, { class: `size-3.5 ${isSorted ? '' : 'opacity-50'}` })],
+        );
+    };
+}
+
+function pill(label: string, tone: string) {
+    return h(
+        'span',
+        {
+            class: `inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${tone}`,
+        },
+        [h('span', { class: 'size-1.5 rounded-full bg-current' }), label],
+    );
+}
+
 export function createColumns(
     onSort: (column: string) => void,
+    sortState?: SortState,
 ): ColumnDef<Dealership>[] {
     return [
         {
             accessorKey: 'name',
-            size: 400,
-            header: () => {
-                return h(
-                    Button,
-                    {
-                        variant: 'ghost',
-                        class: 'h-auto p-0 hover:bg-transparent font-medium',
-                        onClick: () => onSort('name'),
-                    },
-                    () => [
-                        'Name',
-                        h(ArrowUpDown, { class: 'ml-2 h-4 w-4 opacity-50' }),
-                    ],
-                );
-            },
+            size: 320,
+            header: sortHeader('Name', 'name', onSort, sortState),
             cell: ({ row }) => {
                 const dealership = row.original;
                 const children: ReturnType<typeof h>[] = [
@@ -49,7 +69,7 @@ export function createColumns(
                         h(
                             'span',
                             {
-                                class: 'ml-2 inline-flex items-center rounded-full bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                class: 'ml-2 inline-flex items-center rounded-md border border-brand/30 bg-brand/10 px-1.5 py-px text-[11px] font-medium text-brand tabular-nums',
                                 title: `${dealership.openTasksCount} open task${dealership.openTasksCount === 1 ? '' : 's'}`,
                             },
                             String(dealership.openTasksCount),
@@ -57,79 +77,53 @@ export function createColumns(
                     );
                 }
 
-                return h('div', { class: 'flex items-center font-medium' }, children);
+                return h('div', { class: 'flex items-center font-medium text-foreground' }, children);
             },
         },
         {
             accessorKey: 'city',
             size: 150,
-            header: 'City',
+            header: sortHeader('City', 'city', onSort, sortState),
             cell: ({ row }) => {
-                return h('div', {}, row.getValue('city'));
+                return h('div', { class: 'text-muted-foreground' }, row.getValue('city'));
             },
         },
         {
             accessorKey: 'state',
             size: 100,
-            header: 'State',
+            header: sortHeader('State', 'state', onSort, sortState),
             cell: ({ row }) => {
-                return h('div', {}, row.getValue('state'));
+                return h('div', { class: 'text-muted-foreground' }, row.getValue('state'));
+            },
+        },
+        {
+            accessorKey: 'type',
+            size: 140,
+            header: 'Type',
+            cell: ({ row }) => {
+                const type = row.original.type;
+
+                return type
+                    ? h('div', {}, type)
+                    : h('div', { class: 'text-muted-foreground' }, '—');
             },
         },
         {
             accessorKey: 'status',
             size: 150,
-            header: () => {
-                return h(
-                    Button,
-                    {
-                        variant: 'ghost',
-                        class: 'h-auto p-0 hover:bg-transparent font-medium',
-                        onClick: () => onSort('status'),
-                    },
-                    () => [
-                        'Status',
-                        h(ArrowUpDown, { class: 'ml-2 h-4 w-4 opacity-50' }),
-                    ],
-                );
-            },
+            header: sortHeader('Status', 'status', onSort, sortState),
             cell: ({ row }) => {
                 const dealership = row.original;
-                return h(
-                    'span',
-                    {
-                        class: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(dealership.status)}`,
-                    },
-                    dealership.statusLabel,
-                );
+                return pill(dealership.statusLabel, statusClass(dealership.status));
             },
         },
         {
             accessorKey: 'rating',
             size: 150,
-            header: () => {
-                return h(
-                    Button,
-                    {
-                        variant: 'ghost',
-                        class: 'h-auto p-0 hover:bg-transparent font-medium',
-                        onClick: () => onSort('rating'),
-                    },
-                    () => [
-                        'Rating',
-                        h(ArrowUpDown, { class: 'ml-2 h-4 w-4 opacity-50' }),
-                    ],
-                );
-            },
+            header: sortHeader('Rating', 'rating', onSort, sortState),
             cell: ({ row }) => {
                 const dealership = row.original;
-                return h(
-                    'span',
-                    {
-                        class: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${ratingClass(dealership.rating)}`,
-                    },
-                    dealership.ratingLabel,
-                );
+                return pill(dealership.ratingLabel, ratingClass(dealership.rating));
             },
         },
         {

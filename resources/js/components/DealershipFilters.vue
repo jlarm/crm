@@ -7,7 +7,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Filter, Search, X } from 'lucide-vue-next';
+import { ChevronDown, ListFilter, Search, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 interface FilterOption {
@@ -118,14 +118,24 @@ function clearChip(key: keyof Props['modelValue']): void {
     <div class="flex flex-wrap items-center gap-3">
         <DropdownMenu v-model:open="open">
             <DropdownMenuTrigger as-child>
-                <Button variant="outline" class="gap-2">
-                    <Filter class="h-4 w-4" />
-                    Filter
-                </Button>
+                <button
+                    type="button"
+                    class="inline-flex h-10 items-center gap-2.5 rounded-lg border border-border bg-card pr-2.5 pl-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none data-[state=open]:bg-accent"
+                >
+                    <ListFilter class="size-4 text-muted-foreground" />
+                    Filters
+                    <span
+                        v-if="activeChips.length"
+                        class="inline-flex size-5 items-center justify-center rounded-full bg-muted text-[11px] font-medium tabular-nums"
+                    >
+                        {{ activeChips.length }}
+                    </span>
+                    <ChevronDown class="size-4 text-muted-foreground" />
+                </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" class="w-[640px] p-0 shadow-xl">
-                <div class="grid grid-cols-[200px_1fr]">
-                    <div class="border-r border-border p-4">
+            <DropdownMenuContent align="start" class="w-[640px] max-w-[calc(100vw-2rem)] p-0 shadow-xl">
+                <div class="grid sm:grid-cols-[200px_1fr]">
+                    <div class="border-b border-border p-4 sm:border-r sm:border-b-0">
                         <div class="relative">
                             <Search
                                 class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -261,18 +271,21 @@ function clearChip(key: keyof Props['modelValue']): void {
         </DropdownMenu>
 
         <div class="flex flex-wrap items-center gap-2">
-            <Button
+            <span
                 v-for="chip in activeChips"
                 :key="chip.label"
-                variant="outline"
-                size="sm"
-                class="gap-1"
-                type="button"
-                @click="clearChip(chip.key)"
+                class="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card pr-1.5 pl-3 text-sm text-foreground"
             >
                 {{ chip.label }}
-                <X class="h-3 w-3" />
-            </Button>
+                <button
+                    type="button"
+                    class="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    :aria-label="`Remove ${chip.label}`"
+                    @click="clearChip(chip.key)"
+                >
+                    <X class="size-3.5" />
+                </button>
+            </span>
         </div>
     </div>
 </template>
