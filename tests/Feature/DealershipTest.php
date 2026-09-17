@@ -356,42 +356,6 @@ describe('Dealership Business Logic', function () {
         expect($dealership->total_store_count)->toBe(4); // 3 stores + 1 base
     });
 
-    it('returns correct list type for each dealership type', function () {
-        $typeMapping = [
-            'Automotive' => config('services.mailcoach.lists.automotive'),
-            'RV' => config('services.mailcoach.lists.rv'),
-            'Motorsports' => config('services.mailcoach.lists.motorsports'),
-            'Maritime' => config('services.mailcoach.lists.maritime'),
-        ];
-
-        foreach ($typeMapping as $type => $expectedId) {
-            $dealership = Dealership::factory()->create([
-                'user_id' => $this->user->id,
-                'type' => $type,
-            ]);
-
-            expect($dealership->getListType())->toBe($expectedId);
-        }
-    });
-
-    it('returns default value for unknown dealership type', function () {
-        $dealership = Dealership::factory()->create([
-            'user_id' => $this->user->id,
-            'type' => 'Unknown Type',
-        ]);
-
-        expect($dealership->getListType())->toBe('default_value');
-    });
-
-    it('handles association type correctly', function () {
-        $dealership = Dealership::factory()->create([
-            'user_id' => $this->user->id,
-            'type' => 'Association',
-        ]);
-
-        expect($dealership->getListType())->toBe('default_value');
-    });
-
     it('tracks development status changes', function () {
         $dealership = Dealership::factory()->create([
             'user_id' => $this->user->id,

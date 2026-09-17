@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\User;
-use App\Observers\ContactObserver;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
@@ -14,14 +13,9 @@ use function Pest\Laravel\post;
 use function Pest\Laravel\put;
 
 beforeEach(function () {
-    ContactObserver::$syncMailcoach = false;
     $this->user = User::factory()->create();
     actingAs($this->user);
     $this->dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
-});
-
-afterEach(function () {
-    ContactObserver::$syncMailcoach = true;
 });
 
 describe('DealershipContactController store', function () {

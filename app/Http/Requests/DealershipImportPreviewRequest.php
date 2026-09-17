@@ -20,7 +20,6 @@ final class DealershipImportPreviewRequest extends FormRequest
             'default_type' => ['required', 'string', 'in:Automotive,RV,Motorsports,Maritime,Association'],
             'default_user_ids' => ['array'],
             'default_user_ids.*' => ['integer', 'exists:users,id'],
-            'sync_mailcoach' => ['boolean'],
             'update_existing' => ['boolean'],
             'transactional' => ['boolean'],
         ];

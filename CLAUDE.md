@@ -67,7 +67,6 @@ This is a Laravel 13 CRM application using Inertia.js + Vue 3 for the frontend. 
 - **Laravel Fortify**: Headless authentication backend
 - **Spatie Activity Log**: Comprehensive activity logging across models
 - **Spatie Permission**: Role-based access control
-- **Mailcoach SDK**: Email marketing integration with contact tagging
 
 ### Email System Architecture
 
@@ -75,7 +74,6 @@ The email system uses a job-based approach:
 - `SendDealerEmail` job handles email dispatch
 - Templates support customization per dealership
 - PDF attachments via polymorphic relationships
-- Integration with Mailcoach for list management and tagging
 
 ### Key Business Logic
 
@@ -91,7 +89,7 @@ The email system uses a job-based approach:
 - `app/Models/`: Eloquent models with relationships and business logic
 - `app/Jobs/`: Background job classes for email sending and imports
 - `app/Mail/`: Mailable classes for various email types
-- `app/Listeners/`: Event listeners, particularly for Mailcoach integration
+- `app/Listeners/`: Event listeners
 - `app/Console/Commands/`: Custom Artisan commands for bulk operations
 - `app/Policies/`: Authorization policies for resource access
 - `resources/js/pages/`: Inertia Vue page components
@@ -103,7 +101,6 @@ Key relationships:
 - Users can be assigned to multiple dealerships (many-to-many)
 - Email templates can be customized per dealership
 - PDF attachments use polymorphic relationships for flexibility
-- Contact tagging syncs with external Mailcoach service
 
 ### Testing Strategy
 

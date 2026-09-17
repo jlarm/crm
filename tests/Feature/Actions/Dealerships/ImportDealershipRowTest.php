@@ -6,16 +6,7 @@ use App\Actions\Dealerships\ImportDealershipRow;
 use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\User;
-use App\Observers\ContactObserver;
 use Illuminate\Support\Facades\Log;
-
-beforeEach(function (): void {
-    ContactObserver::$syncMailcoach = false;
-});
-
-afterEach(function (): void {
-    ContactObserver::$syncMailcoach = true;
-});
 
 function importerOptions(int $userId, array $overrides = []): array
 {
@@ -23,7 +14,6 @@ function importerOptions(int $userId, array $overrides = []): array
         'importer_id' => $userId,
         'default_user_ids' => [],
         'defaults' => ['status' => 'active', 'rating' => 'warm', 'type' => 'Automotive'],
-        'sync_mailcoach' => false,
         'update_existing' => false,
         'transactional' => true,
     ], $overrides);
@@ -80,20 +70,6 @@ describe('ImportDealershipRow action', function (): void {
         expect($stats['created']['dealerships'])->toBe(1)
             ->and($stats['errors'])->not->toBeEmpty()
             ->and(Dealership::where('name', 'Good Motors')->exists())->toBeTrue();
-    });
-
-    it('toggles ContactObserver mailcoach flag and restores it after the import', function (): void {
-        ContactObserver::$syncMailcoach = false;
-
-        $user = User::factory()->create();
-
-        $action = new ImportDealershipRow;
-        $action(
-            [dealershipRow('Toggle Motors')],
-            importerOptions($user->id, ['sync_mailcoach' => true]),
-        );
-
-        expect(ContactObserver::$syncMailcoach)->toBeFalse();
     });
 
     it('handles orphan contact rows whose parent_ref does not match an existing dealership', function (): void {

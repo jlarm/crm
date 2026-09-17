@@ -6,16 +6,7 @@ use App\Actions\Dealerships\ImportDealershipRow;
 use App\Jobs\ProcessDealershipImport;
 use App\Models\Dealership;
 use App\Models\User;
-use App\Observers\ContactObserver;
 use Illuminate\Support\Facades\Log;
-
-beforeEach(function (): void {
-    ContactObserver::$syncMailcoach = false;
-});
-
-afterEach(function (): void {
-    ContactObserver::$syncMailcoach = true;
-});
 
 describe('ProcessDealershipImport job', function (): void {
     it('runs the import action with the validated rows and options', function (): void {
@@ -39,7 +30,6 @@ describe('ProcessDealershipImport job', function (): void {
             'importer_id' => $user->id,
             'default_user_ids' => [],
             'defaults' => ['status' => 'active', 'rating' => 'warm', 'type' => 'Automotive'],
-            'sync_mailcoach' => false,
             'update_existing' => false,
             'transactional' => true,
         ];
@@ -66,7 +56,6 @@ describe('ProcessDealershipImport job', function (): void {
             'importer_id' => $user->id,
             'default_user_ids' => [],
             'defaults' => ['status' => 'active', 'rating' => 'warm', 'type' => 'Automotive'],
-            'sync_mailcoach' => false,
             'update_existing' => false,
             'transactional' => true,
         ];
@@ -87,7 +76,6 @@ describe('ProcessDealershipImport job', function (): void {
             'importer_id' => $user->id,
             'default_user_ids' => [],
             'defaults' => ['status' => 'active', 'rating' => 'warm', 'type' => 'Automotive'],
-            'sync_mailcoach' => false,
             'update_existing' => false,
             'transactional' => true,
         ];

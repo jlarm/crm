@@ -49,7 +49,6 @@ final class DealershipImportController extends Controller
         $defaultUserIds = array_values(array_unique(array_map(fn (mixed $v): int => is_numeric($v) ? (int) $v : 0, $rawIds)));
 
         $options = [
-            'sync_mailcoach' => (bool) $request->validated('sync_mailcoach', false),
             'update_existing' => (bool) $request->validated('update_existing', false),
             'transactional' => (bool) $request->validated('transactional', true),
         ];
@@ -112,7 +111,7 @@ final class DealershipImportController extends Controller
                     'rowType' => $r['row_type'],
                     'resolved' => $r['resolved'],
                     'errors' => $r['errors'],
-                    'parentRef' => $r['parent_ref'] ?? null,
+                    'parentRef' => $r['parent_ref'],
                 ], $validated),
             ],
         ]);
@@ -124,7 +123,7 @@ final class DealershipImportController extends Controller
     ): RedirectResponse {
         $token = is_string($t = $request->validated('token')) ? $t : '';
         $cacheKey = 'dealership-import:'.$token;
-        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}}|null $payload */
+        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}}|null $payload */
         $payload = Cache::get($cacheKey);
 
         if (! $payload) {

@@ -287,7 +287,7 @@ Scheduled reminder system for users.
 ## Contact Management Tables
 
 ### tags
-Tags for categorizing contacts (syncs with Mailcoach).
+Tags for categorizing contacts.
 
 | Column | Type | Attributes | Description |
 |--------|------|------------|-------------|

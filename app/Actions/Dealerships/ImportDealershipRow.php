@@ -8,7 +8,6 @@ use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
 use App\Models\User;
-use App\Observers\ContactObserver;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +27,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>  $validatedRows
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      * @return array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}
      */
     public function __invoke(array $validatedRows, array $options): array
@@ -41,41 +40,34 @@ final class ImportDealershipRow
             'errors' => [],
         ];
 
-        $previousFlag = ContactObserver::$syncMailcoach;
-        ContactObserver::$syncMailcoach = $options['sync_mailcoach'];
+        $groups = $this->groupRows($validatedRows);
 
-        try {
-            $groups = $this->groupRows($validatedRows);
+        $this->prefetchDealerships($groups);
+        $this->prefetchUsers($validatedRows);
 
-            $this->prefetchDealerships($groups);
-            $this->prefetchUsers($validatedRows);
-
-            if ($options['transactional']) {
-                DB::transaction(function () use ($groups, $options, &$stats): void {
-                    foreach ($groups as $group) {
-                        $this->processGroup($group, $options, $stats);
-                    }
-                });
-            } else {
+        if ($options['transactional']) {
+            DB::transaction(function () use ($groups, $options, &$stats): void {
                 foreach ($groups as $group) {
-                    try {
-                        DB::transaction(function () use ($group, $options, &$stats): void {
-                            $this->processGroup($group, $options, $stats);
-                        });
-                    } catch (Throwable $e) {
-                        Log::error('[ImportDealershipRow] Group failed.', [
-                            'parent_ref' => $group['parent_ref'] ?? null,
-                            'exception' => $e,
-                        ]);
-                        $stats['errors'][] = [
-                            'line' => is_int($group['parent']['line'] ?? null) ? $group['parent']['line'] : 0,
-                            'message' => $e->getMessage(),
-                        ];
-                    }
+                    $this->processGroup($group, $options, $stats);
+                }
+            });
+        } else {
+            foreach ($groups as $group) {
+                try {
+                    DB::transaction(function () use ($group, $options, &$stats): void {
+                        $this->processGroup($group, $options, $stats);
+                    });
+                } catch (Throwable $e) {
+                    Log::error('[ImportDealershipRow] Group failed.', [
+                        'parent_ref' => $group['parent_ref'],
+                        'exception' => $e,
+                    ]);
+                    $stats['errors'][] = [
+                        'line' => is_int($group['parent']['line'] ?? null) ? $group['parent']['line'] : 0,
+                        'message' => $e->getMessage(),
+                    ];
                 }
             }
-        } finally {
-            ContactObserver::$syncMailcoach = $previousFlag;
         }
 
         return $stats;
@@ -214,7 +206,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -235,7 +227,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -255,7 +247,7 @@ final class ImportDealershipRow
         }
 
         $resolvedName = $resolved['name'] ?? null;
-        $parentRef = $group['parent_ref'] ?? null;
+        $parentRef = $group['parent_ref'];
         $name = is_string($resolvedName) ? $resolvedName : (is_string($parentRef) ? $parentRef : '');
         $key = mb_strtolower($name);
         $existing = $this->existingByName[$key] ?? null;
@@ -295,7 +287,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<int, string>  $extraEmails
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      */
     private function syncUsers(Dealership $dealership, array $extraEmails, array $options): void
     {
@@ -313,7 +305,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -350,7 +342,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, sync_mailcoach: bool, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *

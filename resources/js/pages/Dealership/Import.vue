@@ -51,7 +51,6 @@ interface Preview {
     defaults: { status: string; rating: string; type: string };
     defaultUserIds: number[];
     options: {
-        sync_mailcoach: boolean;
         update_existing: boolean;
         transactional: boolean;
     };
@@ -76,7 +75,6 @@ const props = defineProps<Props>();
 const defaultStatus = ref('active');
 const defaultRating = ref('warm');
 const defaultType = ref('Automotive');
-const syncMailcoach = ref(false);
 const updateExisting = ref(false);
 const transactional = ref(true);
 
@@ -193,15 +191,6 @@ function formatErrors(errors: Record<string, string[]>): string {
                             <CardTitle>Options</CardTitle>
                         </CardHeader>
                         <CardContent class="space-y-3">
-                            <label class="flex items-center gap-3 text-sm">
-                                <Checkbox
-                                    :model-value="syncMailcoach"
-                                    @update:model-value="(v) => (syncMailcoach = v === true)"
-                                />
-                                <input type="hidden" name="sync_mailcoach" :value="syncMailcoach ? 1 : 0" />
-                                <span>Sync new contacts to Mailcoach (off by default)</span>
-                            </label>
-
                             <label class="flex items-center gap-3 text-sm">
                                 <Checkbox
                                     :model-value="updateExisting"

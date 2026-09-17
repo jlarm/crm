@@ -7,6 +7,7 @@ use App\Models\Dealership;
 use App\Models\Progress;
 use App\Models\Tag;
 use App\Models\User;
+use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -349,7 +350,6 @@ describe('Contact Validation and Edge Cases', function () {
 
 describe('Contact Activity Logging', function () {
     it('logs activity when contact is created', function () {
-        // Create contact without triggering Mailcoach observer issues
         Contact::withoutEvents(function () {
             $contact = Contact::factory()->create([
                 'name' => 'Activity Test Contact',
@@ -388,7 +388,14 @@ describe('Contact Activity Logging', function () {
     });
 
     it('logs activity when contact is deleted', function () {
-        // Skip this test due to Mailcoach integration requirements
-        expect(true)->toBeTrue();
-    })->skip('Requires Mailcoach API token for contact observers');
+        $contact = Contact::factory()->create();
+
+        $contact->delete();
+
+        expect(Activity::query()
+            ->where('subject_type', Contact::class)
+            ->where('subject_id', $contact->id)
+            ->where('event', 'deleted')
+            ->exists())->toBeTrue();
+    });
 });

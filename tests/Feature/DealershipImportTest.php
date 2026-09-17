@@ -7,7 +7,6 @@ use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
 use App\Models\User;
-use App\Observers\ContactObserver;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
@@ -15,13 +14,6 @@ use Illuminate\Support\Facades\Queue;
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
-
-    // Globally disable Mailcoach in tests; per-test toggling can override.
-    ContactObserver::$syncMailcoach = false;
-});
-
-afterEach(function () {
-    ContactObserver::$syncMailcoach = true;
 });
 
 function csvFile(string $contents): UploadedFile
@@ -38,7 +30,6 @@ function defaultPreviewPayload(array $overrides = []): array
         'default_status' => 'active',
         'default_rating' => 'warm',
         'default_type' => 'Automotive',
-        'sync_mailcoach' => 0,
         'update_existing' => 0,
         'transactional' => 1,
     ], $overrides);
@@ -318,24 +309,4 @@ it('attaches default consultants to auto-created dealerships', function () {
 
     $userIds = Dealership::first()->users->pluck('id')->all();
     expect($userIds)->toContain($this->user->id)->toContain($other->id);
-});
-
-it('does not call Mailcoach when sync_mailcoach is off (default)', function () {
-    // Confirm the observer flag stays false through the import.
-    $csv = <<<'CSV'
-row_type,dealership_ref,name,email
-dealership,,Prime Motors,
-contact,Prime Motors,Jane,jane@example.com
-CSV;
-
-    $response = $this->post('/dealerships/import/preview', defaultPreviewPayload([
-        'file' => csvFile($csv),
-    ]));
-    $token = $response->viewData('page')['props']['preview']['token'];
-
-    // If Mailcoach were called, the observer would attempt the API and fail in tests.
-    // The fact that the import completes proves the gate worked.
-    $this->post('/dealerships/import', ['token' => $token])->assertRedirect('/dashboard');
-
-    expect(Contact::count())->toBe(1);
 });

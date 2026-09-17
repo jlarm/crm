@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Events\ContactTagSync;
 use App\Listeners\LogAuthenticationEvents;
-use App\Listeners\SyncContactTagsWithMailcoach;
 use App\Models\Contact;
 use App\Models\DealerEmail;
 use App\Models\DealerEmailTemplate;
@@ -26,9 +24,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-        ],
-        ContactTagSync::class => [
-            SyncContactTagsWithMailcoach::class,
         ],
     ];
 

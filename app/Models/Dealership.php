@@ -148,20 +148,6 @@ class Dealership extends Model
         return $this->stores()->count() + 1;
     }
 
-    public function getListType(): string
-    {
-        $types = [
-            'Automotive' => config('services.mailcoach.lists.automotive'),
-            'RV' => config('services.mailcoach.lists.rv'),
-            'Motorsports' => config('services.mailcoach.lists.motorsports'),
-            'Maritime' => config('services.mailcoach.lists.maritime'),
-        ];
-
-        $value = $types[$this->type] ?? null;
-
-        return is_string($value) ? $value : 'default_value';
-    }
-
     /**
      * @return array<string, mixed>
      */
