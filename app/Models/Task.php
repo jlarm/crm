@@ -175,6 +175,26 @@ class Task extends Model
         $query->where('type', $type);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeOrderByPriority(Builder $query): void
+    {
+        $query->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END");
+    }
+
+    /**
+     * Overdue first, then due today, then everything else.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeOrderByDueDateUrgency(Builder $query): void
+    {
+        $today = now()->toDateString();
+
+        $query->orderByRaw('CASE WHEN DATE(due_date) < ? THEN 0 WHEN DATE(due_date) = ? THEN 1 ELSE 2 END', [$today, $today]);
+    }
+
     protected function casts(): array
     {
         return [

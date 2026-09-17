@@ -61,7 +61,7 @@ final class DealershipController extends Controller
 
         $tasks = $dealership->tasks()
             ->with(['user', 'createdBy', 'contact'])
-            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
+            ->orderByPriority()
             ->orderBy('due_date')
             ->get()
             ->map(fn (Task $task): array => TaskResource::make($task)->resolve());
@@ -71,14 +71,8 @@ final class DealershipController extends Controller
             'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
             'tasks' => $tasks,
             'taskFilterOptions' => [
-                'types' => collect(TaskType::cases())->map(fn (TaskType $case): array => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ]),
-                'priorities' => collect(TaskPriority::cases())->map(fn (TaskPriority $case): array => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ]),
+                'types' => TaskType::options(),
+                'priorities' => TaskPriority::options(),
             ],
         ]);
     }

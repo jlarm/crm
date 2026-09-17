@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enum\TaskPriority;
-use App\Enum\TaskType;
+use App\Actions\Tasks\BuildTaskFormOptions;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Resources\TaskResource;
-use App\Models\Dealership;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -19,10 +17,12 @@ use Inertia\Response;
 
 final class TaskController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, BuildTaskFormOptions $buildTaskFormOptions): Response
     {
         /** @var User $user */
         $user = $request->user();
+
+        $formOptions = $buildTaskFormOptions();
 
         $query = Task::query()
             ->with(['user', 'createdBy', 'dealership', 'contact'])
@@ -60,21 +60,11 @@ final class TaskController extends Controller
                 'dealership_id' => $request->input('dealership_id', ''),
             ],
             'filterOptions' => [
-                'types' => collect(TaskType::cases())->map(fn (TaskType $case): array => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ]),
-                'priorities' => collect(TaskPriority::cases())->map(fn (TaskPriority $case): array => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ]),
+                'types' => $formOptions['types'],
+                'priorities' => $formOptions['priorities'],
             ],
-            'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
-            'allDealerships' => Dealership::query()
-                ->select('id', 'name')
-                ->whereNot('status', 'imported')
-                ->orderBy('name')
-                ->get(),
+            'allUsers' => $formOptions['allUsers'],
+            'allDealerships' => $formOptions['allDealerships'],
             'summary' => [
                 'incomplete' => Task::forUser($user)->incomplete()->count(),
                 'overdue' => Task::forUser($user)->overdue()->count(),

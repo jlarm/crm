@@ -23,6 +23,7 @@ final class DealershipResource extends JsonResource
             'name' => $this->name,
             'city' => $this->city,
             'state' => $this->state,
+            'type' => (string) $this->type,
             'status' => $this->status,
             'statusLabel' => ucfirst((string) $this->status),
             'rating' => $this->rating,

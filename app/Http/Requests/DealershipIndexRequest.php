@@ -30,4 +30,33 @@ final class DealershipIndexRequest extends FormRequest
     {
         return true;
     }
+
+    public function scope(): string
+    {
+        return $this->string('scope')->toString() === 'all' ? 'all' : 'mine';
+    }
+
+    public function includeImported(): bool
+    {
+        return $this->boolean('include_imported');
+    }
+
+    /**
+     * Normalised filter values, safe to pass to ListDealerships and echo back to the page.
+     *
+     * @return array{search: string, status: string, rating: string, type: string, scope: string, include_imported: string, sort: string, direction: string}
+     */
+    public function filters(): array
+    {
+        return [
+            'search' => $this->string('search')->toString(),
+            'status' => $this->string('status')->toString(),
+            'rating' => $this->string('rating')->toString(),
+            'type' => $this->string('type')->toString(),
+            'scope' => $this->scope(),
+            'include_imported' => $this->includeImported() ? '1' : '',
+            'sort' => $this->string('sort')->toString(),
+            'direction' => $this->string('direction')->toString() === 'desc' ? 'desc' : 'asc',
+        ];
+    }
 }

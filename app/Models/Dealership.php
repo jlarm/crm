@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -78,6 +79,48 @@ class Dealership extends Model
         'in_development' => 'boolean',
         'dev_status' => DevStatus::class,
     ];
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function ratingOptions(): array
+    {
+        return [
+            ['value' => 'hot', 'label' => 'Hot'],
+            ['value' => 'warm', 'label' => 'Warm'],
+            ['value' => 'cold', 'label' => 'Cold'],
+        ];
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function typeOptions(): array
+    {
+        return self::query()
+            ->whereNotNull('type')
+            ->where('type', '!=', '')
+            ->distinct()
+            ->orderBy('type')
+            ->get(['type'])
+            ->map(fn (self $dealership): array => [
+                'value' => (string) $dealership->type,
+                'label' => Str::headline((string) $dealership->type),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function statusOptions(): array
+    {
+        return [
+            ['value' => 'active', 'label' => 'Active'],
+            ['value' => 'inactive', 'label' => 'Inactive'],
+        ];
+    }
 
     /**
      * @return BelongsToMany<User, $this>
@@ -244,5 +287,17 @@ class Dealership extends Model
         } else {
             $query->orderBy('name', 'asc');
         }
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeWithStatus(Builder $query, ?string $status): void
+    {
+        if (! $status) {
+            return;
+        }
+
+        $query->where('status', $status);
     }
 }
