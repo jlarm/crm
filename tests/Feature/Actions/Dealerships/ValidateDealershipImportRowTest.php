@@ -147,6 +147,57 @@ describe('ValidateDealershipImportRow action', function () use ($defaults): void
         expect($result['extra_user_emails'])->toBe([]);
     });
 
+    it('converts full state names to two-letter codes', function (string $rowType, string $state, string $expected) use ($defaults): void {
+        $action = new ValidateDealershipImportRow;
+
+        $row = [
+            'line' => 1,
+            'row_type' => $rowType,
+            'raw' => ['name' => 'Acme', 'state' => $state, 'dealership_ref' => 'Parent Co'],
+        ];
+
+        $result = $action($row, $defaults);
+
+        expect($result['resolved']['state'])->toBe($expected)
+            ->and($result['errors'])->toBeEmpty();
+    })->with([
+        'dealership full name' => ['dealership', 'New Hampshire', 'NH'],
+        'store full name' => ['store', 'North Carolina', 'NC'],
+        'mixed case with extra spaces' => ['dealership', 'west  VIRGINIA', 'WV'],
+        'district of columbia' => ['dealership', 'District of Columbia', 'DC'],
+        'lowercase code' => ['dealership', 'oh', 'OH'],
+        'existing code' => ['store', 'TX', 'TX'],
+    ]);
+
+    it('still rejects state values it cannot convert', function () use ($defaults): void {
+        $action = new ValidateDealershipImportRow;
+
+        $row = [
+            'line' => 1,
+            'row_type' => 'dealership',
+            'raw' => ['name' => 'Acme', 'state' => 'Ontario'],
+        ];
+
+        $result = $action($row, $defaults);
+
+        expect($result['resolved']['state'])->toBe('Ontario')
+            ->and($result['errors'])->toHaveKey('state');
+    });
+
+    it('still rejects unsupported dealership types', function () use ($defaults): void {
+        $action = new ValidateDealershipImportRow;
+
+        $row = [
+            'line' => 1,
+            'row_type' => 'dealership',
+            'raw' => ['name' => 'Acme', 'type' => 'Retail'],
+        ];
+
+        $result = $action($row, $defaults);
+
+        expect($result['errors'])->toHaveKey('type');
+    });
+
     it('applies dropdown defaults when status, rating or type are missing', function () use ($defaults): void {
         $action = new ValidateDealershipImportRow;
 

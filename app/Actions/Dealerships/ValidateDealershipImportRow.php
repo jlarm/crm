@@ -24,6 +24,65 @@ final class ValidateDealershipImportRow
     ];
 
     /**
+     * Lowercased full state names mapped to their two-letter codes.
+     *
+     * @var array<string, string>
+     */
+    private const array STATE_CODES = [
+        'alabama' => 'AL',
+        'alaska' => 'AK',
+        'arizona' => 'AZ',
+        'arkansas' => 'AR',
+        'california' => 'CA',
+        'colorado' => 'CO',
+        'connecticut' => 'CT',
+        'delaware' => 'DE',
+        'district of columbia' => 'DC',
+        'florida' => 'FL',
+        'georgia' => 'GA',
+        'hawaii' => 'HI',
+        'idaho' => 'ID',
+        'illinois' => 'IL',
+        'indiana' => 'IN',
+        'iowa' => 'IA',
+        'kansas' => 'KS',
+        'kentucky' => 'KY',
+        'louisiana' => 'LA',
+        'maine' => 'ME',
+        'maryland' => 'MD',
+        'massachusetts' => 'MA',
+        'michigan' => 'MI',
+        'minnesota' => 'MN',
+        'mississippi' => 'MS',
+        'missouri' => 'MO',
+        'montana' => 'MT',
+        'nebraska' => 'NE',
+        'nevada' => 'NV',
+        'new hampshire' => 'NH',
+        'new jersey' => 'NJ',
+        'new mexico' => 'NM',
+        'new york' => 'NY',
+        'north carolina' => 'NC',
+        'north dakota' => 'ND',
+        'ohio' => 'OH',
+        'oklahoma' => 'OK',
+        'oregon' => 'OR',
+        'pennsylvania' => 'PA',
+        'rhode island' => 'RI',
+        'south carolina' => 'SC',
+        'south dakota' => 'SD',
+        'tennessee' => 'TN',
+        'texas' => 'TX',
+        'utah' => 'UT',
+        'vermont' => 'VT',
+        'virginia' => 'VA',
+        'washington' => 'WA',
+        'west virginia' => 'WV',
+        'wisconsin' => 'WI',
+        'wyoming' => 'WY',
+    ];
+
+    /**
      * Apply defaults and validate a row. Returns the resolved values and any errors.
      *
      * @param  array{line: int, row_type: string, raw: array<string, string|null>}  $row
@@ -58,6 +117,7 @@ final class ValidateDealershipImportRow
     private function validateDealership(int $line, array $raw, array $defaults): array
     {
         $resolved = $this->pick($raw, self::DEALERSHIP_FIELDS);
+        $resolved['state'] = $this->normalizeState($resolved['state']);
         $resolved['status'] ??= $defaults['status'];
         $resolved['rating'] ??= $defaults['rating'];
         $resolved['type'] ??= $defaults['type'];
@@ -96,6 +156,7 @@ final class ValidateDealershipImportRow
     private function validateStore(int $line, array $raw): array
     {
         $resolved = $this->pick($raw, self::STORE_FIELDS);
+        $resolved['state'] = $this->normalizeState($resolved['state']);
         $parentRef = $raw['dealership_ref'] ?? null;
 
         $rules = [
@@ -182,6 +243,24 @@ final class ValidateDealershipImportRow
         }
 
         return $out;
+    }
+
+    /**
+     * Convert a full state name or lowercase code to its two-letter code. Unrecognized values pass through for validation to reject.
+     */
+    private function normalizeState(mixed $state): mixed
+    {
+        if (! is_string($state)) {
+            return $state;
+        }
+
+        $key = mb_strtolower(preg_replace('/\s+/', ' ', mb_trim($state)) ?? $state);
+
+        if (in_array(mb_strtoupper($key), self::STATE_CODES, true)) {
+            return mb_strtoupper($key);
+        }
+
+        return self::STATE_CODES[$key] ?? $state;
     }
 
     /**
