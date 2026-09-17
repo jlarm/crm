@@ -76,18 +76,16 @@ function visitRow(row: TData, event?: MouseEvent | KeyboardEvent): void {
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-xl border border-border bg-card">
+    <div class="rounded-md border">
         <Table>
             <TableHeader>
                 <TableRow
                     v-for="headerGroup in table.getHeaderGroups()"
                     :key="headerGroup.id"
-                    class="bg-muted/50 hover:bg-muted/50"
                 >
                     <TableHead
                         v-for="header in headerGroup.headers"
                         :key="header.id"
-                        class="h-11 px-5 text-xs font-medium tracking-[0.06em] text-muted-foreground uppercase"
                         :style="{ width: `${header.getSize()}px` }"
                     >
                         <FlexRender
@@ -106,8 +104,8 @@ function visitRow(row: TData, event?: MouseEvent | KeyboardEvent): void {
                         :data-state="row.getIsSelected() && 'selected'"
                         :class="
                             getRowHref(row.original)
-                                ? 'cursor-pointer last:border-b-0 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset'
-                                : 'last:border-b-0'
+                                ? 'cursor-pointer focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none'
+                                : undefined
                         "
                         :tabindex="getRowHref(row.original) ? 0 : undefined"
                         :role="getRowHref(row.original) ? 'link' : undefined"
@@ -118,7 +116,6 @@ function visitRow(row: TData, event?: MouseEvent | KeyboardEvent): void {
                         <TableCell
                             v-for="cell in row.getVisibleCells()"
                             :key="cell.id"
-                            class="px-5 py-3.5 text-sm"
                             :style="{ width: `${cell.column.getSize()}px` }"
                         >
                             <FlexRender
@@ -131,7 +128,7 @@ function visitRow(row: TData, event?: MouseEvent | KeyboardEvent): void {
                 <TableRow v-else>
                     <TableCell
                         :colspan="columns.length"
-                        class="h-32 text-center"
+                        class="h-24 text-center"
                     >
                         <div class="text-muted-foreground">
                             No dealerships found.

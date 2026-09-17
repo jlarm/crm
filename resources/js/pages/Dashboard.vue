@@ -1,31 +1,24 @@
 <script setup lang="ts">
 import { type Dealership, createColumns } from '@/components/companies/columns';
 import DataTable from '@/components/companies/DataTable.vue';
-import DashboardCardMenu from '@/components/dashboard/DashboardCardMenu.vue';
-import DashboardGoingQuiet from '@/components/dashboard/DashboardGoingQuiet.vue';
-import DashboardMetricRibbon from '@/components/dashboard/DashboardMetricRibbon.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
-import DashboardPipeline from '@/components/dashboard/DashboardPipeline.vue';
-import DashboardRecentActivity from '@/components/dashboard/DashboardRecentActivity.vue';
-import DashboardTaskBoard from '@/components/dashboard/DashboardTaskBoard.vue';
-import type {
-    ActivitySummary,
-    BookSummary,
-    PipelineSummary,
-    QuietDealership,
-    TaskStats,
-} from '@/components/dashboard/types';
+import DashboardTaskStats from '@/components/dashboard/DashboardTaskStats.vue';
+import DashboardTasksWidget from '@/components/dashboard/DashboardTasksWidget.vue';
 import DealershipFilters from '@/components/DealershipFilters.vue';
 import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import TaskFormModal from '@/components/tasks/TaskFormModal.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useDashboardCards } from '@/composables/useDashboardCards';
 import { useTableFilters } from '@/composables/useTableFilters';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { ListPlus, Plus, Upload } from 'lucide-vue-next';
+import { Plus, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+
+interface FilterOption2 {
+    value: string;
+    label: string;
+}
 
 interface Props {
     dealerships: {
@@ -49,11 +42,16 @@ interface Props {
         direction?: string;
     };
     filterOptions: {
-        statuses: FilterOption[];
-        ratings: FilterOption[];
-        types: FilterOption[];
+        statuses: FilterOption2[];
+        ratings: FilterOption2[];
+        types: FilterOption2[];
     };
-    taskStats: TaskStats;
+    taskStats: {
+        incomplete: number;
+        overdue: number;
+        dueToday: number;
+        completedThisWeek: number;
+    };
     upcomingTasks: Task[];
     taskFormData: {
         allUsers: { id: number; name: string }[];
@@ -61,19 +59,12 @@ interface Props {
         types: FilterOption[];
         priorities: FilterOption[];
     };
-    bookSummary: BookSummary;
-    goingQuiet: QuietDealership[];
-    pipeline: PipelineSummary;
-    activity: ActivitySummary;
 }
 
 const props = defineProps<Props>();
 
 const page = usePage();
-const currentUser = computed(
-    () => (page.props.auth as { user: { id: number; name: string } }).user,
-);
-const currentUserId = computed(() => currentUser.value.id);
+const currentUserId = computed(() => (page.props.auth as { user: { id: number } }).user.id);
 
 const isTaskFormOpen = ref(false);
 const editingTask = ref<Task | null>(null);
@@ -82,62 +73,6 @@ function openTaskCreate(): void {
     editingTask.value = null;
     isTaskFormOpen.value = true;
 }
-
-function openTaskEdit(task: Task): void {
-    editingTask.value = task;
-    isTaskFormOpen.value = true;
-}
-
-const today = new Date();
-
-const greeting = computed(() => {
-    const hour = today.getHours();
-    const partOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-    const firstName = currentUser.value.name.split(' ')[0];
-
-    return `Good ${partOfDay}, ${firstName}`;
-});
-
-const todayLabel = computed(() =>
-    today.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-    }),
-);
-
-function plural(count: number, singular: string): string {
-    return `${count} ${singular}${count === 1 ? '' : 's'}`;
-}
-
-const statusLine = computed(() => {
-    const { overdue, dueToday, incomplete } = props.taskStats;
-
-    if (overdue > 0 && dueToday > 0) {
-        return `${plural(overdue, 'task')} overdue and ${plural(dueToday, 'task')} due today.`;
-    }
-    if (overdue > 0) {
-        return `${plural(overdue, 'task')} overdue. Nothing else is due today.`;
-    }
-    if (dueToday > 0) {
-        return `${plural(dueToday, 'task')} due today. Nothing is overdue.`;
-    }
-    if (incomplete > 0) {
-        return `Nothing is due today. ${plural(incomplete, 'task')} still open.`;
-    }
-
-    return 'Nothing is due today.';
-});
-
-const bookLine = computed(() => {
-    const { hot, warm } = props.bookSummary;
-
-    if (hot === 0 && warm === 0) {
-        return null;
-    }
-
-    return `${hot} hot and ${warm} warm in your book`;
-});
 
 const { filters, isLoadingData, resetFilters } = useTableFilters({
     routeUrl: '/dashboard',
@@ -157,7 +92,9 @@ const { filters, isLoadingData, resetFilters } = useTableFilters({
                 : '',
         sort: typeof props.filters.sort === 'string' ? props.filters.sort : '',
         direction:
-            typeof props.filters.direction === 'string' ? props.filters.direction : 'asc',
+            typeof props.filters.direction === 'string'
+                ? props.filters.direction
+                : 'asc',
     },
     debounceMs: 500,
     onlyProps: ['dealerships', 'filters'],
@@ -179,19 +116,7 @@ const currentSorting = computed(() => ({
     direction: (filters.value.direction || 'asc') as 'asc' | 'desc',
 }));
 
-const { hidden: hiddenCards, isVisible } = useDashboardCards();
-
-const showsTaskBoard = computed(() => isVisible('taskBoard'));
-const showsPipeline = computed(() => isVisible('pipeline'));
-const showsGoingQuiet = computed(() => isVisible('goingQuiet') && props.goingQuiet.length > 0);
-const showsRecentActivity = computed(() => isVisible('recentActivity'));
-
-const scopeOptions = [
-    { value: 'mine', label: 'Mine' },
-    { value: 'all', label: 'All' },
-] as const;
-
-const columns = createColumns(handleSort, () => currentSorting.value);
+const columns = createColumns(handleSort);
 </script>
 
 <template>
@@ -207,111 +132,34 @@ const columns = createColumns(handleSort, () => currentSorting.value);
         :current-user-id="currentUserId"
     />
 
-    <div class="mx-auto max-w-[1680px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div class="space-y-5 p-6">
         <LoadingOverlay />
 
-        <header class="flex flex-wrap items-end justify-between gap-4">
-            <div class="min-w-0">
-                <p class="text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">
-                    {{ todayLabel }}
-                </p>
-                <h1 class="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
-                    {{ greeting }}
-                </h1>
-                <p class="mt-1 text-sm text-muted-foreground">{{ statusLine }}</p>
-            </div>
+        <!-- Task stat cards -->
+        <DashboardTaskStats :stats="taskStats" />
 
-            <div class="flex flex-wrap items-center gap-2">
-                <DashboardCardMenu />
-                <Button type="button" variant="outline" class="h-10" @click="openTaskCreate">
-                    <ListPlus class="size-4" />
-                    New task
-                </Button>
-                <Button as-child variant="outline" class="h-10">
-                    <Link href="/dealerships/import">
-                        <Upload class="size-4" />
-                        Import
-                    </Link>
-                </Button>
-                <Button as-child class="h-10 px-4">
-                    <Link href="/dealerships/create">
-                        Add dealership
-                        <Plus class="size-4" />
-                    </Link>
-                </Button>
-            </div>
-        </header>
-
-        <DashboardMetricRibbon
-            :hidden-keys="hiddenCards"
-            :stats="taskStats"
-            :book="bookSummary"
-            :pipeline="pipeline"
-            :activity="activity"
-        />
-
-        <div v-if="showsTaskBoard || showsPipeline" class="grid gap-6 xl:grid-cols-3">
-            <DashboardTaskBoard
-                v-if="showsTaskBoard"
-                :class="showsPipeline ? 'xl:col-span-2' : 'xl:col-span-3'"
-                :tasks="upcomingTasks"
-                @create-task="openTaskCreate"
-                @edit-task="openTaskEdit"
-            />
-            <DashboardPipeline
-                v-if="showsPipeline"
-                :class="showsTaskBoard ? '' : 'xl:col-span-3'"
-                :pipeline="pipeline"
-            />
-        </div>
-
-        <div v-if="showsGoingQuiet || showsRecentActivity" class="grid items-start gap-6 xl:grid-cols-3">
-            <DashboardGoingQuiet
-                v-if="showsGoingQuiet"
-                :class="showsRecentActivity ? 'xl:col-span-2' : 'xl:col-span-3'"
-                :dealerships="goingQuiet"
-            />
-            <DashboardRecentActivity
-                v-if="showsRecentActivity"
-                :class="showsGoingQuiet ? '' : 'xl:col-span-3'"
-                :entries="activity.recent"
-            />
-        </div>
-
-        <section v-if="isVisible('dealerships')" id="dealerships" class="scroll-mt-20 pt-2">
-            <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                    <h2 class="text-lg font-semibold tracking-tight text-foreground">Dealerships</h2>
-                    <p class="text-sm text-muted-foreground">
-                        {{ bookLine ?? 'Everything you are responsible for' }}
-                    </p>
-                </div>
-
-                <div
-                    role="radiogroup"
-                    aria-label="Dealership scope"
-                    class="inline-flex rounded-lg border border-border bg-card p-0.5"
-                >
-                    <button
-                        v-for="option in scopeOptions"
-                        :key="option.value"
+        <!-- Actions row -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="inline-flex rounded-md border border-border bg-background p-1">
+                    <Button
                         type="button"
-                        role="radio"
-                        :aria-checked="filters.scope === option.value"
-                        class="h-8 rounded-md px-3.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        :class="
-                            filters.scope === option.value
-                                ? 'bg-primary font-medium text-primary-foreground'
-                                : 'text-muted-foreground hover:text-foreground'
-                        "
-                        @click="filters.scope = option.value"
+                        size="sm"
+                        :variant="filters.scope === 'all' ? 'ghost' : 'secondary'"
+                        @click="filters.scope = 'mine'"
                     >
-                        {{ option.label }}
-                    </button>
+                        My dealerships
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        :variant="filters.scope === 'all' ? 'secondary' : 'ghost'"
+                        @click="filters.scope = 'all'"
+                    >
+                        All dealerships
+                    </Button>
                 </div>
-            </div>
 
-            <div class="mb-3">
                 <DealershipFilters
                     v-model="filters"
                     :statuses="filterOptions.statuses"
@@ -321,28 +169,58 @@ const columns = createColumns(handleSort, () => currentSorting.value);
                 />
             </div>
 
-            <div v-if="isLoadingData" class="space-y-2">
-                <Skeleton class="h-11 w-full rounded-xl" />
-                <Skeleton v-for="i in 10" :key="i" class="h-12 w-full" />
+            <div class="flex items-center gap-2">
+                <Button type="button" variant="outline" @click="openTaskCreate">
+                    <Plus class="mr-1.5 h-4 w-4" />
+                    New Task
+                </Button>
+                <Link href="/dealerships/import">
+                    <Button type="button" variant="outline">
+                        <Upload class="mr-1.5 h-4 w-4" />
+                        Import
+                    </Button>
+                </Link>
+                <Link href="/dealerships/create">
+                    <Button type="button">New Dealership</Button>
+                </Link>
+            </div>
+        </div>
+
+        <!-- Two-column layout: dealerships + tasks widget -->
+        <div class="flex items-start gap-5">
+            <!-- Dealership table -->
+            <div class="min-w-0 flex-1">
+                <div v-if="isLoadingData" class="space-y-2">
+                    <Skeleton class="h-10 w-full" />
+                    <Skeleton v-for="i in 15" :key="i" class="h-12 w-full" />
+                </div>
+
+                <template v-else>
+                    <DataTable
+                        :columns="columns"
+                        :data="dealerships.data"
+                        :sorting="currentSorting"
+                        :row-href="(d) => `/dealerships/${d.id}`"
+                    />
+
+                    <DashboardPagination
+                        :current-page="dealerships.current_page"
+                        :last-page="dealerships.last_page"
+                        :from="dealerships.from"
+                        :to="dealerships.to"
+                        :total="dealerships.total"
+                        :links="dealerships.links"
+                    />
+                </template>
             </div>
 
-            <template v-else>
-                <DataTable
-                    :columns="columns"
-                    :data="dealerships.data"
-                    :sorting="currentSorting"
-                    :row-href="(d) => `/dealerships/${d.id}`"
+            <!-- Tasks widget -->
+            <div class="w-72 shrink-0 xl:w-80">
+                <DashboardTasksWidget
+                    :tasks="upcomingTasks"
+                    @create-task="openTaskCreate"
                 />
-
-                <DashboardPagination
-                    :current-page="dealerships.current_page"
-                    :last-page="dealerships.last_page"
-                    :from="dealerships.from"
-                    :to="dealerships.to"
-                    :total="dealerships.total"
-                    :links="dealerships.links"
-                />
-            </template>
-        </section>
+            </div>
+        </div>
     </div>
 </template>

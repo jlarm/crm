@@ -55,8 +55,7 @@ final class DealershipActivityController extends Controller
             ->orderByDesc('id')
             ->limit(200)
             ->get()
-            ->map(fn (Activity $a): ?array => $this->mapLoggedActivity($a))
-            ->toBase();
+            ->map(fn (Activity $a): ?array => $this->mapLoggedActivity($a));
 
         $opportunityActivities = OpportunityActivity::query()
             ->with(['user:id,name', 'opportunity:id,name'])

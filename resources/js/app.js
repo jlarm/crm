@@ -4,7 +4,6 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { initializeTheme } from '@/composables/useAppearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'CRM';
 
@@ -20,5 +19,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-initializeTheme();

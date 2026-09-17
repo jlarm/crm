@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AiChatWidget from '@/components/ai/AiChatWidget.vue';
 import SearchModal from '@/components/SearchModal.vue';
-import AppConsoleLayout from '@/layouts/app/AppConsoleLayout.vue';
+import AppHeaderLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { useSearchModal } from '@/composables/useSearchModal';
 import { router, usePage } from '@inertiajs/vue3';
@@ -56,15 +56,15 @@ onUnmounted(() => window.removeEventListener('keydown', onSearchKeydown));
         position="top-right"
         :toast-options="{
             style: {
-                background: 'var(--popover)',
-                border: '1px solid var(--border)',
-                color: 'var(--popover-foreground)',
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                color: '#111827',
             },
         }"
     />
-    <AppConsoleLayout :breadcrumbs="breadcrumbs">
+    <AppHeaderLayout :breadcrumbs="breadcrumbs">
         <slot />
-    </AppConsoleLayout>
+    </AppHeaderLayout>
     <AiChatWidget
         :dealership-id="aiDealership?.id ?? null"
         :dealership-name="aiDealership?.name ?? null"

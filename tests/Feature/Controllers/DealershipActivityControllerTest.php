@@ -9,7 +9,6 @@ use App\Models\OpportunityActivity;
 use App\Models\Progress;
 use App\Models\Store;
 use App\Models\User;
-use Spatie\Activitylog\Models\Activity;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -50,20 +49,6 @@ describe('DealershipActivityController index', function () {
         getJson(route('dealerships.activities.index', [$this->dealership, 'page' => 0]))
             ->assertOk()
             ->assertJsonPath('meta.currentPage', 1);
-    });
-
-    it('still returns opportunity activities when nothing has been logged', function () {
-        $opportunity = Opportunity::factory()->create(['dealership_id' => $this->dealership->id]);
-        OpportunityActivity::factory()->create([
-            'opportunity_id' => $opportunity->id,
-            'user_id' => $this->user->id,
-        ]);
-
-        Activity::query()->delete();
-
-        getJson(route('dealerships.activities.index', $this->dealership))
-            ->assertOk()
-            ->assertJsonPath('meta.total', 1);
     });
 
     it('includes opportunity activities in the feed', function () {

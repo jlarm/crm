@@ -4,52 +4,155 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Dealerships\BuildActivitySummary;
-use App\Actions\Dealerships\BuildBookSummary;
-use App\Actions\Dealerships\BuildPipelineSummary;
-use App\Actions\Dealerships\ListDealerships;
-use App\Actions\Dealerships\ListDealershipsGoingQuiet;
-use App\Actions\Tasks\BuildTaskFormOptions;
-use App\Actions\Tasks\BuildTaskStats;
-use App\Actions\Tasks\ListUpcomingTasks;
+use App\Enum\TaskPriority;
+use App\Enum\TaskType;
 use App\Http\Requests\DealershipIndexRequest;
+use App\Http\Resources\DealershipResource;
+use App\Http\Resources\TaskResource;
 use App\Models\Dealership;
+use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class DashboardController extends Controller
 {
-    public function index(
-        DealershipIndexRequest $request,
-        ListDealerships $listDealerships,
-        BuildTaskStats $buildTaskStats,
-        ListUpcomingTasks $listUpcomingTasks,
-        BuildTaskFormOptions $buildTaskFormOptions,
-        BuildBookSummary $buildBookSummary,
-        ListDealershipsGoingQuiet $listDealershipsGoingQuiet,
-        BuildPipelineSummary $buildPipelineSummary,
-        BuildActivitySummary $buildActivitySummary,
-    ): Response {
+    public function index(DealershipIndexRequest $request): Response
+    {
         /** @var User $user */
         $user = $request->user();
-        $filters = $request->filters();
+
+        $scope = $request->input('scope');
+        if (! in_array($scope, ['mine', 'all'], true)) {
+            $scope = 'mine';
+        }
+
+        $includeImported = $request->boolean('include_imported');
+        $status = $request->input('status');
+
+        $applyFilters = function (Builder $query) use ($request, $scope, $includeImported, $status): void {
+            /** @var Builder<Dealership> $query */
+            if ($scope === 'mine') {
+                $query->forUser($request->user());
+            }
+
+            if (! $includeImported) {
+                $query->whereNot('status', 'imported');
+            }
+
+            $query->search($request->string('search')->toString() ?: null)
+                ->withRating($request->string('rating')->toString() ?: null)
+                ->withType($request->string('type')->toString() ?: null);
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+        };
+
+        $typeOptionsQuery = Dealership::query();
+        $typeOptions = $typeOptionsQuery
+            ->select('type')
+            ->distinct()
+            ->orderBy('type')
+            ->pluck('type')
+            ->filter()
+            ->values()
+            ->map(fn (mixed $type): array => [
+                'value' => is_string($type) ? $type : '',
+                'label' => Str::headline(is_string($type) ? $type : ''),
+            ])
+            ->all();
+
+        $query = Dealership::query();
+        $applyFilters($query);
+
+        $dealerships = $query
+            ->sortBy($request->string('sort')->toString() ?: null, $request->string('direction', 'asc')->toString())
+            ->select('id', 'name', 'city', 'state', 'status', 'rating')
+            ->withCount(['tasks as open_tasks_count' => fn (Builder $q) => $q->whereNull('completed_at')])
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn (Dealership $dealership): array => DealershipResource::make($dealership)->resolve());
 
         return Inertia::render('Dashboard', [
-            'dealerships' => $listDealerships($user, $filters),
-            'filters' => $filters,
-            'filterOptions' => [
-                'statuses' => Dealership::statusOptions(),
-                'ratings' => Dealership::ratingOptions(),
-                'types' => Dealership::typeOptions(),
+            'dealerships' => $dealerships,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'status' => $request->input('status', ''),
+                'rating' => $request->input('rating', ''),
+                'type' => $request->input('type', ''),
+                'scope' => $scope,
+                'include_imported' => $includeImported ? '1' : '',
+                'sort' => $request->input('sort', ''),
+                'direction' => $request->input('direction', 'asc'),
             ],
-            'taskStats' => $buildTaskStats($user),
-            'upcomingTasks' => $listUpcomingTasks($user),
-            'taskFormData' => $buildTaskFormOptions(),
-            'bookSummary' => $buildBookSummary($user),
-            'goingQuiet' => $listDealershipsGoingQuiet($user),
-            'pipeline' => $buildPipelineSummary($user),
-            'activity' => $buildActivitySummary($user),
+            'filterOptions' => [
+                'statuses' => [
+                    ['value' => 'active', 'label' => 'Active'],
+                    ['value' => 'inactive', 'label' => 'Inactive'],
+                ],
+                'ratings' => [
+                    ['value' => 'hot', 'label' => 'Hot'],
+                    ['value' => 'warm', 'label' => 'Warm'],
+                    ['value' => 'cold', 'label' => 'Cold'],
+                ],
+                'types' => $typeOptions,
+            ],
+            'taskStats' => $this->buildTaskStats($user),
+            'upcomingTasks' => $this->buildUpcomingTasks($user),
+            'taskFormData' => [
+                'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+                'allDealerships' => Dealership::query()
+                    ->select('id', 'name')
+                    ->whereNot('status', 'imported')
+                    ->orderBy('name')
+                    ->get(),
+                'types' => collect(TaskType::cases())->map(fn (TaskType $case): array => [
+                    'value' => $case->value,
+                    'label' => $case->label(),
+                ]),
+                'priorities' => collect(TaskPriority::cases())->map(fn (TaskPriority $case): array => [
+                    'value' => $case->value,
+                    'label' => $case->label(),
+                ]),
+            ],
         ]);
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function buildTaskStats(User $user): array
+    {
+        return [
+            'incomplete' => Task::forUser($user)->incomplete()->count(),
+            'overdue' => Task::forUser($user)->overdue()->count(),
+            'dueToday' => Task::forUser($user)->dueToday()->count(),
+            'completedThisWeek' => Task::forUser($user)
+                ->completed()
+                ->where('completed_at', '>=', now()->startOfWeek())
+                ->count(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function buildUpcomingTasks(User $user): array
+    {
+        $today = now()->toDateString();
+
+        return Task::forUser($user)
+            ->with(['dealership:id,name', 'contact:id,name'])
+            ->incomplete()
+            ->orderByRaw('CASE WHEN due_date < ? THEN 0 WHEN due_date = ? THEN 1 ELSE 2 END', [$today, $today])
+            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
+            ->orderBy('due_date')
+            ->limit(10)
+            ->get()
+            ->map(fn (Task $task): array => TaskResource::make($task)->resolve())
+            ->all();
     }
 }
