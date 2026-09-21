@@ -10,12 +10,13 @@
     "nightwatch": false,
     "sail": false,
     "skills": [
+        "infer-conventions",
         "ai-sdk-development",
         "fortify-development",
         "laravel-best-practices",
+        "testing-best-practices",
         "scout-development",
         "wayfinder-development",
-        "pest-testing",
         "inertia-vue-development",
         "tailwindcss-development"
     ]
