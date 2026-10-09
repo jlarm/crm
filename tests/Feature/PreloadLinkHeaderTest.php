@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Vite;
+
 /*
 |--------------------------------------------------------------------------
 | Vite preload "Link" header size
@@ -29,6 +31,15 @@ const MAX_LINK_HEADER_BYTES = 1024;
  * Mirrors the limit passed to AddLinkHeadersForPreloadedAssets in bootstrap/app.php.
  */
 const MAX_PRELOADED_ASSETS = 5;
+
+/**
+ * A running `npm run dev` leaves public/hot behind, which switches Vite to the dev
+ * server and suppresses preload headers entirely. Point Vite at a hot file that
+ * never exists so these tests always measure the built manifest.
+ */
+beforeEach(function (): void {
+    Vite::useHotFile(storage_path('framework/testing/vite.hot'));
+});
 
 /**
  * @return list<string>
