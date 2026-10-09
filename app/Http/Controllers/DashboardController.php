@@ -7,8 +7,10 @@ namespace App\Http\Controllers;
 use App\Actions\Dealerships\BuildActivitySummary;
 use App\Actions\Dealerships\BuildBookSummary;
 use App\Actions\Dealerships\BuildPipelineSummary;
+use App\Actions\Dealerships\BuildWeeklyDigest;
 use App\Actions\Dealerships\ListDealerships;
 use App\Actions\Dealerships\ListDealershipsGoingQuiet;
+use App\Actions\Dealerships\SummarizeWeeklyDigest;
 use App\Actions\Tasks\BuildTaskFormOptions;
 use App\Actions\Tasks\BuildTaskStats;
 use App\Actions\Tasks\ListUpcomingTasks;
@@ -30,10 +32,13 @@ final class DashboardController extends Controller
         ListDealershipsGoingQuiet $listDealershipsGoingQuiet,
         BuildPipelineSummary $buildPipelineSummary,
         BuildActivitySummary $buildActivitySummary,
+        BuildWeeklyDigest $buildWeeklyDigest,
+        SummarizeWeeklyDigest $summarizeWeeklyDigest,
     ): Response {
         /** @var User $user */
         $user = $request->user();
         $filters = $request->filters();
+        $weeklyDigest = fn (): array => once(fn (): array => $buildWeeklyDigest($user));
 
         return Inertia::render('Dashboard', [
             'dealerships' => $listDealerships($user, $filters),
@@ -50,6 +55,8 @@ final class DashboardController extends Controller
             'goingQuiet' => $listDealershipsGoingQuiet($user),
             'pipeline' => $buildPipelineSummary($user),
             'activity' => $buildActivitySummary($user),
+            'weeklyDigest' => $weeklyDigest,
+            'weeklyDigestSummary' => Inertia::defer(fn (): ?string => $summarizeWeeklyDigest($user, $weeklyDigest())),
         ]);
     }
 }

@@ -54,3 +54,43 @@ export interface ActivitySummary {
     lastWeek: number;
     recent: ActivityEntry[];
 }
+
+export interface WeeklyDigestMove {
+    id: number;
+    opportunityId: number;
+    name: string;
+    dealership: { id: number; name: string };
+    from: { value: string; label: string } | null;
+    to: { value: string; label: string };
+    direction: 'new' | 'advanced' | 'slipped' | 'won' | 'lost';
+    changedAt: string;
+    changedBy: string | null;
+}
+
+export interface WeeklyDigestQuietDeal {
+    id: number;
+    name: string;
+    dealership: { id: number; name: string };
+    stageLabel: string;
+    estimatedValue: number;
+    daysSinceActivity: number | null;
+}
+
+export interface WeeklyDigest {
+    periodStart: string;
+    periodEnd: string;
+    counts: {
+        newDeals: number;
+        advanced: number;
+        slipped: number;
+        won: number;
+        lost: number;
+        wonValue: number;
+        activitiesLogged: number;
+        tasksCompleted: number;
+        tasksDueThisWeek: number;
+        tasksOverdue: number;
+    };
+    moves: WeeklyDigestMove[];
+    quietDeals: WeeklyDigestQuietDeal[];
+}

@@ -8,12 +8,14 @@ import DashboardPagination from '@/components/dashboard/DashboardPagination.vue'
 import DashboardPipeline from '@/components/dashboard/DashboardPipeline.vue';
 import DashboardRecentActivity from '@/components/dashboard/DashboardRecentActivity.vue';
 import DashboardTaskBoard from '@/components/dashboard/DashboardTaskBoard.vue';
+import DashboardWeeklyDigest from '@/components/dashboard/DashboardWeeklyDigest.vue';
 import type {
     ActivitySummary,
     BookSummary,
     PipelineSummary,
     QuietDealership,
     TaskStats,
+    WeeklyDigest,
 } from '@/components/dashboard/types';
 import DealershipFilters from '@/components/DealershipFilters.vue';
 import LoadingOverlay from '@/components/LoadingOverlay.vue';
@@ -65,6 +67,9 @@ interface Props {
     goingQuiet: QuietDealership[];
     pipeline: PipelineSummary;
     activity: ActivitySummary;
+    weeklyDigest: WeeklyDigest;
+    /** Deferred: undefined until the AI summary loads, null when there is none. */
+    weeklyDigestSummary?: string | null;
 }
 
 const props = defineProps<Props>();
@@ -248,6 +253,12 @@ const columns = createColumns(handleSort, () => currentSorting.value);
             :book="bookSummary"
             :pipeline="pipeline"
             :activity="activity"
+        />
+
+        <DashboardWeeklyDigest
+            v-if="isVisible('weeklyDigest')"
+            :digest="weeklyDigest"
+            :summary="weeklyDigestSummary"
         />
 
         <div v-if="showsTaskBoard || showsPipeline" class="grid gap-6 xl:grid-cols-3">

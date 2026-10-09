@@ -7,6 +7,7 @@ export type DashboardCardKey =
     | 'won'
     | 'tasks'
     | 'book'
+    | 'weeklyDigest'
     | 'taskBoard'
     | 'pipeline'
     | 'goingQuiet'
@@ -25,6 +26,7 @@ export const dashboardCards: DashboardCard[] = [
     { key: 'won', label: 'Won this month', group: 'Stats' },
     { key: 'tasks', label: 'Open tasks', group: 'Stats' },
     { key: 'book', label: 'In your book', group: 'Stats' },
+    { key: 'weeklyDigest', label: 'This week', group: 'Sections' },
     { key: 'taskBoard', label: "Today's work", group: 'Sections' },
     { key: 'pipeline', label: 'Pipeline', group: 'Sections' },
     { key: 'goingQuiet', label: 'Going quiet', group: 'Sections' },
