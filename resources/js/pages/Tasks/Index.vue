@@ -82,6 +82,11 @@ const activeType = computed({
     set: (value) => applyFilter('type', value),
 });
 
+/** Maps a Select value back to a filter value, where "_all" stands for no filter. */
+function selectedFilterValue(value: unknown): string {
+    return typeof value === 'string' && value !== '_all' ? value : '';
+}
+
 function applyFilter(key: string, value: string): void {
     router.get(
         '/tasks',
@@ -150,7 +155,7 @@ const hasActiveFilters = computed(
 
             <Select
                 :model-value="activePriority || '_all'"
-                @update:model-value="activePriority = $event === '_all' ? '' : $event"
+                @update:model-value="activePriority = selectedFilterValue($event)"
             >
                 <SelectTrigger class="w-36">
                     <SelectValue placeholder="Priority" />
@@ -169,7 +174,7 @@ const hasActiveFilters = computed(
 
             <Select
                 :model-value="activeType || '_all'"
-                @update:model-value="activeType = $event === '_all' ? '' : $event"
+                @update:model-value="activeType = selectedFilterValue($event)"
             >
                 <SelectTrigger class="w-36">
                     <SelectValue placeholder="Type" />

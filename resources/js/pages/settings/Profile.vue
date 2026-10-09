@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/settings/profile';
 import { send } from '@/routes/verification';
+import type { SharedData } from '@/types';
 
 type Props = {
     mustVerifyEmail: boolean;
@@ -29,7 +30,7 @@ defineOptions({
     },
 });
 
-const page = usePage();
+const page = usePage<SharedData>();
 const user = computed(() => page.props.auth.user);
 </script>
 

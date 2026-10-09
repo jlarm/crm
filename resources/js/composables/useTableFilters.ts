@@ -1,20 +1,29 @@
 import { router } from '@inertiajs/vue3';
+import type { Ref } from 'vue';
 import { onMounted, ref, watch } from 'vue';
 
+/** Every filter is a query-string value; an empty string means "not filtered". */
+type FilterValues = Record<string, string>;
 
-interface UseTableFiltersOptions {
+interface UseTableFiltersOptions<T extends FilterValues> {
     routeUrl: string;
-    initialFilters?: Record<string, any>;
+    initialFilters: T;
     debounceMs?: number;
     onlyProps?: string[];
     storageKey?: string;
-    persistedKeys?: string[];
+    persistedKeys?: (keyof T & string)[];
 }
 
-export function useTableFilters(options: UseTableFiltersOptions) {
+export function useTableFilters<T extends FilterValues>(options: UseTableFiltersOptions<T>): {
+    filters: Ref<T>;
+    isLoadingData: Ref<boolean>;
+    applyFilters: () => void;
+    resetFilters: () => void;
+    hasActiveFilters: (excludeKeys?: string[]) => boolean;
+} {
     const {
         routeUrl,
-        initialFilters = {},
+        initialFilters,
         debounceMs = 300,
         onlyProps = [],
         storageKey,
@@ -22,7 +31,7 @@ export function useTableFilters(options: UseTableFiltersOptions) {
     } = options;
 
     const defaultFilters = { ...initialFilters };
-    const filters = ref({ ...defaultFilters });
+    const filters = ref({ ...defaultFilters }) as Ref<T>;
     const isLoadingData = ref(false);
     let debounceTimeout: number | null = null;
 
@@ -56,7 +65,7 @@ export function useTableFilters(options: UseTableFiltersOptions) {
         { deep: true },
     );
 
-    function getStoredFilters(): Record<string, unknown> | null {
+    function getStoredFilters(): Partial<T> | null {
         if (
             typeof window === 'undefined' ||
             !storageKey ||
@@ -82,14 +91,19 @@ export function useTableFilters(options: UseTableFiltersOptions) {
                 return null;
             }
 
-            return Object.fromEntries(
-                persistedKeys
-                    .filter((key) => key in parsedFilters)
-                    .map((key) => [
-                        key,
-                        parsedFilters[key as keyof typeof parsedFilters],
-                    ]),
-            );
+            const stored = parsedFilters as Record<string, unknown>;
+            const restored: Partial<T> = {};
+
+            for (const key of persistedKeys) {
+                const value = stored[key];
+
+                // Ignore anything that isn't a string; it can't be a filter value.
+                if (typeof value === 'string') {
+                    restored[key] = value as T[typeof key];
+                }
+            }
+
+            return restored;
         } catch {
             return null;
         }

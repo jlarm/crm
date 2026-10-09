@@ -7,9 +7,8 @@
         "jsx": "preserve",
         "lib": ["ESNext", "DOM"],
         "types": ["vite/client"],
-        "baseUrl": ".",
         "paths": {
-            "@/*": ["resources/js/*"]
+            "@/*": ["./resources/js/*"]
         },
         "skipLibCheck": true,
         "verbatimModuleSyntax": true
