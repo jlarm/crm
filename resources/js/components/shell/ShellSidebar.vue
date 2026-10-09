@@ -181,13 +181,7 @@ function itemClass(item: ShellNavItem): string {
                 class="shrink-0 border-t border-sidebar-border"
                 :class="props.collapsed ? 'p-2' : 'p-4'"
             >
-                <div
-                    :class="
-                        props.collapsed
-                            ? ''
-                            : 'space-y-3 rounded-xl bg-card p-3'
-                    "
-                >
+                <div>
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
                             <button
