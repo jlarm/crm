@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'openai',
+    'default' => 'anthropic',
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
@@ -56,6 +56,14 @@ return [
             'driver' => 'anthropic',
             'key' => env('ANTHROPIC_API_KEY'),
             'url' => env('ANTHROPIC_URL', 'https://api.anthropic.com/v1'),
+            // Any value containing "structured-outputs" makes the SDK send output_config.format
+            // for structured agents instead of forcing a tool call, which current models reject.
+            'anthropic_beta' => env('ANTHROPIC_BETA', 'structured-outputs-2025-11-13'),
+            'models' => [
+                'text' => [
+                    'default' => env('ANTHROPIC_TEXT_MODEL', 'claude-opus-5-5'),
+                ],
+            ],
         ],
 
         'azure' => [

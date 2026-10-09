@@ -9,14 +9,12 @@ use App\Models\Opportunity;
 use App\Models\Progress;
 use App\Models\Task;
 use App\Models\User;
-use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Promptable;
 
-#[Temperature(0.3)]
 #[Timeout(90)]
 class DealershipAssistant implements Agent, Conversational
 {

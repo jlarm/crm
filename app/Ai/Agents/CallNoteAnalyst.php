@@ -10,7 +10,6 @@ use App\Enum\TaskType;
 use App\Models\Contact;
 use App\Models\Opportunity;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
@@ -22,8 +21,7 @@ use Laravel\Ai\Promptable;
  * Every field is required and uses an empty value ("" or 0) for "nothing", rather than
  * null, so the schema works with strict structured output on every provider.
  */
-#[Temperature(0.2)]
-#[Timeout(60)]
+#[Timeout(120)]
 class CallNoteAnalyst implements Agent, HasStructuredOutput
 {
     use Promptable;

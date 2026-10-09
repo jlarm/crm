@@ -11,6 +11,8 @@ use App\Models\Opportunity;
 use App\Models\OpportunityActivity;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Prompts\AgentPrompt;
 
 beforeEach(function () {
@@ -177,5 +179,48 @@ describe('logging an activity with approved suggestions', function () {
 
         expect(OpportunityActivity::count())->toBe(0)
             ->and(Task::count())->toBe(0);
+    });
+});
+
+describe('Anthropic request', function () {
+    it('asks Claude for structured output without temperature or a forced tool call', function () {
+        config(['ai.providers.anthropic.key' => 'test-key']);
+
+        Http::fake([
+            'api.anthropic.com/*' => Http::response([
+                'id' => 'msg_test',
+                'type' => 'message',
+                'role' => 'assistant',
+                'model' => 'claude-opus-5-5',
+                'content' => [[
+                    'type' => 'text',
+                    'text' => json_encode([
+                        'summary' => '- Wants pricing',
+                        'tasks' => [],
+                        'stage' => 'demo',
+                        'stage_reason' => '',
+                        'rating' => 'warm',
+                        'rating_reason' => '',
+                        'new_contacts' => [],
+                    ]),
+                ]],
+                'stop_reason' => 'end_turn',
+                'usage' => ['input_tokens' => 10, 'output_tokens' => 10],
+            ]),
+        ]);
+
+        $this->postJson(analyzeUrl($this->dealership, $this->opportunity), ['notes' => 'Met with the GM, they want pricing for all three rooftops.'])
+            ->assertOk()
+            ->assertJsonPath('summary', '- Wants pricing');
+
+        Http::assertSent(function (Request $request): bool {
+            $body = $request->data();
+
+            return $request->url() === 'https://api.anthropic.com/v1/messages'
+                && $body['model'] === 'claude-opus-5-5'
+                && ($body['output_config']['format']['type'] ?? null) === 'json_schema'
+                && ! array_key_exists('temperature', $body)
+                && ! array_key_exists('tool_choice', $body);
+        });
     });
 });
