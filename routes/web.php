@@ -11,6 +11,7 @@ use App\Http\Controllers\DealershipImportController;
 use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunWebhookController;
+use App\Http\Controllers\OpportunityActivityAnalysisController;
 use App\Http\Controllers\OpportunityActivityController;
 use App\Http\Controllers\SalesDashboardController;
 use App\Http\Controllers\SearchController;
@@ -62,6 +63,10 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::delete('dealerships/{dealership}/opportunities/{opportunity}', [DealershipOpportunityController::class, 'destroy'])->name('dealerships.opportunities.destroy');
 
     Route::post('dealerships/{dealership}/opportunities/{opportunity}/activities', [OpportunityActivityController::class, 'store'])->name('dealerships.opportunities.activities.store');
+    Route::post('dealerships/{dealership}/opportunities/{opportunity}/activities/analyze', OpportunityActivityAnalysisController::class)
+        ->scopeBindings()
+        ->middleware('throttle:20,1')
+        ->name('dealerships.opportunities.activities.analyze');
     Route::delete('dealerships/{dealership}/opportunities/{opportunity}/activities/{activity}', [OpportunityActivityController::class, 'destroy'])->name('dealerships.opportunities.activities.destroy');
 
     Route::post('dealerships/{dealership}/stores', [DealershipStoreController::class, 'store'])->name('dealerships.stores.store');

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
+import CallNoteSuggestions from '@/components/dealership/show/CallNoteSuggestions.vue';
 import DatePicker from '@/components/ui/date-picker/DatePicker.vue';
 import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
-import type { Activity, Dealership, Opportunity } from '@/pages/Dealership/types';
-import { Form, router } from '@inertiajs/vue3';
-import { FileText, Mail, Phone, Trash2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import type { Activity, CallNoteAnalysis, Dealership, Opportunity } from '@/pages/Dealership/types';
+import analyzeCallNotes from '@/actions/App/Http/Controllers/OpportunityActivityAnalysisController';
+import { Form, router, useHttp } from '@inertiajs/vue3';
+import { FileText, Mail, Phone, Sparkles, Trash2 } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     dealership: Dealership;
@@ -49,9 +51,52 @@ function deleteActivity(activity: Activity): void {
 }
 
 const occurredAt = ref<string | null>(null);
+const notes = ref('');
+const analysis = ref<CallNoteAnalysis | null>(null);
+const analysisError = ref<string | null>(null);
+
+/** Matches the server's minimum so the button only enables when a request can succeed. */
+const MIN_NOTES_LENGTH = 20;
+
+const analyzer = useHttp<{ notes: string }, CallNoteAnalysis>({ notes: '' });
+
+const canAnalyze = computed(() => notes.value.trim().length >= MIN_NOTES_LENGTH && !analyzer.processing);
+
+function analyze(): void {
+    analysisError.value = null;
+    analyzer.notes = notes.value;
+    analyzer.post(
+        analyzeCallNotes({ dealership: props.dealership.id, opportunity: props.opportunity.id }).url,
+        {
+            onSuccess: (response: CallNoteAnalysis) => {
+                analysis.value = response;
+            },
+            onHttpException: (response) => {
+                analysisError.value = errorMessageFrom(response.data);
+            },
+        },
+    );
+}
+
+function errorMessageFrom(body: string): string {
+    try {
+        const parsed: unknown = JSON.parse(body);
+
+        if (parsed && typeof parsed === 'object' && 'message' in parsed && typeof parsed.message === 'string') {
+            return parsed.message;
+        }
+    } catch {
+        // Not JSON; fall through to the generic message.
+    }
+
+    return 'The AI could not analyze these notes right now.';
+}
 
 function resetForm(): void {
     occurredAt.value = null;
+    notes.value = '';
+    analysis.value = null;
+    analysisError.value = null;
 }
 
 function displayDate(activity: Activity): string {
@@ -105,13 +150,30 @@ function displayDate(activity: Activity): string {
                     <FieldLabel :for="`details_${opportunity.id}`">Details</FieldLabel>
                     <Textarea
                         :id="`details_${opportunity.id}`"
+                        v-model="notes"
                         name="details"
                         :rows="3"
-                        placeholder="What happened?"
+                        placeholder="What happened? Paste call notes and click Analyze to turn them into tasks and updates."
                         required
                     />
                     <InputError :message="errors.details" />
                 </Field>
+
+                <div v-if="analyzer.processing" class="space-y-2 rounded-lg border border-violet-200 p-3 dark:border-violet-900">
+                    <div class="h-3 w-1/3 animate-pulse rounded bg-violet-100 dark:bg-violet-900/50" />
+                    <div class="h-3 w-full animate-pulse rounded bg-violet-100 dark:bg-violet-900/50" />
+                    <div class="h-3 w-2/3 animate-pulse rounded bg-violet-100 dark:bg-violet-900/50" />
+                </div>
+                <p v-else-if="analysisError" class="text-xs text-red-600 dark:text-red-400">{{ analysisError }}</p>
+                <InputError v-if="analyzer.errors.notes" :message="analyzer.errors.notes" />
+                <CallNoteSuggestions
+                    v-if="analysis && !analyzer.processing"
+                    :analysis="analysis"
+                    :contacts="dealership.contacts"
+                    :current-stage-label="opportunity.stageLabel"
+                    @dismiss="analysis = null"
+                />
+                <InputError :message="Object.entries(errors).find(([key]) => key.startsWith('apply'))?.[1]" />
 
                 <Field>
                     <FieldLabel>Date (optional)</FieldLabel>
@@ -122,8 +184,19 @@ function displayDate(activity: Activity): string {
                     <input type="hidden" name="occurred_at" :value="occurredAt ?? ''" />
                 </Field>
 
-                <div class="flex justify-end">
-                    <Button type="submit" size="sm" :disabled="processing">Log</Button>
+                <div class="flex justify-end gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        :disabled="!canAnalyze"
+                        :title="canAnalyze ? 'Suggest tasks, stage and contact updates from these notes' : 'Write a few sentences of notes first'"
+                        @click="analyze"
+                    >
+                        <Sparkles class="h-3.5 w-3.5" />
+                        {{ analyzer.processing ? 'Analyzing…' : 'Analyze' }}
+                    </Button>
+                    <Button type="submit" size="sm" :disabled="processing || analyzer.processing">Log</Button>
                 </div>
             </Form>
         </div>

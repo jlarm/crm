@@ -84,3 +84,17 @@ export interface Dealership {
     users: User[];
     opportunities: Opportunity[];
 }
+
+export interface CallNoteAnalysis {
+    summary: string;
+    tasks: {
+        title: string;
+        type: string;
+        priority: string;
+        dueDate: string | null;
+        contactId: number | null;
+    }[];
+    stage: { value: string; label: string; reason: string } | null;
+    rating: { value: string; label: string; reason: string } | null;
+    newContacts: { name: string; position: string; email: string; phone: string }[];
+}
