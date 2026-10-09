@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enum\OpportunityStage;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property int $dealership_id
  * @property string $name
  * @property OpportunityStage $stage
- * @property Carbon|null $stage_entered_at
+ * @property CarbonImmutable|null $stage_entered_at
  * @property int|null $probability
  * @property string|null $estimated_value
  * @property string|null $actual_value
@@ -29,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $contract_sent_date
  * @property Carbon|null $contract_signed_date
  * @property Carbon|null $contract_renewal_date
- * @property Carbon|null $closed_at
+ * @property CarbonImmutable|null $closed_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Dealership $dealership
@@ -65,6 +66,14 @@ class Opportunity extends Model
     public function dealership(): BelongsTo
     {
         return $this->belongsTo(Dealership::class);
+    }
+
+    /**
+     * @return HasMany<OpportunityStageChange, $this>
+     */
+    public function stageChanges(): HasMany
+    {
+        return $this->hasMany(OpportunityStageChange::class)->orderBy('changed_at')->orderBy('id');
     }
 
     /**
@@ -121,6 +130,41 @@ class Opportunity extends Model
             ->whereYear('closed_at', now()->subMonth()->year);
     }
 
+    /**
+     * Keep stage timestamps in step with the stage and record every move.
+     *
+     * Entering Won or Lost stamps closed_at; reopening a deal clears it. Values set
+     * explicitly in the same save win, so imports and factories can backdate them.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Opportunity $opportunity): void {
+            if (! $opportunity->exists || $opportunity->isDirty('stage')) {
+                if (! $opportunity->isDirty('stage_entered_at') || $opportunity->stage_entered_at === null) {
+                    $opportunity->stage_entered_at = now();
+                }
+
+                if (! $opportunity->isDirty('closed_at')) {
+                    $opportunity->closed_at = $opportunity->stage->isOpen() ? null : now();
+                }
+            }
+        });
+
+        static::created(function (Opportunity $opportunity): void {
+            $opportunity->recordStageChange(null);
+        });
+
+        static::updated(function (Opportunity $opportunity): void {
+            if (! $opportunity->wasChanged('stage')) {
+                return;
+            }
+
+            $from = $opportunity->getRawOriginal('stage');
+
+            $opportunity->recordStageChange(is_string($from) ? $from : null);
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -136,5 +180,15 @@ class Opportunity extends Model
             'estimated_value' => 'decimal:2',
             'actual_value' => 'decimal:2',
         ];
+    }
+
+    private function recordStageChange(?string $fromStage): void
+    {
+        $this->stageChanges()->create([
+            'user_id' => auth()->id(),
+            'from_stage' => $fromStage,
+            'to_stage' => $this->stage->value,
+            'changed_at' => $this->stage_entered_at ?? now(),
+        ]);
     }
 }

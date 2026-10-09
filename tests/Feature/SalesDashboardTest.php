@@ -187,3 +187,96 @@ describe('Sales Dashboard open deals', function () {
         );
     });
 });
+
+describe('Sales Dashboard open deal filters', function () {
+    it('filters open deals by rep and stage', function () {
+        $otherRep = User::factory()->create();
+        $mine = Dealership::factory()->create(['user_id' => $this->user->id]);
+        $theirs = Dealership::factory()->create(['user_id' => $otherRep->id]);
+        $myDemo = Opportunity::factory()->create(['dealership_id' => $mine->id, 'stage' => OpportunityStage::Demo->value]);
+        Opportunity::factory()->create(['dealership_id' => $mine->id, 'stage' => OpportunityStage::Proposal->value]);
+        Opportunity::factory()->create(['dealership_id' => $theirs->id, 'stage' => OpportunityStage::Demo->value]);
+
+        get('/sales?rep='.$this->user->id.'&stage=demo')->assertInertia(
+            fn ($page) => $page
+                ->has('openDeals.data', 1)
+                ->where('openDeals.data.0.id', $myDemo->id)
+                ->where('dealFilters.rep', (string) $this->user->id)
+                ->where('dealFilters.stage', 'demo')
+        );
+    });
+
+    it('filters to quiet deals with no activity in 21 days', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        $quiet = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id]);
+        $untouched = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id]);
+        $active = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id]);
+        OpportunityActivity::factory()->create(['opportunity_id' => $quiet->id, 'occurred_at' => now()->subDays(22)->toDateString()]);
+        OpportunityActivity::factory()->create(['opportunity_id' => $active->id, 'occurred_at' => now()->subDays(20)->toDateString()]);
+
+        get('/sales?activity=quiet')->assertInertia(
+            fn ($page) => $page->where(
+                'openDeals.data',
+                fn ($deals) => collect($deals)->pluck('id')->sort()->values()->all() === collect([$quiet->id, $untouched->id])->sort()->values()->all()
+            )
+        );
+    });
+
+    it('filters by close date this month or overdue', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        $thisMonth = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'expected_close_date' => now()->endOfMonth()->toDateString()]);
+        $overdue = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'expected_close_date' => now()->subMonths(2)->toDateString()]);
+        Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'expected_close_date' => now()->addMonths(2)->toDateString()]);
+
+        get('/sales?closing=this_month')->assertInertia(
+            fn ($page) => $page->has('openDeals.data', 1)->where('openDeals.data.0.id', $thisMonth->id)
+        );
+
+        get('/sales?closing=overdue')->assertInertia(
+            fn ($page) => $page->has('openDeals.data', 1)->where('openDeals.data.0.id', $overdue->id)
+        );
+    });
+
+    it('rejects filter values it does not understand', function () {
+        get('/sales?stage=won&closing=someday')->assertSessionHasErrors(['stage', 'closing']);
+    });
+
+    it('offers only reps who own a dealership with an open deal', function () {
+        $idleRep = User::factory()->create();
+        Dealership::factory()->create(['user_id' => $idleRep->id]);
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        Opportunity::factory()->open()->create(['dealership_id' => $dealership->id]);
+
+        get('/sales')->assertInertia(
+            fn ($page) => $page
+                ->has('repOptions', 1)
+                ->where('repOptions.0.value', (string) $this->user->id)
+        );
+    });
+});
+
+describe('Sales Dashboard stage conversion', function () {
+    it('counts deals reaching each stage and how many moved on', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+
+        $this->travelTo(now()->subDays(10));
+        $advanced = Opportunity::factory()->create(['dealership_id' => $dealership->id, 'stage' => OpportunityStage::Demo->value, 'stage_entered_at' => null, 'closed_at' => null]);
+        $stalled = Opportunity::factory()->create(['dealership_id' => $dealership->id, 'stage' => OpportunityStage::Demo->value, 'stage_entered_at' => null, 'closed_at' => null]);
+        $this->travelBack();
+
+        $this->travelTo(now()->subDays(4));
+        $advanced->update(['stage' => OpportunityStage::Proposal->value]);
+        $this->travelBack();
+
+        get('/sales')->assertInertia(
+            fn ($page) => $page->where('stageConversion', function ($stages) {
+                $demo = collect($stages)->firstWhere('stage', 'demo');
+
+                return $demo['reached'] === 2
+                    && $demo['advanced'] === 1
+                    && $demo['conversionRate'] === 50
+                    && $demo['avgDaysInStage'] === 6;
+            })
+        );
+    });
+});

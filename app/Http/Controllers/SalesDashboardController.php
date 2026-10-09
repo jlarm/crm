@@ -4,23 +4,39 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Opportunities\BuildStageConversion;
 use App\Actions\Opportunities\ListOpenDeals;
 use App\Enum\OpportunityStage;
+use App\Http\Requests\SalesDashboardRequest;
+use App\Models\Dealership;
 use App\Models\Opportunity;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class SalesDashboardController extends Controller
 {
-    public function __invoke(ListOpenDeals $listOpenDeals): Response
-    {
+    public function __invoke(
+        SalesDashboardRequest $request,
+        ListOpenDeals $listOpenDeals,
+        BuildStageConversion $buildStageConversion,
+    ): Response {
+        $dealFilters = $request->dealFilters();
+
         return Inertia::render('SalesDashboard/Index', [
             'kpis' => $this->buildKpis(),
             'pipelineByStage' => $this->buildPipelineByStage(),
             'repPerformance' => $this->buildRepPerformance(),
-            'openDeals' => $listOpenDeals(),
+            'stageConversion' => $buildStageConversion(),
+            'openDeals' => $listOpenDeals($dealFilters),
+            'dealFilters' => $dealFilters,
+            'repOptions' => $this->buildRepOptions(),
+            'stageOptions' => array_values(array_map(
+                fn (OpportunityStage $stage): array => ['value' => $stage->value, 'label' => $stage->getLabel()],
+                array_filter(OpportunityStage::cases(), fn (OpportunityStage $stage): bool => $stage->isOpen()),
+            )),
         ]);
     }
 
@@ -101,6 +117,24 @@ final class SalesDashboardController extends Controller
                 'value' => is_numeric($row?->getAttribute('value')) ? (float) $row->getAttribute('value') : 0.0,
             ];
         }, OpportunityStage::cases());
+    }
+
+    /**
+     * Reps who own at least one dealership with an open deal.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    private function buildRepOptions(): array
+    {
+        return array_values(User::query()
+            ->whereIn('id', Dealership::query()
+                ->select('user_id')
+                ->whereNotNull('user_id')
+                ->whereHas('opportunities', fn (Builder $query) => $query->open()))
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (User $user): array => ['value' => (string) $user->id, 'label' => $user->name])
+            ->all());
     }
 
     /**

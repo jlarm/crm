@@ -32,6 +32,7 @@ import DealershipImportController from '@/actions/App/Http/Controllers/Dealershi
 import { Form, Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Download, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { show } from '@/routes/dealerships';
 
 interface PreviewRow {
     line: number;
@@ -44,6 +45,13 @@ interface PreviewRow {
 interface ParseError {
     line: number;
     message: string;
+}
+
+interface LikelyDuplicate {
+    line: number;
+    name: string;
+    reason: string;
+    match: { id: number; name: string; city: string | null; state: string | null };
 }
 
 interface Preview {
@@ -62,6 +70,7 @@ interface Preview {
         autoCreatedDealerships: number;
     };
     parseErrors: ParseError[];
+    likelyDuplicates: LikelyDuplicate[];
     rows: PreviewRow[];
 }
 
@@ -76,6 +85,7 @@ const defaultStatus = ref('active');
 const defaultRating = ref('warm');
 const defaultType = ref('Automotive');
 const updateExisting = ref(false);
+const mergeDuplicates = ref(true);
 const transactional = ref(true);
 
 const consultantSearch = ref('');
@@ -438,6 +448,64 @@ function formatErrors(errors: Record<string, string[]>): string {
                 </CardContent>
             </Card>
 
+            <Card v-if="preview.likelyDuplicates.length > 0">
+                <CardHeader>
+                    <CardTitle>Possible duplicates ({{ preview.likelyDuplicates.length }})</CardTitle>
+                    <p class="text-sm text-slate-500">
+                        These look like dealerships you already have, written differently.
+                    </p>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead class="w-16">Line</TableHead>
+                                <TableHead>In this file</TableHead>
+                                <TableHead>Existing dealership</TableHead>
+                                <TableHead>Why</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="duplicate in preview.likelyDuplicates" :key="duplicate.line">
+                                <TableCell>{{ duplicate.line }}</TableCell>
+                                <TableCell>{{ duplicate.name }}</TableCell>
+                                <TableCell>
+                                    <a
+                                        :href="show(duplicate.match.id).url"
+                                        class="font-medium hover:underline"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        {{ duplicate.match.name }}
+                                    </a>
+                                    <span
+                                        v-if="duplicate.match.city || duplicate.match.state"
+                                        class="block text-xs text-slate-500"
+                                    >
+                                        {{ [duplicate.match.city, duplicate.match.state].filter(Boolean).join(', ') }}
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-slate-600">{{ duplicate.reason }}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+
+                    <label class="flex items-start gap-3 text-sm">
+                        <Checkbox
+                            class="mt-0.5"
+                            :model-value="mergeDuplicates"
+                            @update:model-value="(v) => (mergeDuplicates = v === true)"
+                        />
+                        <span>
+                            Treat these as the existing dealership
+                            <span class="block text-xs text-slate-500">
+                                Their stores and contacts go on the existing record. Uncheck to create them as new dealerships.
+                            </span>
+                        </span>
+                    </label>
+                </CardContent>
+            </Card>
+
             <div class="flex items-center justify-end gap-3">
                 <Link href="/dealerships/import">
                     <Button type="button" variant="outline">Re-upload</Button>
@@ -448,6 +516,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                     v-slot="{ processing }"
                 >
                     <input type="hidden" name="token" :value="preview.token" />
+                    <input type="hidden" name="merge_duplicates" :value="mergeDuplicates ? 1 : 0" />
                     <Button type="submit" :disabled="processing || validRowCount === 0">
                         Confirm Import ({{ validRowCount }} rows)
                     </Button>

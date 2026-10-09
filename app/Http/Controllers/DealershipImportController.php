@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Dealerships\FindLikelyDuplicateDealerships;
 use App\Actions\Dealerships\ImportDealershipRow;
 use App\Actions\Dealerships\ParseDealershipImportCsv;
 use App\Actions\Dealerships\ValidateDealershipImportRow;
@@ -37,6 +38,7 @@ final class DealershipImportController extends Controller
         DealershipImportPreviewRequest $request,
         ParseDealershipImportCsv $parse,
         ValidateDealershipImportRow $validate,
+        FindLikelyDuplicateDealerships $findLikelyDuplicates,
     ): Response {
         $defaults = [
             'status' => is_string($s = $request->validated('default_status')) ? $s : '',
@@ -81,10 +83,12 @@ final class DealershipImportController extends Controller
         $errorCount += count($parsed['parse_errors']);
 
         $autoCreateCount = $this->countAutoCreatedDealerships($validated);
+        $likelyDuplicates = $findLikelyDuplicates($validated);
 
         $token = Str::uuid()->toString();
         Cache::put('dealership-import:'.$token, [
             'validated' => $validated,
+            'likely_duplicates' => $likelyDuplicates,
             'options' => [
                 ...$options,
                 'importer_id' => (int) auth()->id(),
@@ -106,6 +110,7 @@ final class DealershipImportController extends Controller
                     'autoCreatedDealerships' => $autoCreateCount,
                 ],
                 'parseErrors' => $parsed['parse_errors'],
+                'likelyDuplicates' => $likelyDuplicates,
                 'rows' => array_map(fn (array $r): array => [
                     'line' => $r['line'],
                     'rowType' => $r['row_type'],
@@ -120,10 +125,11 @@ final class DealershipImportController extends Controller
     public function store(
         DealershipImportConfirmRequest $request,
         ImportDealershipRow $import,
+        FindLikelyDuplicateDealerships $findLikelyDuplicates,
     ): RedirectResponse {
         $token = is_string($t = $request->validated('token')) ? $t : '';
         $cacheKey = 'dealership-import:'.$token;
-        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}}|null $payload */
+        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, likely_duplicates?: list<array{line: int, name: string, reason: string, match: array{id: int, name: string, city: string|null, state: string|null}}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}}|null $payload */
         $payload = Cache::get($cacheKey);
 
         if (! $payload) {
@@ -136,6 +142,10 @@ final class DealershipImportController extends Controller
             $payload['validated'],
             fn (array $r): bool => empty($r['errors'])
         ));
+
+        if ($request->boolean('merge_duplicates')) {
+            $validRows = array_values($findLikelyDuplicates->mergeIntoExisting($validRows, $payload['likely_duplicates'] ?? []));
+        }
 
         if (count($validRows) > self::SYNC_THRESHOLD) {
             ProcessDealershipImport::dispatch($validRows, $payload['options']);

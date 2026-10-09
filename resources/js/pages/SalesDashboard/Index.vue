@@ -3,6 +3,7 @@ import KpiCard from '@/components/sales/KpiCard.vue';
 import OpenDealsTable from '@/components/sales/OpenDealsTable.vue';
 import PipelineStageChart from '@/components/sales/PipelineStageChart.vue';
 import RepPerformanceTable from '@/components/sales/RepPerformanceTable.vue';
+import StageConversionTable from '@/components/sales/StageConversionTable.vue';
 import { Head } from '@inertiajs/vue3';
 
 interface Stage {
@@ -38,6 +39,20 @@ interface OpenDeal {
     recentActivityCount: number;
 }
 
+interface StageConversion {
+    stage: string;
+    label: string;
+    reached: number;
+    advanced: number;
+    conversionRate: number | null;
+    avgDaysInStage: number | null;
+}
+
+interface FilterOption {
+    value: string;
+    label: string;
+}
+
 interface Kpis {
     pipelineValue: number;
     openCount: number;
@@ -56,6 +71,10 @@ defineProps<{
     kpis: Kpis;
     pipelineByStage: Stage[];
     repPerformance: Rep[];
+    stageConversion: StageConversion[];
+    dealFilters: { rep: string; stage: string; activity: string; closing: string };
+    repOptions: FilterOption[];
+    stageOptions: FilterOption[];
     openDeals: {
         data: OpenDeal[];
         current_page: number;
@@ -121,7 +140,15 @@ function formatCurrency(value: number): string {
             <PipelineStageChart :stages="pipelineByStage" />
 
             <!-- Open deals -->
-            <OpenDealsTable :deals="openDeals" />
+            <OpenDealsTable
+                :deals="openDeals"
+                :filters="dealFilters"
+                :rep-options="repOptions"
+                :stage-options="stageOptions"
+            />
+
+            <!-- Stage conversion -->
+            <StageConversionTable :stages="stageConversion" />
 
             <!-- Rep performance -->
             <RepPerformanceTable :reps="repPerformance" />

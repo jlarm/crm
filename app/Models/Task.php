@@ -19,6 +19,7 @@ use Laravel\Scout\Searchable;
  * @property int $created_by_user_id
  * @property int|null $dealership_id
  * @property int|null $contact_id
+ * @property int|null $opportunity_id
  * @property string $title
  * @property string|null $description
  * @property TaskType $type
@@ -31,6 +32,7 @@ use Laravel\Scout\Searchable;
  * @property-read User $createdBy
  * @property-read Dealership|null $dealership
  * @property-read Contact|null $contact
+ * @property-read Opportunity|null $opportunity
  */
 class Task extends Model
 {
@@ -44,6 +46,7 @@ class Task extends Model
         'created_by_user_id',
         'dealership_id',
         'contact_id',
+        'opportunity_id',
         'title',
         'description',
         'type',
@@ -82,6 +85,14 @@ class Task extends Model
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    /**
+     * @return BelongsTo<Opportunity, $this>
+     */
+    public function opportunity(): BelongsTo
+    {
+        return $this->belongsTo(Opportunity::class);
     }
 
     /**

@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { X } from 'lucide-vue-next';
+import { computed } from 'vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
+import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useTableFilters } from '@/composables/useTableFilters';
 import { show } from '@/routes/dealerships';
+import { index as salesIndex } from '@/routes/sales';
 
 interface OpenDeal {
     id: number;
@@ -25,7 +37,22 @@ interface PaginationLink {
     active: boolean;
 }
 
-defineProps<{
+interface FilterOption {
+    value: string;
+    label: string;
+}
+
+interface DealFilters {
+    rep: string;
+    stage: string;
+    activity: string;
+    closing: string;
+}
+
+const props = defineProps<{
+    filters: DealFilters;
+    repOptions: FilterOption[];
+    stageOptions: FilterOption[];
     deals: {
         data: OpenDeal[];
         current_page: number;
@@ -36,6 +63,34 @@ defineProps<{
         links: PaginationLink[];
     };
 }>();
+
+/** Reka's Select cannot hold an empty string, so "any" stands in for no filter. */
+const ANY = 'any';
+
+const { filters, isLoadingData, hasActiveFilters } = useTableFilters({
+    routeUrl: salesIndex.url(),
+    initialFilters: { ...props.filters },
+    onlyProps: ['openDeals', 'dealFilters'],
+    debounceMs: 0,
+});
+
+function clearFilters(): void {
+    filters.value = { rep: '', stage: '', activity: '', closing: '' };
+}
+
+function filterModel(key: keyof DealFilters) {
+    return computed({
+        get: () => filters.value[key] || ANY,
+        set: (value: string) => {
+            filters.value[key] = value === ANY ? '' : value;
+        },
+    });
+}
+
+const repFilter = filterModel('rep');
+const stageFilter = filterModel('stage');
+const activityFilter = filterModel('activity');
+const closingFilter = filterModel('closing');
 
 const stageBadgeClass: Record<string, string> = {
     prospect: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -82,13 +137,72 @@ function lastActivityColor(days: number | null): string {
                 Open Deals
             </h3>
             <p class="mt-0.5 text-xs text-slate-500">Most recently worked first</p>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+                <Select v-model="repFilter">
+                    <SelectTrigger class="h-8 w-full text-xs sm:w-40" aria-label="Rep">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem :value="ANY">All reps</SelectItem>
+                        <SelectItem v-for="option in repOptions" :key="option.value" :value="option.value">
+                            {{ option.label }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select v-model="stageFilter">
+                    <SelectTrigger class="h-8 w-full text-xs sm:w-36" aria-label="Stage">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem :value="ANY">All stages</SelectItem>
+                        <SelectItem v-for="option in stageOptions" :key="option.value" :value="option.value">
+                            {{ option.label }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select v-model="activityFilter">
+                    <SelectTrigger class="h-8 w-full text-xs sm:w-40" aria-label="Activity">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem :value="ANY">Any activity</SelectItem>
+                        <SelectItem value="quiet">Quiet 21+ days</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select v-model="closingFilter">
+                    <SelectTrigger class="h-8 w-full text-xs sm:w-40" aria-label="Close date">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem :value="ANY">Any close date</SelectItem>
+                        <SelectItem value="this_month">Closing this month</SelectItem>
+                        <SelectItem value="overdue">Past close date</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Button
+                    v-if="hasActiveFilters()"
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 text-xs"
+                    @click="clearFilters"
+                >
+                    <X class="size-3.5" />
+                    Clear
+                </Button>
+            </div>
         </div>
 
         <div v-if="deals.total === 0" class="px-5 py-8 text-center text-sm text-slate-400">
-            No open deals.
+            {{ hasActiveFilters() ? 'No open deals match these filters.' : 'No open deals.' }}
         </div>
 
-        <div v-else class="overflow-x-auto">
+        <div v-else class="overflow-x-auto transition-opacity" :class="isLoadingData ? 'opacity-60' : ''">
             <table class="w-full min-w-[56rem] text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800">

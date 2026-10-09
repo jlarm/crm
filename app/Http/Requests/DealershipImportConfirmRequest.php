@@ -15,6 +15,7 @@ final class DealershipImportConfirmRequest extends FormRequest
     {
         return [
             'token' => ['required', 'string'],
+            'merge_duplicates' => ['nullable', 'boolean'],
         ];
     }
 

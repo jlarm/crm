@@ -6,4 +6,5 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('activitylog:clean --force')->daily();
 Schedule::command('reminder:send')->dailyAt('06:00');
+Schedule::command('opportunities:follow-up-tasks')->dailyAt('06:15');
 Schedule::command('dealer:send')->dailyAt('06:30');

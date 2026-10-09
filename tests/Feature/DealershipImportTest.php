@@ -310,3 +310,55 @@ it('attaches default consultants to auto-created dealerships', function () {
     $userIds = Dealership::first()->users->pluck('id')->all();
     expect($userIds)->toContain($this->user->id)->toContain($other->id);
 });
+
+describe('likely duplicate dealerships', function () {
+    it('flags rows whose name or phone matches an existing dealership', function () {
+        $smith = Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Smith Ford', 'phone' => '(555) 010-2000']);
+        $lake = Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Lakeside RV', 'phone' => '555-010-3000']);
+        Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Prime Motors']);
+
+        $csv = "name,phone\n\"Smith Ford, Inc.\",\nLake Side Campers,+1 555 010 3000\nPrime Motors,\nBrand New Dealer,\n";
+
+        $this->post('/dealerships/import/preview', defaultPreviewPayload([
+            'file' => csvFile($csv),
+        ]))->assertInertia(fn ($page) => $page
+            ->has('preview.likelyDuplicates', 2)
+            ->where('preview.likelyDuplicates.0.name', 'Smith Ford, Inc.')
+            ->where('preview.likelyDuplicates.0.reason', 'Similar name')
+            ->where('preview.likelyDuplicates.0.match.id', $smith->id)
+            ->where('preview.likelyDuplicates.1.name', 'Lake Side Campers')
+            ->where('preview.likelyDuplicates.1.reason', 'Same phone number')
+            ->where('preview.likelyDuplicates.1.match.id', $lake->id));
+    });
+
+    it('merges flagged rows and their contacts into the existing dealership when asked', function () {
+        $smith = Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Smith Ford']);
+
+        $csv = <<<'CSV'
+row_type,dealership_ref,name,email
+dealership,,"Smith Ford, Inc.",
+contact,"Smith Ford, Inc.",Jane Doe,jane@example.com
+CSV;
+
+        $response = $this->post('/dealerships/import/preview', defaultPreviewPayload(['file' => csvFile($csv)]));
+        $token = $response->viewData('page')['props']['preview']['token'];
+
+        $this->post('/dealerships/import', ['token' => $token, 'merge_duplicates' => 1])->assertRedirect();
+
+        expect(Dealership::count())->toBe(1)
+            ->and(Contact::sole()->dealership_id)->toBe($smith->id);
+    });
+
+    it('creates flagged rows as new dealerships when merging is turned off', function () {
+        Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Smith Ford']);
+
+        $response = $this->post('/dealerships/import/preview', defaultPreviewPayload([
+            'file' => csvFile("name\n\"Smith Ford, Inc.\"\n"),
+        ]));
+        $token = $response->viewData('page')['props']['preview']['token'];
+
+        $this->post('/dealerships/import', ['token' => $token, 'merge_duplicates' => 0])->assertRedirect();
+
+        expect(Dealership::where('name', 'Smith Ford, Inc.')->exists())->toBeTrue();
+    });
+});
