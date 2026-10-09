@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Opportunities\ListOpenDeals;
 use App\Enum\OpportunityStage;
 use App\Models\Opportunity;
 use App\Models\User;
@@ -13,12 +14,13 @@ use Inertia\Response;
 
 final class SalesDashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(ListOpenDeals $listOpenDeals): Response
     {
         return Inertia::render('SalesDashboard/Index', [
             'kpis' => $this->buildKpis(),
             'pipelineByStage' => $this->buildPipelineByStage(),
             'repPerformance' => $this->buildRepPerformance(),
+            'openDeals' => $listOpenDeals(),
         ]);
     }
 
@@ -77,7 +79,7 @@ final class SalesDashboardController extends Controller
     }
 
     /**
-     * @return list<array{stage: string, label: string, count: int, value: float}>
+     * @return list<array{stage: string, label: string, color: string, count: int, value: float}>
      */
     private function buildPipelineByStage(): array
     {

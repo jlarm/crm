@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import KpiCard from '@/components/sales/KpiCard.vue';
+import OpenDealsTable from '@/components/sales/OpenDealsTable.vue';
 import PipelineStageChart from '@/components/sales/PipelineStageChart.vue';
 import RepPerformanceTable from '@/components/sales/RepPerformanceTable.vue';
 import { Head } from '@inertiajs/vue3';
@@ -21,6 +22,22 @@ interface Rep {
     winRate: number;
 }
 
+interface OpenDeal {
+    id: number;
+    name: string;
+    stage: string;
+    stageLabel: string;
+    estimatedValue: number;
+    probability: number | null;
+    expectedCloseDate: string | null;
+    nextAction: string | null;
+    dealership: { id: number; name: string };
+    repName: string | null;
+    lastActivityAt: string | null;
+    daysSinceActivity: number | null;
+    recentActivityCount: number;
+}
+
 interface Kpis {
     pipelineValue: number;
     openCount: number;
@@ -39,6 +56,15 @@ defineProps<{
     kpis: Kpis;
     pipelineByStage: Stage[];
     repPerformance: Rep[];
+    openDeals: {
+        data: OpenDeal[];
+        current_page: number;
+        last_page: number;
+        from: number;
+        to: number;
+        total: number;
+        links: { url: string | null; label: string; active: boolean }[];
+    };
 }>();
 
 function formatCurrency(value: number): string {
@@ -93,6 +119,9 @@ function formatCurrency(value: number): string {
 
             <!-- Pipeline by stage chart -->
             <PipelineStageChart :stages="pipelineByStage" />
+
+            <!-- Open deals -->
+            <OpenDealsTable :deals="openDeals" />
 
             <!-- Rep performance -->
             <RepPerformanceTable :reps="repPerformance" />

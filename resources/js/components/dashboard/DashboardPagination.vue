@@ -9,14 +9,26 @@ interface PaginationLink {
     active: boolean;
 }
 
-const props = defineProps<{
-    currentPage: number;
-    lastPage: number;
-    from: number;
-    to: number;
-    total: number;
-    links: PaginationLink[];
-}>();
+const props = withDefaults(
+    defineProps<{
+        currentPage: number;
+        lastPage: number;
+        from: number;
+        to: number;
+        total: number;
+        links: PaginationLink[];
+        /** Page props to reload when changing page. */
+        only?: string[];
+        /** Query string key the paginator reads its page from. */
+        pageName?: string;
+    }>(),
+    {
+        only: () => ['dealerships'],
+        pageName: 'page',
+    },
+);
+
+const jumpInputId = computed(() => `${props.only.join('-')}-page-jump`);
 
 function visit(url: string | null | undefined): void {
     if (!url) {
@@ -28,7 +40,7 @@ function visit(url: string | null | undefined): void {
     router.get(parsed.pathname, Object.fromEntries(parsed.searchParams), {
         preserveState: true,
         preserveScroll: true,
-        only: ['dealerships'],
+        only: props.only,
     });
 }
 
@@ -38,8 +50,8 @@ function visitPage(page: number): void {
 
     router.get(
         window.location.pathname,
-        { ...params, page: target },
-        { preserveState: true, preserveScroll: true, only: ['dealerships'] },
+        { ...params, [props.pageName]: target },
+        { preserveState: true, preserveScroll: true, only: props.only },
     );
 }
 
@@ -121,9 +133,9 @@ const pageButton =
         </div>
 
         <form v-if="lastPage > 1" class="flex items-center gap-2" @submit.prevent="submitJump">
-            <label for="dealership-page-jump" class="text-muted-foreground">Go to page</label>
+            <label :for="jumpInputId" class="text-muted-foreground">Go to page</label>
             <input
-                id="dealership-page-jump"
+                :id="jumpInputId"
                 v-model="jumpTo"
                 type="number"
                 min="1"

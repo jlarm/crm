@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enum\OpportunityStage;
 use App\Models\Dealership;
 use App\Models\Opportunity;
+use App\Models\OpportunityActivity;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -143,5 +144,46 @@ describe('Sales Dashboard page', function () {
     it('requires authentication', function () {
         auth()->logout();
         get('/sales')->assertRedirect('/login');
+    });
+});
+
+describe('Sales Dashboard open deals', function () {
+    it('lists open deals with their dealership and rep, most recently worked first', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id, 'name' => 'Lakeside RV']);
+        $quiet = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'name' => 'Quiet deal']);
+        $active = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'name' => 'Active deal']);
+        $untouched = Opportunity::factory()->open()->create(['dealership_id' => $dealership->id, 'name' => 'Untouched deal']);
+        Opportunity::factory()->won()->create(['dealership_id' => $dealership->id]);
+
+        OpportunityActivity::factory()->create(['opportunity_id' => $quiet->id, 'occurred_at' => now()->subDays(40)->toDateString()]);
+        OpportunityActivity::factory()->count(2)->create(['opportunity_id' => $active->id, 'occurred_at' => now()->subDays(2)->toDateString()]);
+
+        get('/sales')->assertInertia(
+            fn ($page) => $page
+                ->has('openDeals.data', 3)
+                ->where('openDeals.data.0.id', $active->id)
+                ->where('openDeals.data.0.dealership', ['id' => $dealership->id, 'name' => 'Lakeside RV'])
+                ->where('openDeals.data.0.repName', $this->user->name)
+                ->where('openDeals.data.0.daysSinceActivity', 2)
+                ->where('openDeals.data.0.recentActivityCount', 2)
+                ->where('openDeals.data.1.id', $quiet->id)
+                ->where('openDeals.data.1.daysSinceActivity', 40)
+                ->where('openDeals.data.1.recentActivityCount', 0)
+                ->where('openDeals.data.2.id', $untouched->id)
+                ->where('openDeals.data.2.lastActivityAt', null)
+        );
+    });
+
+    it('pages open deals using the deals_page query string', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        Opportunity::factory()->open()->count(17)->create(['dealership_id' => $dealership->id]);
+
+        get('/sales?deals_page=2')->assertInertia(
+            fn ($page) => $page
+                ->has('openDeals.data', 2)
+                ->where('openDeals.current_page', 2)
+                ->where('openDeals.last_page', 2)
+                ->where('openDeals.total', 17)
+        );
     });
 });
