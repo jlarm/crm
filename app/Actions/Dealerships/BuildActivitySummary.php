@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 final class BuildActivitySummary
 {
+    private const string TOUCHED_AT = 'COALESCE(progresses.date, progresses.created_at)';
+
     /**
      * Logged contacts across a user's book: a seven-day trend and the latest entries.
      *
@@ -24,7 +26,7 @@ final class BuildActivitySummary
         $weekStart = $today->copy()->subDays(6)->toDateString();
         $previousWeekStart = $today->copy()->subDays(13)->toDateString();
 
-        $recent = $this->query($user)
+        $recent = array_values($this->query($user)
             ->with(['dealership:id,name', 'category:id,name', 'user:id,name'])
             ->orderByRaw('COALESCE(progresses.date, progresses.created_at) DESC')
             ->orderByDesc('id')
@@ -41,14 +43,13 @@ final class BuildActivitySummary
                     'name' => (string) $progress->dealership->name,
                 ],
             ])
-            ->values()
-            ->all();
+            ->all());
 
         return [
-            'thisWeek' => $this->query($user)->whereRaw($this->touchedAt().' >= ?', [$weekStart])->count(),
+            'thisWeek' => $this->query($user)->whereRaw(self::TOUCHED_AT.' >= ?', [$weekStart])->count(),
             'lastWeek' => $this->query($user)
-                ->whereRaw($this->touchedAt().' >= ?', [$previousWeekStart])
-                ->whereRaw($this->touchedAt().' < ?', [$weekStart])
+                ->whereRaw(self::TOUCHED_AT.' >= ?', [$previousWeekStart])
+                ->whereRaw(self::TOUCHED_AT.' < ?', [$weekStart])
                 ->count(),
             'recent' => $recent,
         ];
@@ -63,10 +64,5 @@ final class BuildActivitySummary
             'dealership',
             fn (Builder $dealership) => $dealership->forUser($user)->whereNot('status', 'imported'),
         );
-    }
-
-    private function touchedAt(): string
-    {
-        return 'COALESCE(progresses.date, progresses.created_at)';
     }
 }
