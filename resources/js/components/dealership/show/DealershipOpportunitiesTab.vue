@@ -3,6 +3,7 @@ import InputError from '@/components/InputError.vue';
 import OpportunityActivityFeed from '@/components/dealership/show/OpportunityActivityFeed.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DatePicker from '@/components/ui/date-picker/DatePicker.vue';
 import {
     Dialog,
     DialogContent,
@@ -57,6 +58,8 @@ const isEditOpen = ref(false);
 const isActivityOpen = ref(false);
 const editingOpportunity = ref<Opportunity | null>(null);
 const activityOpportunityId = ref<number | null>(null);
+const createCloseDate = ref<string | null>(null);
+const editCloseDate = ref<string | null>(null);
 
 // Derived from props so it stays fresh after Inertia re-renders
 const activityOpportunity = computed(() =>
@@ -67,6 +70,7 @@ const activityOpportunity = computed(() =>
 
 function openEdit(opportunity: Opportunity): void {
     editingOpportunity.value = opportunity;
+    editCloseDate.value = opportunity.expectedCloseDate ?? null;
     isEditOpen.value = true;
 }
 
@@ -111,7 +115,7 @@ function formatCurrency(value: number): string {
                         method="post"
                         class="grid grid-cols-2 gap-4"
                         reset-on-success
-                        :on-success="() => (isCreateOpen = false)"
+                        :on-success="() => { isCreateOpen = false; createCloseDate = null; }"
                         v-slot="{ errors, processing }"
                     >
                         <Field class="col-span-2">
@@ -147,8 +151,9 @@ function formatCurrency(value: number): string {
                             <Input id="opp_probability" name="probability" type="number" min="0" max="100" placeholder="0–100" />
                         </Field>
                         <Field>
-                            <FieldLabel for="opp_close_date">Expected Close Date</FieldLabel>
-                            <Input id="opp_close_date" name="expected_close_date" type="date" />
+                            <FieldLabel>Expected Close Date</FieldLabel>
+                            <DatePicker v-model="createCloseDate" />
+                            <input type="hidden" name="expected_close_date" :value="createCloseDate ?? ''" />
                         </Field>
                         <Field class="col-span-2">
                             <FieldLabel for="opp_next_action">Next Action</FieldLabel>
@@ -328,13 +333,9 @@ function formatCurrency(value: number): string {
                         />
                     </Field>
                     <Field>
-                        <FieldLabel for="opp_edit_close_date">Expected Close Date</FieldLabel>
-                        <Input
-                            id="opp_edit_close_date"
-                            name="expected_close_date"
-                            type="date"
-                            :default-value="editingOpportunity.expectedCloseDate ?? ''"
-                        />
+                        <FieldLabel>Expected Close Date</FieldLabel>
+                        <DatePicker v-model="editCloseDate" />
+                        <input type="hidden" name="expected_close_date" :value="editCloseDate ?? ''" />
                     </Field>
                     <Field class="col-span-2">
                         <FieldLabel for="opp_edit_next_action">Next Action</FieldLabel>
