@@ -3,7 +3,6 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { ChevronDown, ChevronsUpDown, PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import BrandMark from '@/components/shell/BrandMark.vue';
-import ThemeToggle from '@/components/shell/ThemeToggle.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -186,7 +185,7 @@ function itemClass(item: ShellNavItem): string {
                     :class="
                         props.collapsed
                             ? ''
-                            : 'space-y-3 rounded-xl border border-sidebar-border bg-card p-3'
+                            : 'space-y-3 rounded-xl bg-card p-3'
                     "
                 >
                     <DropdownMenu>
@@ -223,11 +222,6 @@ function itemClass(item: ShellNavItem): string {
                             <UserMenuContent :user="page.props.auth.user" />
                         </DropdownMenuContent>
                     </DropdownMenu>
-
-                    <ThemeToggle v-if="!props.collapsed" />
-                    <div v-else class="mt-2 flex justify-center">
-                        <ThemeToggle cycle />
-                    </div>
                 </div>
             </div>
         </div>

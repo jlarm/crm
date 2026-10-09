@@ -7,6 +7,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import ThemeToggle from '@/components/shell/ThemeToggle.vue';
 import UserInfo from '@/components/UserInfo.vue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/settings/profile';
@@ -37,6 +38,9 @@ defineProps<Props>();
                 Settings
             </Link>
         </DropdownMenuItem>
+        <div class="px-1 py-1.5">
+            <ThemeToggle />
+        </div>
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
