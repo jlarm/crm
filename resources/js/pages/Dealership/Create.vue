@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
+import DealershipWebLookup, { type DealershipLookupResult, type LikelyDuplicate } from '@/components/dealership/DealershipWebLookup.vue';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -21,8 +23,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import type { User } from '@/pages/Dealership/types';
-import { Form, Head } from '@inertiajs/vue3';
-import { Save } from 'lucide-vue-next';
+import { show as showDealership } from '@/routes/dealerships';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { AlertTriangle, Save } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -30,6 +33,34 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const name = ref('');
+const address = ref('');
+const city = ref('');
+const state = ref('');
+const zipCode = ref('');
+const phone = ref('');
+const website = ref('');
+/** PhoneInput only reads its default value on mount, so it is re-mounted when a lookup fills it. */
+const phoneInputKey = ref(0);
+
+const duplicate = ref<LikelyDuplicate | null>(null);
+
+function applyLookupResult(result: DealershipLookupResult): void {
+    name.value = result.name;
+    address.value = result.address ?? address.value;
+    city.value = result.city ?? city.value;
+    state.value = result.state ?? state.value;
+    zipCode.value = result.zip_code ?? zipCode.value;
+    website.value = result.website ?? website.value;
+
+    if (result.phone) {
+        phone.value = result.phone;
+        phoneInputKey.value++;
+    }
+
+    duplicate.value = result.duplicate;
+}
 
 const consultantSearch = ref('');
 const selectedConsultantIds = ref<number[]>([]);
@@ -75,6 +106,21 @@ function toggleConsultant(userId: number, add: boolean): void {
         </div>
 
         <div class="mx-auto mt-5 w-full">
+            <Alert v-if="duplicate" class="mb-5 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                <AlertTriangle />
+                <AlertTitle>This dealership may already be in the CRM</AlertTitle>
+                <AlertDescription class="text-amber-800 dark:text-amber-300">
+                    <p>
+                        {{ duplicate.reason }}:
+                        <Link :href="showDealership(duplicate.match.id).url" class="font-semibold underline underline-offset-2">
+                            {{ duplicate.match.name }}</Link
+                        ><template v-if="duplicate.match.city || duplicate.match.state">
+                            ({{ [duplicate.match.city, duplicate.match.state].filter(Boolean).join(', ') }})</template
+                        >. You can still create it if it's a different location.
+                    </p>
+                </AlertDescription>
+            </Alert>
+
             <Form
                 action="/dealerships"
                 method="post"
@@ -90,18 +136,26 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <FieldLabel for="name">Name</FieldLabel>
                                         <Input
                                             id="name"
+                                            v-model="name"
                                             name="name"
                                             required
                                             placeholder="Name"
                                             autofocus
                                         />
                                         <InputError :message="errors.name" />
+                                        <DealershipWebLookup
+                                            :name="name"
+                                            :city="city"
+                                            :state="state"
+                                            @pick="applyLookupResult"
+                                        />
                                     </Field>
 
                                     <Field class="col-span-full">
                                         <FieldLabel for="address">Address</FieldLabel>
                                         <Input
                                             id="address"
+                                            v-model="address"
                                             name="address"
                                             placeholder="Address"
                                         />
@@ -111,6 +165,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <FieldLabel for="city">City</FieldLabel>
                                         <Input
                                             id="city"
+                                            v-model="city"
                                             name="city"
                                             placeholder="City"
                                         />
@@ -121,6 +176,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <FieldLabel for="state">State</FieldLabel>
                                         <Input
                                             id="state"
+                                            v-model="state"
                                             name="state"
                                             placeholder="ST"
                                             maxlength="2"
@@ -132,14 +188,26 @@ function toggleConsultant(userId: number, add: boolean): void {
                                         <FieldLabel for="zip_code">Zip Code</FieldLabel>
                                         <Input
                                             id="zip_code"
+                                            v-model="zipCode"
                                             name="zip_code"
                                             placeholder="Zip Code"
                                         />
                                     </Field>
 
-                                    <Field class="col-span-full">
+                                    <Field class="col-span-3">
                                         <FieldLabel for="phone">Phone</FieldLabel>
-                                        <PhoneInput id="phone" name="phone" />
+                                        <PhoneInput id="phone" :key="phoneInputKey" name="phone" :default-value="phone" />
+                                    </Field>
+
+                                    <Field class="col-span-3">
+                                        <FieldLabel for="website">Website</FieldLabel>
+                                        <Input
+                                            id="website"
+                                            v-model="website"
+                                            name="website"
+                                            placeholder="example.com"
+                                        />
+                                        <InputError :message="errors.website" />
                                     </Field>
 
                                     <Separator class="col-span-full my-3" />

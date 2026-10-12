@@ -96,6 +96,34 @@ final class FindLikelyDuplicateDealerships
     }
 
     /**
+     * The existing dealership a single new one most likely duplicates, if any.
+     *
+     * Unlike the import check, an exact name match counts here: nothing else will catch it.
+     *
+     * @return array{reason: string, match: array{id: int, name: string, city: string|null, state: string|null}}|null
+     */
+    public function forCandidate(string $name, ?string $phone): ?array
+    {
+        $columns = ['id', 'name', 'city', 'state', 'phone'];
+
+        $normalisedName = $this->normaliseName($name);
+        $normalisedPhone = $this->normalisePhone($phone);
+        $phoneMatch = null;
+
+        foreach (Dealership::query()->select($columns)->orderBy('id')->lazy(1000) as $dealership) {
+            if ($normalisedName !== '' && $this->normaliseName($dealership->name) === $normalisedName) {
+                return $this->candidateMatch('Similar name', $dealership);
+            }
+
+            if ($normalisedPhone !== null && $phoneMatch === null && $this->normalisePhone($dealership->phone) === $normalisedPhone) {
+                $phoneMatch = $dealership;
+            }
+        }
+
+        return $phoneMatch === null ? null : $this->candidateMatch('Same phone number', $phoneMatch);
+    }
+
+    /**
      * Point flagged rows, and the store/contact rows under them, at the existing dealership.
      *
      * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>  $validatedRows
@@ -169,6 +197,22 @@ final class FindLikelyDuplicateDealerships
         }
 
         return $candidates + $orphanRefs;
+    }
+
+    /**
+     * @return array{reason: string, match: array{id: int, name: string, city: string|null, state: string|null}}
+     */
+    private function candidateMatch(string $reason, Dealership $dealership): array
+    {
+        return [
+            'reason' => $reason,
+            'match' => [
+                'id' => $dealership->id,
+                'name' => $dealership->name,
+                'city' => $dealership->city,
+                'state' => $dealership->state,
+            ],
+        ];
     }
 
     private function normaliseName(string $name): string

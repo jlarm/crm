@@ -90,4 +90,11 @@ describe('DealershipUpdateRequest', function () {
             'user_ids' => [$other->id, $this->user->id],
         ]))->assertSessionHasNoErrors();
     });
+
+    it('updates the website, adding https when it is missing', function () {
+        $this->put("/dealerships/{$this->dealership->id}", validDealershipUpdatePayload(['website' => 'updated.com']))
+            ->assertSessionHasNoErrors();
+
+        expect($this->dealership->fresh()->website)->toBe('https://updated.com');
+    });
 });

@@ -8,6 +8,7 @@ use App\Http\Controllers\DealershipActivityController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\DealershipImportController;
+use App\Http\Controllers\DealershipLookupController;
 use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipProgressController;
 use App\Http\Controllers\DealershipStoreController;
@@ -49,6 +50,9 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
 
     Route::get('dealerships/create', [DealershipController::class, 'create'])->name('dealerships.create');
     Route::post('dealerships', [DealershipController::class, 'store'])->name('dealerships.store');
+    Route::post('dealerships/lookup', DealershipLookupController::class)
+        ->middleware('throttle:10,1')
+        ->name('dealerships.lookup');
 
     Route::get('dealerships/import', [DealershipImportController::class, 'create'])->name('dealerships.import.create');
     Route::post('dealerships/import/preview', [DealershipImportController::class, 'preview'])->name('dealerships.import.preview');

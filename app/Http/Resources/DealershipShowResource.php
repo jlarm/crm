@@ -31,6 +31,7 @@ final class DealershipShowResource extends JsonResource
             'state' => $this->state,
             'zipCode' => $this->zip_code,
             'phone' => $this->phone,
+            'website' => $this->website,
             'notes' => $this->notes,
             'currentSolutionName' => $this->current_solution_name,
             'currentSolutionUse' => $this->current_solution_use,

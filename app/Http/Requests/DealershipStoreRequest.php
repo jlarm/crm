@@ -20,6 +20,7 @@ final class DealershipStoreRequest extends FormRequest
             'state' => ['nullable', 'string', 'max:2'],
             'zip_code' => ['nullable', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'website' => ['nullable', 'url', 'max:255'],
             'type' => ['required', 'string', 'in:Automotive,RV,Motorsports,Maritime,Association'],
             'current_solution_name' => ['nullable', 'string', 'max:255'],
             'current_solution_use' => ['nullable', 'string', 'max:255'],
@@ -34,5 +35,17 @@ final class DealershipStoreRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * Reps paste bare domains ("smithford.com"); store them as full URLs.
+     */
+    protected function prepareForValidation(): void
+    {
+        $website = mb_trim((string) $this->input('website'));
+
+        if ($website !== '' && preg_match('#^https?://#i', $website) !== 1) {
+            $this->merge(['website' => 'https://'.$website]);
+        }
     }
 }

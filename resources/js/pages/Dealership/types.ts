@@ -83,6 +83,7 @@ export interface Dealership {
     state: string;
     zipCode: string | null;
     phone: string | null;
+    website: string | null;
     notes: string | null;
     currentSolutionName: string | null;
     currentSolutionUse: string | null;

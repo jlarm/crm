@@ -110,4 +110,23 @@ describe('DealershipStoreRequest', function () {
             'user_ids' => [9999999],
         ]))->assertSessionHasErrors('user_ids.0');
     });
+
+    it('saves the website', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['website' => 'https://primemotors.com']))
+            ->assertSessionHasNoErrors();
+
+        expect(Dealership::where('name', 'Prime Motors')->value('website'))->toBe('https://primemotors.com');
+    });
+
+    it('adds https to a website typed without a scheme', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['website' => 'primemotors.com']))
+            ->assertSessionHasNoErrors();
+
+        expect(Dealership::where('name', 'Prime Motors')->value('website'))->toBe('https://primemotors.com');
+    });
+
+    it('rejects a website that is not a url', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['website' => 'not a website']))
+            ->assertSessionHasErrors('website');
+    });
 });

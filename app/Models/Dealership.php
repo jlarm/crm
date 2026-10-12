@@ -27,6 +27,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string|null $zip_code
  * @property string|null $phone
  * @property string|null $email
+ * @property string|null $website
  * @property string|null $current_solution_name
  * @property string|null $current_solution_use
  * @property string|null $notes
@@ -65,6 +66,7 @@ class Dealership extends Model
         'zip_code',
         'phone',
         'email',
+        'website',
         'current_solution_name',
         'current_solution_use',
         'notes',

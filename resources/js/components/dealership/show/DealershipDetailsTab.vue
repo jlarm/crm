@@ -174,13 +174,24 @@ function toggleConsultant(userId: number, add: boolean): void {
                                     />
                                 </Field>
 
-                                <Field class="col-span-full">
+                                <Field class="col-span-3">
                                     <FieldLabel for="phone">Phone</FieldLabel>
                                     <PhoneInput
                                         id="phone"
                                         name="phone"
                                         :default-value="dealership.phone"
                                     />
+                                </Field>
+
+                                <Field class="col-span-3">
+                                    <FieldLabel for="website">Website</FieldLabel>
+                                    <Input
+                                        id="website"
+                                        name="website"
+                                        :default-value="dealership.website ?? undefined"
+                                        placeholder="example.com"
+                                    />
+                                    <InputError :message="errors.website" />
                                 </Field>
 
                                 <Separator class="col-span-full my-3" />
