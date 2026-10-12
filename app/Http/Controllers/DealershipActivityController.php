@@ -47,7 +47,9 @@ final class DealershipActivityController extends Controller
                             ->whereIn('subject_id', $opportunityIds);
                     })
                     ->orWhere(function (Builder $q) use ($dealership): void {
+                        // The logged touchpoint itself stands in for its "created" entry.
                         $q->where('subject_type', Progress::class)
+                            ->where('event', '!=', 'created')
                             ->whereIn('subject_id', Progress::where('dealership_id', $dealership->id)->pluck('id'));
                     });
             })
@@ -75,8 +77,18 @@ final class DealershipActivityController extends Controller
                 'occurredAt' => ($a->occurred_at ?? $a->created_at)->toIso8601String(),
             ]);
 
+        $loggedTouchpoints = Progress::query()
+            ->with(['user:id,name', 'contact:id,name', 'category:id,name'])
+            ->where('dealership_id', $dealership->id)
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->limit(200)
+            ->get()
+            ->map(fn (Progress $progress): array => $this->mapProgress($progress));
+
         $items = $logged
             ->merge($opportunityActivities)
+            ->merge($loggedTouchpoints)
             ->filter()
             ->sortByDesc('occurredAt')
             ->values();
@@ -96,6 +108,35 @@ final class DealershipActivityController extends Controller
                 'hasMore' => ($page * $perPage) < $total,
             ],
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapProgress(Progress $progress): array
+    {
+        [$icon, $label] = match ($progress->category?->name) {
+            'Phone' => ['call', 'Phone call'],
+            'Email' => ['email', 'Email'],
+            'In Person' => ['meeting', 'In-person meeting'],
+            default => ['note', 'Contact'],
+        };
+
+        // Same-day entries keep the time they were logged so they sort among today's other activity.
+        $isLoggedSameDay = $progress->date === null || $progress->date->isSameDay($progress->created_at);
+        $occurredAt = $isLoggedSameDay ? $progress->created_at : $progress->date;
+
+        return [
+            'id' => 'progress_'.$progress->id,
+            'category' => 'progress',
+            'icon' => $icon,
+            'title' => $progress->contact ? sprintf('%s with %s', $label, $progress->contact->name) : $label.' logged',
+            'description' => $progress->details === null ? null : mb_trim(strip_tags($progress->details)),
+            'actor' => $progress->user ? ['id' => $progress->user->id, 'name' => $progress->user->name] : null,
+            'occurredAt' => $occurredAt->toIso8601String(),
+            'dateOnly' => ! $isLoggedSameDay,
+            'progressId' => $progress->id,
+        ];
     }
 
     /**

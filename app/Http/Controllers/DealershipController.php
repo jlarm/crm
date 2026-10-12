@@ -11,6 +11,7 @@ use App\Http\Requests\DealershipUpdateRequest;
 use App\Http\Resources\DealershipShowResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Dealership;
+use App\Models\ProgressCategory;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -74,6 +75,7 @@ final class DealershipController extends Controller
                 'types' => TaskType::options(),
                 'priorities' => TaskPriority::options(),
             ],
+            'progressCategories' => ProgressCategory::query()->select('id', 'name')->orderBy('id')->get(),
         ]);
     }
 

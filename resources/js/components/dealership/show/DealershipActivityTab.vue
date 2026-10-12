@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import LogActivityDialog from '@/components/dealership/show/LogActivityDialog.vue';
 import { Button } from '@/components/ui/button';
-import type { ActivityFeedItem, ActivityFeedMeta, Dealership } from '@/pages/Dealership/types';
+import type { ActivityFeedItem, ActivityFeedMeta, Dealership, ProgressCategory } from '@/pages/Dealership/types';
+import { destroy as destroyProgress } from '@/routes/dealerships/progress';
+import { router } from '@inertiajs/vue3';
 import {
     Activity as ActivityIcon,
     Briefcase,
@@ -8,15 +11,21 @@ import {
     FileText,
     Mail,
     Phone,
+    Plus,
     Sparkles,
     Store as StoreIcon,
+    Trash2,
     User as UserIcon,
+    Users,
 } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps<{
     dealership: Dealership;
+    progressCategories: ProgressCategory[];
 }>();
+
+const isLogOpen = ref(false);
 
 const items = ref<ActivityFeedItem[]>([]);
 const meta = ref<ActivityFeedMeta | null>(null);
@@ -32,6 +41,7 @@ const iconMap: Record<string, unknown> = {
     building: Building2,
     call: Phone,
     email: Mail,
+    meeting: Users,
     activity: ActivityIcon,
 };
 
@@ -69,8 +79,13 @@ function loadMore(): void {
     }
 }
 
-function formatDateTime(iso: string): string {
-    const date = new Date(iso);
+function formatDateTime(item: ActivityFeedItem): string {
+    const date = new Date(item.occurredAt);
+
+    if (item.dateOnly) {
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
     return date.toLocaleString(undefined, {
         month: 'short',
         day: 'numeric',
@@ -80,11 +95,37 @@ function formatDateTime(iso: string): string {
     });
 }
 
+function deleteLoggedActivity(progressId: number): void {
+    if (!window.confirm('Delete this activity?')) {
+        return;
+    }
+
+    router.delete(destroyProgress([props.dealership.id, progressId]).url, {
+        preserveScroll: true,
+        onSuccess: () => load(1),
+    });
+}
+
 onMounted(() => load(1));
 </script>
 
 <template>
     <div class="mt-6">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Activity</h2>
+            <Button @click="isLogOpen = true">
+                <Plus class="h-4 w-4" />
+                Log activity
+            </Button>
+        </div>
+
+        <LogActivityDialog
+            v-model:open="isLogOpen"
+            :dealership="dealership"
+            :categories="progressCategories"
+            @logged="load(1)"
+        />
+
         <div v-if="error" class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
             {{ error }}
         </div>
@@ -109,7 +150,7 @@ onMounted(() => load(1));
                 <li
                     v-for="item in items"
                     :key="item.id"
-                    class="relative flex gap-4"
+                    class="group relative flex gap-4"
                 >
                     <span class="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                         <component :is="iconFor(item.icon)" class="h-4 w-4" />
@@ -127,9 +168,20 @@ onMounted(() => load(1));
                         </p>
                         <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
                             <span v-if="item.actor">{{ item.actor.name }} · </span>
-                            {{ formatDateTime(item.occurredAt) }}
+                            {{ formatDateTime(item) }}
                         </p>
                     </div>
+
+                    <Button
+                        v-if="item.progressId"
+                        variant="ghost"
+                        size="icon"
+                        class="h-8 w-8 shrink-0 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                        aria-label="Delete activity"
+                        @click="deleteLoggedActivity(item.progressId)"
+                    >
+                        <Trash2 class="h-4 w-4" />
+                    </Button>
                 </li>
             </ul>
 

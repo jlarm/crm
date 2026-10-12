@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useRecentItems } from '@/composables/useRecentItems';
 import { show } from '@/routes/dealerships';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
-import type { Dealership, DealershipShowTab, User } from '@/pages/Dealership/types';
+import type { Dealership, DealershipShowTab, ProgressCategory, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
@@ -25,6 +25,7 @@ interface Props {
         types: FilterOption[];
         priorities: FilterOption[];
     };
+    progressCategories: ProgressCategory[];
 }
 
 const props = defineProps<Props>();
@@ -147,6 +148,7 @@ function setActiveTab(tab: DealershipShowTab): void {
         <DealershipActivityTab
             v-if="activeTab === 'activity'"
             :dealership="dealership"
+            :progress-categories="progressCategories"
         />
     </div>
 </template>

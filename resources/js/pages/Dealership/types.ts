@@ -8,6 +8,15 @@ export interface ActivityFeedItem {
     description: string | null;
     actor: { id: number; name: string } | null;
     occurredAt: string;
+    /** Back-dated entries carry a date but no meaningful time. */
+    dateOnly?: boolean;
+    /** Set on activities logged by hand, which can be deleted. */
+    progressId?: number;
+}
+
+export interface ProgressCategory {
+    id: number;
+    name: string;
 }
 
 export interface ActivityFeedMeta {
