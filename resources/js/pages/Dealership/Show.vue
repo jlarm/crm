@@ -8,12 +8,14 @@ import DealershipStoresTab from '@/components/dealership/show/DealershipStoresTa
 import DealershipTasksTab from '@/components/dealership/show/DealershipTasksTab.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useRecentItems } from '@/composables/useRecentItems';
+import { show } from '@/routes/dealerships';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
 import type { Dealership, DealershipShowTab, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 
 interface Props {
     dealership: Dealership;
@@ -26,6 +28,23 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { recordRecentItem } = useRecentItems();
+
+watch(
+    () => props.dealership.id,
+    () => {
+        recordRecentItem({
+            type: 'dealership',
+            id: props.dealership.id,
+            label: props.dealership.name,
+            subtitle: [props.dealership.city, props.dealership.state].filter(Boolean).join(', ') || null,
+            meta: null,
+            url: show(props.dealership.id).url,
+        });
+    },
+    { immediate: true },
+);
 
 const activeTab = ref<DealershipShowTab>('details');
 const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
