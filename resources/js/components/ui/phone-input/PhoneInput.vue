@@ -1,39 +1,47 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { computed, ref } from 'vue';
+import { formatPhoneAsTyped } from '@/lib/phone';
+import { computed, ref, watch } from 'vue';
 
+/**
+ * Phone field shown as 999-999-9999 that submits digits only.
+ *
+ * Inside an Inertia <Form>, pass `name` and it posts through a hidden input.
+ * With useForm, bind v-model instead; the model receives the digits.
+ */
 const props = defineProps<{
-    name: string;
+    name?: string;
     defaultValue?: string | null;
     placeholder?: string;
     id?: string;
     class?: string;
 }>();
 
-function formatPhone(value: string): string {
-    const digits = value.replace(/\D/g, '').slice(0, 10);
-    if (digits.length <= 3) {
-        return digits;
-    }
-    if (digits.length <= 6) {
-        return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    }
-    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-}
+const model = defineModel<string | null>({ default: undefined });
 
-const displayValue = ref(formatPhone(props.defaultValue ?? ''));
+const displayValue = ref(formatPhoneAsTyped(model.value ?? props.defaultValue ?? ''));
 const rawValue = computed(() => displayValue.value.replace(/\D/g, ''));
+
+watch(model, (value) => {
+    if (value !== undefined && (value ?? '').replace(/\D/g, '') !== rawValue.value) {
+        displayValue.value = formatPhoneAsTyped(value ?? '');
+    }
+});
 
 function handleInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const formatted = formatPhone(input.value);
+    const formatted = formatPhoneAsTyped(input.value);
     displayValue.value = formatted;
     input.value = formatted;
+
+    if (model.value !== undefined) {
+        model.value = rawValue.value;
+    }
 }
 </script>
 
 <template>
-    <input type="hidden" :name="name" :value="rawValue" />
+    <input v-if="name" type="hidden" :name="name" :value="rawValue" />
     <input
         :id="id"
         type="tel"

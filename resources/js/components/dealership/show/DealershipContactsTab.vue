@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPhone } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -164,7 +165,7 @@ function togglePrimary(dealershipId: number, contact: Contact): void {
                     <div class="space-y-2">
                         <div v-if="contact.phone" class="flex items-center gap-3">
                             <Phone class="h-3 w-3 text-slate-500" />
-                            <span>{{ contact.phone }}</span>
+                            <span>{{ formatPhone(contact.phone) }}</span>
                         </div>
                         <div v-if="contact.email" class="flex items-center gap-3">
                             <Mail class="h-3 w-3 text-slate-500" />

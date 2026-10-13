@@ -41,7 +41,7 @@ describe('looking up a dealership online', function () {
                 'city' => 'Naperville',
                 'state' => 'IL',
                 'zip_code' => '60540',
-                'phone' => '(630) 555-0100',
+                'phone' => '630-555-0100',
                 'website' => 'https://smithford.com',
                 'sourceUrl' => 'https://smithford.com/contact',
                 'duplicate' => null,

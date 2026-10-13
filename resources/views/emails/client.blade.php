@@ -5,5 +5,5 @@
 Thanks,<br>
 {{ $sender->name }}<br>
 {{ $sender->email }}<br>
-{{ $sender->phone }}
+{{ format_phone((string) $sender->phone) }}
 @endcomponent

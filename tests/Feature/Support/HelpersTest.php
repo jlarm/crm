@@ -3,17 +3,22 @@
 declare(strict_types=1);
 
 describe('format_phone helper', function (): void {
-    it('formats a 10-digit string into US phone format', function (): void {
-        expect(format_phone('5551234567'))->toBe('(555) 123-4567');
+    it('formats a 10-digit string as 999-999-9999', function (): void {
+        expect(format_phone('5551234567'))->toBe('555-123-4567');
     });
 
     it('strips non-numeric characters before formatting', function (): void {
-        expect(format_phone('(555) 123-4567'))->toBe('(555) 123-4567');
-        expect(format_phone('555.123.4567'))->toBe('(555) 123-4567');
-        expect(format_phone('555-123-4567'))->toBe('(555) 123-4567');
+        expect(format_phone('(555) 123-4567'))->toBe('555-123-4567');
+        expect(format_phone('555.123.4567'))->toBe('555-123-4567');
+        expect(format_phone('555-123-4567'))->toBe('555-123-4567');
     });
 
-    it('returns the digits unchanged when not exactly 10 digits', function (): void {
+    it('drops a leading country code 1', function (): void {
+        expect(format_phone('1-555-123-4567'))->toBe('555-123-4567');
+        expect(format_phone('+1 (555) 123-4567'))->toBe('555-123-4567');
+    });
+
+    it('returns the digits unchanged when not a US number', function (): void {
         expect(format_phone('12345'))->toBe('12345');
         expect(format_phone('123456789012'))->toBe('123456789012');
     });

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPhone } from '@/lib/phone';
 import { Button } from '@/components/ui/button';
 import { lookup } from '@/routes/dealerships';
 import { useHttp } from '@inertiajs/vue3';
@@ -147,7 +148,7 @@ function hostname(url: string): string {
                         <p class="font-medium text-slate-900 dark:text-slate-100">{{ result.name }}</p>
                         <p v-if="location(result)" class="text-xs text-muted-foreground">{{ location(result) }}</p>
                         <p class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-                            <span v-if="result.phone">{{ result.phone }}</span>
+                            <span v-if="result.phone">{{ formatPhone(result.phone) }}</span>
                             <span v-if="result.website">{{ hostname(result.website) }}</span>
                             <a
                                 v-if="result.sourceUrl"

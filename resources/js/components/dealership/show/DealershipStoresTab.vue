@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPhone } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -147,7 +148,7 @@ function deleteStore(dealershipId: number, store: Store): void {
                             {{ store.city }}{{ store.state ? `, ${store.state}` : '' }}
                             {{ store.zipCode || '' }}
                         </p>
-                        <p class="text-xs text-slate-500">{{ store.phone || '—' }}</p>
+                        <p class="text-xs text-slate-500">{{ formatPhone(store.phone) || '—' }}</p>
                     </div>
                 </CardHeader>
             </Card>

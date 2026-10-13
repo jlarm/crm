@@ -40,7 +40,7 @@ For each result:
 - address: street address only, e.g. "1200 W Ogden Ave".
 - city, zip_code: as found.
 - state: the two-letter USPS code, e.g. "IL".
-- phone: the main sales or front-desk number, formatted (555) 555-5555.
+- phone: the main sales or front-desk number, formatted 555-555-5555.
 - website: the dealership's own site, not a listing or review site.
 - source_url: the page where you found the address and phone.
 TXT;

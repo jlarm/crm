@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import PhoneInput from '@/components/ui/phone-input/PhoneInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { Save } from 'lucide-vue-next';
 import type { UserListItem, UserRole } from './types';
@@ -69,7 +70,7 @@ function submit(): void {
 
                             <Field class="col-span-1">
                                 <FieldLabel for="phone">Phone</FieldLabel>
-                                <Input id="phone" v-model="form.phone" />
+                                <PhoneInput id="phone" v-model="form.phone" />
                                 <InputError :message="form.errors.phone" />
                             </Field>
 

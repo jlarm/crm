@@ -6,7 +6,7 @@ Thanks,<br>
 {{ $user->name }}<br>
 {{ $user->email }}<br>
 @if($user->phone)
-{{ $user->phone }}<br>
+{{ format_phone((string) $user->phone) }}<br>
 @endif
 Automotive Risk Management Partners
 

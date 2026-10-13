@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPhone } from '@/lib/phone';
 import { ArrowRight, Sparkles, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -142,7 +143,7 @@ function typeLabel(value: string): string {
                     <span class="min-w-0">
                         <span class="text-slate-800 dark:text-slate-200">{{ contact.name }}</span>
                         <span class="block text-xs text-slate-500">
-                            {{ [contact.position, contact.email, contact.phone].filter(Boolean).join(' · ') || 'No other details' }}
+                            {{ [contact.position, contact.email, formatPhone(contact.phone)].filter(Boolean).join(' · ') || 'No other details' }}
                         </span>
                     </span>
                     <template v-if="selectedContacts[index]">

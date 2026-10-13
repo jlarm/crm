@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPhone } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -356,7 +357,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                             <div class="space-y-2 text-xs text-slate-600">
                                 <div v-if="primaryContact.phone" class="flex items-center gap-3">
                                     <PhoneIcon class="h-3 w-3 text-slate-500" />
-                                    <span>{{ primaryContact.phone }}</span>
+                                    <span>{{ formatPhone(primaryContact.phone) }}</span>
                                 </div>
                                 <div v-if="primaryContact.email" class="flex items-center gap-3">
                                     <Mail class="h-3 w-3 text-slate-500" />

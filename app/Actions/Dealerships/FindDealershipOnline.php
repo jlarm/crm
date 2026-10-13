@@ -105,7 +105,7 @@ final class FindDealershipOnline
             return null;
         }
 
-        return sprintf('(%s) %s-%s', mb_substr($digits, 0, 3), mb_substr($digits, 3, 3), mb_substr($digits, 6));
+        return format_phone($digits);
     }
 
     private function url(mixed $value): ?string
