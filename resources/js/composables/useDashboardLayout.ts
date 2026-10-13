@@ -7,7 +7,7 @@ export type DashboardCardWidth = 1 | 2 | 3;
 
 export type DashboardSectionKey = Extract<
     DashboardCardKey,
-    'weeklyDigest' | 'emailReplies' | 'taskBoard' | 'pipeline' | 'goingQuiet' | 'recentActivity' | 'dealerships'
+    'weeklyDigest' | 'emailReplies' | 'starred' | 'taskBoard' | 'pipeline' | 'goingQuiet' | 'recentActivity' | 'dealerships'
 >;
 
 type DashboardLayout = {
@@ -17,10 +17,11 @@ type DashboardLayout = {
 
 /** The arrangement before anyone customised it. */
 const defaultLayout: DashboardLayout = {
-    order: ['weeklyDigest', 'emailReplies', 'taskBoard', 'pipeline', 'goingQuiet', 'recentActivity', 'dealerships'],
+    order: ['weeklyDigest', 'emailReplies', 'starred', 'taskBoard', 'pipeline', 'goingQuiet', 'recentActivity', 'dealerships'],
     widths: {
         weeklyDigest: 3,
         emailReplies: 3,
+        starred: 1,
         taskBoard: 2,
         pipeline: 1,
         goingQuiet: 2,
@@ -33,6 +34,7 @@ const defaultLayout: DashboardLayout = {
 export const allowedWidths: Record<DashboardSectionKey, DashboardCardWidth[]> = {
     weeklyDigest: [1, 2, 3],
     emailReplies: [1, 2, 3],
+    starred: [1, 2, 3],
     taskBoard: [1, 2, 3],
     pipeline: [1, 2, 3],
     goingQuiet: [1, 2, 3],
@@ -63,8 +65,17 @@ function readLayout(): DashboardLayout {
         const { order, widths } = stored as { order?: unknown; widths?: unknown };
 
         if (Array.isArray(order)) {
-            const known = order.filter((key): key is DashboardSectionKey => defaultLayout.order.includes(key));
-            layout.order = [...new Set([...known, ...defaultLayout.order])];
+            const known = [...new Set(order.filter((key): key is DashboardSectionKey => defaultLayout.order.includes(key)))];
+
+            // Sections added since the layout was saved go after the one they follow by default.
+            for (const [index, key] of defaultLayout.order.entries()) {
+                if (!known.includes(key)) {
+                    const previous = defaultLayout.order[index - 1];
+                    known.splice(previous ? known.indexOf(previous) + 1 : 0, 0, key);
+                }
+            }
+
+            layout.order = known;
         }
 
         if (widths && typeof widths === 'object') {

@@ -15,6 +15,7 @@ use App\Http\Controllers\DealershipImportController;
 use App\Http\Controllers\DealershipLookupController;
 use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipProgressController;
+use App\Http\Controllers\DealershipStarController;
 use App\Http\Controllers\DealershipStoreController;
 use App\Http\Controllers\MailgunInboundController;
 use App\Http\Controllers\MailgunWebhookController;
@@ -68,6 +69,9 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
 
     Route::get('dealerships/{dealership}', [DealershipController::class, 'show'])->name('dealerships.show');
     Route::put('dealerships/{dealership}', [DealershipController::class, 'update'])->name('dealerships.update');
+
+    Route::put('dealerships/{dealership}/star', [DealershipStarController::class, 'store'])->name('dealerships.star.store');
+    Route::delete('dealerships/{dealership}/star', [DealershipStarController::class, 'destroy'])->name('dealerships.star.destroy');
 
     Route::get('dealerships/{dealership}/activities', [DealershipActivityController::class, 'index'])->name('dealerships.activities.index');
     Route::post('dealerships/{dealership}/progress', [DealershipProgressController::class, 'store'])->name('dealerships.progress.store');

@@ -110,3 +110,12 @@ export interface EmailRepliesAwaiting {
     total: number;
     items: EmailReplyAwaiting[];
 }
+
+export interface StarredDealership {
+    id: number;
+    name: string;
+    city: string | null;
+    state: string | null;
+    rating: string | null;
+    ratingLabel: string | null;
+}

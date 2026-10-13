@@ -10,6 +10,7 @@ use App\Actions\Dealerships\BuildPipelineSummary;
 use App\Actions\Dealerships\BuildWeeklyDigest;
 use App\Actions\Dealerships\ListDealerships;
 use App\Actions\Dealerships\ListDealershipsGoingQuiet;
+use App\Actions\Dealerships\ListStarredDealerships;
 use App\Actions\Dealerships\SummarizeWeeklyDigest;
 use App\Actions\Emails\ListRepliesAwaitingResponse;
 use App\Actions\Tasks\BuildTaskFormOptions;
@@ -36,6 +37,7 @@ final class DashboardController extends Controller
         BuildWeeklyDigest $buildWeeklyDigest,
         SummarizeWeeklyDigest $summarizeWeeklyDigest,
         ListRepliesAwaitingResponse $listRepliesAwaitingResponse,
+        ListStarredDealerships $listStarredDealerships,
     ): Response {
         /** @var User $user */
         $user = $request->user();
@@ -56,6 +58,7 @@ final class DashboardController extends Controller
             'bookSummary' => $buildBookSummary($user),
             'goingQuiet' => $listDealershipsGoingQuiet($user),
             'emailReplies' => $listRepliesAwaitingResponse($user),
+            'starredDealerships' => $listStarredDealerships($user),
             'pipeline' => $buildPipelineSummary($user),
             'activity' => $buildActivitySummary($user),
             'weeklyDigest' => $weeklyDigest,

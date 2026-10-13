@@ -81,6 +81,7 @@ final class DealershipController extends Controller
             ],
             'progressCategories' => ProgressCategory::query()->select('id', 'name')->orderBy('id')->get(),
             'emailThreads' => Inertia::defer(fn (): array => $this->emailThreads($dealership)),
+            'isStarred' => fn (): bool => (bool) auth()->user()?->starredDealerships()->whereKey($dealership->id)->exists(),
             'unreadReplyCount' => fn (): int => $dealership->emails()->unreadReplies()->count(),
         ]);
     }

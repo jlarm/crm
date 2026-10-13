@@ -4,6 +4,7 @@ import DataTable from '@/components/companies/DataTable.vue';
 import DashboardCardMenu from '@/components/dashboard/DashboardCardMenu.vue';
 import DashboardEmailReplies from '@/components/dashboard/DashboardEmailReplies.vue';
 import DashboardLayoutItem from '@/components/dashboard/DashboardLayoutItem.vue';
+import DashboardStarred from '@/components/dashboard/DashboardStarred.vue';
 import DashboardGoingQuiet from '@/components/dashboard/DashboardGoingQuiet.vue';
 import DashboardMetricRibbon from '@/components/dashboard/DashboardMetricRibbon.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
@@ -17,6 +18,7 @@ import type {
     EmailRepliesAwaiting,
     PipelineSummary,
     QuietDealership,
+    StarredDealership,
     TaskStats,
     WeeklyDigest,
 } from '@/components/dashboard/types';
@@ -70,6 +72,7 @@ interface Props {
     bookSummary: BookSummary;
     goingQuiet: QuietDealership[];
     emailReplies: EmailRepliesAwaiting;
+    starredDealerships: StarredDealership[];
     pipeline: PipelineSummary;
     activity: ActivitySummary;
     weeklyDigest: WeeklyDigest;
@@ -315,6 +318,7 @@ const columns = createColumns(handleSort, () => currentSorting.value);
                     :summary="weeklyDigestSummary"
                 />
                 <DashboardEmailReplies v-else-if="key === 'emailReplies'" :replies="emailReplies" />
+                <DashboardStarred v-else-if="key === 'starred'" :dealerships="starredDealerships" />
                 <DashboardTaskBoard
                     v-else-if="key === 'taskBoard'"
                     :tasks="upcomingTasks"

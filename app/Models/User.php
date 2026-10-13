@@ -77,6 +77,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Dealerships this user starred to keep on their dashboard.
+     *
+     * @return BelongsToMany<Dealership, $this>
+     */
+    public function starredDealerships(): BelongsToMany
+    {
+        return $this->belongsToMany(Dealership::class, 'dealership_stars')->withTimestamps();
+    }
+
+    /**
      * @return HasMany<Progress, $this>
      */
     public function progresses(): HasMany

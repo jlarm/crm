@@ -11,11 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRecentItems } from '@/composables/useRecentItems';
 import { show } from '@/routes/dealerships';
+import { destroy as unstar, store as star } from '@/routes/dealerships/star';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
 import type { Dealership, DealershipShowTab, EmailThread, ProgressCategory, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head, router, usePage, usePoll } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, Star } from 'lucide-vue-next';
 import { nextTick, ref, watch } from 'vue';
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
     /** Deferred: undefined until loaded. */
     emailThreads?: EmailThread[];
     unreadReplyCount: number;
+    isStarred: boolean;
 }
 
 const props = defineProps<Props>();
@@ -50,6 +52,29 @@ watch(
     },
     { immediate: true },
 );
+
+const starred = ref(props.isStarred);
+watch(() => props.isStarred, (value) => (starred.value = value));
+
+/** Flips the star straight away and rolls back if the request fails. */
+function toggleStar(): void {
+    const wasStarred = starred.value;
+    starred.value = !wasStarred;
+
+    const options = {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['isStarred'],
+        showProgress: false,
+        onError: () => (starred.value = wasStarred),
+    };
+
+    if (wasStarred) {
+        router.delete(unstar(props.dealership.id).url, options);
+    } else {
+        router.put(star(props.dealership.id).url, {}, options);
+    }
+}
 
 const TABS: DealershipShowTab[] = ['details', 'stores', 'contacts', 'tasks', 'opportunities', 'emails', 'activity'];
 
@@ -119,9 +144,21 @@ function setActiveTab(tab: DealershipShowTab): void {
                     <ArrowLeft class="h-4 w-4" />
                 </Button>
                 <div class="flex flex-col">
-                    <h1 class="text-2xl font-black text-slate-900 dark:text-slate-100">
-                        {{ dealership.name }}
-                    </h1>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl font-black text-slate-900 dark:text-slate-100">
+                            {{ dealership.name }}
+                        </h1>
+                        <button
+                            type="button"
+                            class="rounded-md p-1 transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                            :aria-pressed="starred"
+                            :aria-label="starred ? 'Unstar dealership' : 'Star dealership'"
+                            :title="starred ? 'Starred: shown on your dashboard. Click to unstar.' : 'Star to keep it on your dashboard'"
+                            @click="toggleStar"
+                        >
+                            <Star class="size-5" :class="starred ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-400 dark:text-slate-600'" />
+                        </button>
+                    </div>
                     <div class="mt-1 flex items-center gap-1">
                         <p class="text-xs text-zinc-400 dark:text-zinc-500">
                             ID: {{ dealership.id }}
