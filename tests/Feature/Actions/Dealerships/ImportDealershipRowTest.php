@@ -152,7 +152,7 @@ describe('ImportDealershipRow action', function (): void {
             ->and($stats['created']['dealerships'])->toBe(1);
     });
 
-    it('attaches consultants from extra_user_emails resolving via the prefetch cache', function (): void {
+    it('assigns users from extra_user_emails resolving via the prefetch cache, not the importer', function (): void {
         $importer = User::factory()->create();
         $extra = User::factory()->create(['email' => 'extra@example.com']);
 
@@ -174,9 +174,7 @@ describe('ImportDealershipRow action', function (): void {
         $action($rows, importerOptions($importer->id));
 
         $dealer = Dealership::where('name', 'Cache Motors')->first();
-        expect($dealer->users->pluck('id')->all())
-            ->toContain($importer->id)
-            ->toContain($extra->id);
+        expect($dealer->users->pluck('id')->all())->toBe([$extra->id]);
     });
 
     it('updates existing stores and contacts when update_existing is true', function (): void {

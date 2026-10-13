@@ -291,7 +291,9 @@ final class ImportDealershipRow
      */
     private function syncUsers(Dealership $dealership, array $extraEmails, array $options): void
     {
-        $ids = array_unique(array_merge([$options['importer_id']], $options['default_user_ids']));
+        // Assigned users are the import's defaults plus any named in the row. The importer is
+        // recorded as the dealership's user_id, not assigned unless picked.
+        $ids = $options['default_user_ids'];
 
         foreach ($extraEmails as $email) {
             $key = mb_strtolower($email);

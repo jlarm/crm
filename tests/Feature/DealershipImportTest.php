@@ -76,7 +76,8 @@ CSV;
     expect($dealer->name)->toBe('Prime Motors')
         ->and($dealer->stores()->count())->toBe(1)
         ->and($dealer->contacts()->count())->toBe(1)
-        ->and($dealer->users)->toHaveCount(1);
+        ->and($dealer->users)->toHaveCount(0)
+        ->and($dealer->user_id)->toBe($this->user->id);
 });
 
 it('applies dropdown defaults when status/rating/type columns are absent', function () {
@@ -213,7 +214,7 @@ it('returns to upload when token is expired', function () {
         ->assertRedirect('/dealerships/import');
 });
 
-it('attaches default consultants and importer to imported dealerships', function () {
+it('assigns the default users, not the importer, to imported dealerships', function () {
     $other = User::factory()->create();
     $csv = "name\nPrime Motors\n";
 
@@ -224,13 +225,10 @@ it('attaches default consultants and importer to imported dealerships', function
     $token = $response->viewData('page')['props']['preview']['token'];
     $this->post('/dealerships/import', ['token' => $token]);
 
-    $dealer = Dealership::first();
-    expect($dealer->users->pluck('id')->all())
-        ->toContain($this->user->id)
-        ->toContain($other->id);
+    expect(Dealership::first()->users->pluck('id')->all())->toBe([$other->id]);
 });
 
-it('attaches consultants from CSV user_emails column on top of defaults', function () {
+it('assigns users from the CSV user_emails column on top of defaults', function () {
     $extra = User::factory()->create(['email' => 'extra@example.com']);
 
     $csv = "name,user_emails\nPrime Motors,extra@example.com\n";
@@ -308,7 +306,7 @@ it('attaches default consultants to auto-created dealerships', function () {
     $this->post('/dealerships/import', ['token' => $token]);
 
     $userIds = Dealership::first()->users->pluck('id')->all();
-    expect($userIds)->toContain($this->user->id)->toContain($other->id);
+    expect($userIds)->toContain($other->id)->not->toContain($this->user->id);
 });
 
 describe('likely duplicate dealerships', function () {

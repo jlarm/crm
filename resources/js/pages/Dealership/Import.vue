@@ -349,7 +349,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                                         v-if="selectedConsultants.length === 0"
                                         class="text-xs text-slate-500"
                                     >
-                                        Importer is always attached. Add others to apply to every imported dealership.
+                                        No one picked. Imported dealerships will only be assigned to users the CSV names.
                                     </span>
                                 </div>
                             </div>
