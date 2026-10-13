@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\TitleCasesAllCapsText;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,14 @@ class Store extends Model
 
     use LogsActivity;
     use Searchable;
+    use TitleCasesAllCapsText;
+
+    /**
+     * Saved in title case when entered in all capitals.
+     *
+     * @var list<string>
+     */
+    protected array $titleCaseAttributes = ['name', 'address', 'city'];
 
     protected $fillable = [
         'user_id',

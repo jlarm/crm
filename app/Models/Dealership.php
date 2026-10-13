@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enum\DevStatus;
+use App\Models\Concerns\TitleCasesAllCapsText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +57,14 @@ class Dealership extends Model
 
     use LogsActivity;
     use Searchable;
+    use TitleCasesAllCapsText;
+
+    /**
+     * Saved in title case when entered in all capitals.
+     *
+     * @var list<string>
+     */
+    protected array $titleCaseAttributes = ['name', 'address', 'city'];
 
     protected $fillable = [
         'user_id',

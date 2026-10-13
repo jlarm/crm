@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\TitleCasesAllCapsText;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,7 @@ class Contact extends Model
 
     use LogsActivity;
     use Searchable;
+    use TitleCasesAllCapsText;
 
     /**
      * The relationships that should touch the parent model when updated.
@@ -27,6 +29,13 @@ class Contact extends Model
      * @var list<string>
      */
     protected $touches = ['tags'];
+
+    /**
+     * Saved in title case when entered in all capitals.
+     *
+     * @var list<string>
+     */
+    protected array $titleCaseAttributes = ['name', 'position'];
 
     protected $fillable = [
         'dealership_id',
