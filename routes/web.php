@@ -37,7 +37,8 @@ Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
 })->name('home');
 
-Route::redirect('/admin', '/dashboard');
+// GET only: Route::redirect answers every method, including QUERY, which Wayfinder can't type yet.
+Route::get('/admin', fn () => redirect('/dashboard'));
 Route::get('/admin/{any}', fn () => redirect('/dashboard'))->where('any', '.*');
 
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
