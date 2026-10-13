@@ -18,7 +18,7 @@ import {
     User as UserIcon,
     Users,
 } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     dealership: Dealership;
@@ -49,6 +49,21 @@ function iconFor(name: string): unknown {
     return iconMap[name] ?? ActivityIcon;
 }
 
+const PER_PAGE = 25;
+const POLL_INTERVAL_MS = 15_000;
+
+async function fetchPage(page: number): Promise<{ data: ActivityFeedItem[]; meta: ActivityFeedMeta }> {
+    const response = await fetch(
+        `/dealerships/${props.dealership.id}/activities?page=${page}&per_page=${PER_PAGE}`,
+        { headers: { Accept: 'application/json' } },
+    );
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+
+    return (await response.json()) as { data: ActivityFeedItem[]; meta: ActivityFeedMeta };
+}
+
 async function load(page = 1): Promise<void> {
     if (loading.value) {
         return;
@@ -56,15 +71,10 @@ async function load(page = 1): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-        const response = await fetch(
-            `/dealerships/${props.dealership.id}/activities?page=${page}&per_page=25`,
-            { headers: { Accept: 'application/json' } },
-        );
-        if (!response.ok) {
-            throw new Error(`Request failed: ${response.status}`);
-        }
-        const json = (await response.json()) as { data: ActivityFeedItem[]; meta: ActivityFeedMeta };
-        items.value = page === 1 ? json.data : [...items.value, ...json.data];
+        const json = await fetchPage(page);
+        // New activity shifts later pages, so skip anything already shown.
+        const known = new Set(items.value.map((item) => item.id));
+        items.value = page === 1 ? json.data : [...items.value, ...json.data.filter((item) => !known.has(item.id))];
         meta.value = json.meta;
     } catch (e) {
         error.value = e instanceof Error ? e.message : 'Failed to load activity';
@@ -106,7 +116,38 @@ function deleteLoggedActivity(progressId: number): void {
     });
 }
 
-onMounted(() => load(1));
+/**
+ * Adds activity that happened since the feed loaded (replies, edits by teammates) to the
+ * top, keeping any older pages already loaded. Skipped while the browser tab is hidden.
+ */
+async function refresh(): Promise<void> {
+    if (loading.value || document.hidden || meta.value === null) {
+        return;
+    }
+
+    try {
+        const json = await fetchPage(1);
+        const known = new Set(items.value.map((item) => item.id));
+        const fresh = json.data.filter((item) => !known.has(item.id));
+
+        if (fresh.length > 0) {
+            items.value = [...fresh, ...items.value].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+        }
+
+        meta.value = { ...meta.value, total: json.meta.total, hasMore: items.value.length < json.meta.total };
+    } catch {
+        // A missed refresh is harmless; the next one will catch up.
+    }
+}
+
+let refreshTimer: ReturnType<typeof setInterval> | undefined;
+
+onMounted(() => {
+    load(1);
+    refreshTimer = setInterval(refresh, POLL_INTERVAL_MS);
+});
+
+onUnmounted(() => clearInterval(refreshTimer));
 </script>
 
 <template>
