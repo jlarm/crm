@@ -20,9 +20,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { Dealership, DealershipEmail } from '@/pages/Dealership/types';
-import { store } from '@/routes/dealerships/emails';
-import { useForm } from '@inertiajs/vue3';
-import { Paperclip, X } from 'lucide-vue-next';
+import { draft, store } from '@/routes/dealerships/emails';
+import { useForm, useHttp } from '@inertiajs/vue3';
+import { Paperclip, Sparkles, Undo2, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -59,10 +59,67 @@ const attachmentError = computed(() => {
     return key ? errors[key] : undefined;
 });
 
+const drafter = useHttp<{ parent_id: number | null; contact_id: number | null; notes: string }, { subject: string; body: string; bodyHtml: string }>({
+    parent_id: null,
+    contact_id: null,
+    notes: '',
+});
+const draftError = ref<string | null>(null);
+/** What the rep had written before the AI draft replaced it, so it can be restored. */
+const bodyBeforeDraft = ref<string | null>(null);
+
+const canDraft = computed(() => !drafter.processing && (props.replyingTo !== null && props.replyingTo !== undefined || drafter.notes.trim() !== ''));
+
+function draftWithAi(): void {
+    draftError.value = null;
+    drafter.parent_id = form.parent_id;
+    drafter.contact_id = form.contact_id === '' ? null : Number(form.contact_id);
+
+    drafter.post(draft(props.dealership.id).url, {
+        onSuccess: (response: { subject: string; body: string; bodyHtml: string }) => {
+            bodyBeforeDraft.value = form.body;
+            form.body = response.bodyHtml;
+
+            if (!props.replyingTo || form.subject.trim() === '') {
+                form.subject = response.subject;
+            }
+        },
+        onHttpException: (response) => {
+            draftError.value = response.status === 429
+                ? 'Too many drafts in a row. Wait a minute and try again.'
+                : messageFrom(response.data) ?? "Couldn't write a draft right now. Try again, or write the email yourself.";
+        },
+    });
+}
+
+function undoDraft(): void {
+    form.body = bodyBeforeDraft.value ?? '';
+    bodyBeforeDraft.value = null;
+}
+
+function messageFrom(body: string): string | null {
+    try {
+        const parsed: unknown = JSON.parse(body);
+
+        if (parsed && typeof parsed === 'object' && 'message' in parsed && typeof parsed.message === 'string') {
+            return parsed.message;
+        }
+    } catch {
+        // Not JSON.
+    }
+
+    return null;
+}
+
 watch(open, (isOpen) => {
     if (!isOpen) {
         return;
     }
+
+    drafter.reset();
+    drafter.clearErrors();
+    draftError.value = null;
+    bodyBeforeDraft.value = null;
 
     form.reset();
     form.clearErrors();
@@ -150,6 +207,31 @@ function submit(): void {
                     <Input id="email_subject" v-model="form.subject" maxlength="255" required />
                     <InputError :message="form.errors.subject" />
                 </Field>
+
+                <div class="space-y-2 rounded-lg border border-violet-200 bg-violet-50/40 p-3 dark:border-violet-900 dark:bg-violet-950/20">
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <Input
+                            v-model="drafter.notes"
+                            maxlength="1000"
+                            :placeholder="replyingTo ? 'Anything to include? (optional) e.g. offer Tuesday or Thursday for a call' : 'What should it say? e.g. intro to our cyber risk assessment, ask for 20 minutes'"
+                            aria-label="Notes for the AI draft"
+                            @keydown.enter.prevent="canDraft && draftWithAi()"
+                        />
+                        <Button type="button" variant="outline" class="shrink-0" :disabled="!canDraft" @click="draftWithAi">
+                            <Sparkles class="h-3.5 w-3.5" />
+                            {{ drafter.processing ? 'Writing…' : replyingTo ? 'Draft reply with AI' : 'Draft with AI' }}
+                        </Button>
+                    </div>
+                    <p v-if="drafter.processing" class="text-xs text-muted-foreground">Reading the thread and writing a draft. This takes a few seconds.</p>
+                    <p v-else-if="draftError || drafter.errors.notes" class="text-xs text-red-600 dark:text-red-400">{{ draftError ?? drafter.errors.notes }}</p>
+                    <p v-else-if="bodyBeforeDraft !== null" class="flex items-center gap-2 text-xs text-muted-foreground">
+                        Draft added below. Read it and edit before sending.
+                        <button type="button" class="inline-flex items-center gap-1 font-medium text-violet-700 hover:underline dark:text-violet-300" @click="undoDraft">
+                            <Undo2 class="h-3 w-3" />
+                            Undo
+                        </button>
+                    </p>
+                </div>
 
                 <Field>
                     <FieldLabel for="email_body">Message</FieldLabel>

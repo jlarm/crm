@@ -10,6 +10,7 @@ use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
 use App\Http\Controllers\DealershipEmailAttachmentController;
 use App\Http\Controllers\DealershipEmailController;
+use App\Http\Controllers\DealershipEmailDraftController;
 use App\Http\Controllers\DealershipImportController;
 use App\Http\Controllers\DealershipLookupController;
 use App\Http\Controllers\DealershipOpportunityController;
@@ -74,6 +75,9 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::post('dealerships/{dealership}/emails', [DealershipEmailController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('dealerships.emails.store');
+    Route::post('dealerships/{dealership}/emails/draft', DealershipEmailDraftController::class)
+        ->middleware('throttle:20,1')
+        ->name('dealerships.emails.draft');
     Route::patch('dealerships/{dealership}/emails/{email}/read', [DealershipEmailController::class, 'markRead'])->name('dealerships.emails.read');
     Route::get('dealerships/{dealership}/email-attachments/{attachment}', [DealershipEmailAttachmentController::class, 'show'])->name('dealerships.emails.attachments.show');
 
