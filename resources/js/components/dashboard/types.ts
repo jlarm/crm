@@ -94,3 +94,19 @@ export interface WeeklyDigest {
     moves: WeeklyDigestMove[];
     quietDeals: WeeklyDigestQuietDeal[];
 }
+
+export interface EmailReplyAwaiting {
+    id: number;
+    threadId: number;
+    dealership: { id: number; name: string };
+    from: string;
+    subject: string;
+    snippet: string;
+    receivedAt: string;
+    unread: boolean;
+}
+
+export interface EmailRepliesAwaiting {
+    total: number;
+    items: EmailReplyAwaiting[];
+}

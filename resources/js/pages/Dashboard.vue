@@ -2,6 +2,7 @@
 import { type Dealership, createColumns } from '@/components/companies/columns';
 import DataTable from '@/components/companies/DataTable.vue';
 import DashboardCardMenu from '@/components/dashboard/DashboardCardMenu.vue';
+import DashboardEmailReplies from '@/components/dashboard/DashboardEmailReplies.vue';
 import DashboardGoingQuiet from '@/components/dashboard/DashboardGoingQuiet.vue';
 import DashboardMetricRibbon from '@/components/dashboard/DashboardMetricRibbon.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
@@ -12,6 +13,7 @@ import DashboardWeeklyDigest from '@/components/dashboard/DashboardWeeklyDigest.
 import type {
     ActivitySummary,
     BookSummary,
+    EmailRepliesAwaiting,
     PipelineSummary,
     QuietDealership,
     TaskStats,
@@ -25,7 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardCards } from '@/composables/useDashboardCards';
 import { useTableFilters } from '@/composables/useTableFilters';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, usePoll } from '@inertiajs/vue3';
 import { ListPlus, Plus, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -65,6 +67,7 @@ interface Props {
     };
     bookSummary: BookSummary;
     goingQuiet: QuietDealership[];
+    emailReplies: EmailRepliesAwaiting;
     pipeline: PipelineSummary;
     activity: ActivitySummary;
     weeklyDigest: WeeklyDigest;
@@ -188,6 +191,10 @@ const { hidden: hiddenCards, isVisible } = useDashboardCards();
 
 const showsTaskBoard = computed(() => isVisible('taskBoard'));
 const showsPipeline = computed(() => isVisible('pipeline'));
+// Picks up new replies from contacts without reloading the dashboard.
+usePoll(10_000, { only: ['emailReplies'] }, { mode: 'rest' });
+
+const showsEmailReplies = computed(() => isVisible('emailReplies') && props.emailReplies.total > 0);
 const showsGoingQuiet = computed(() => isVisible('goingQuiet') && props.goingQuiet.length > 0);
 const showsRecentActivity = computed(() => isVisible('recentActivity'));
 
@@ -260,6 +267,8 @@ const columns = createColumns(handleSort, () => currentSorting.value);
             :digest="weeklyDigest"
             :summary="weeklyDigestSummary"
         />
+
+        <DashboardEmailReplies v-if="showsEmailReplies" :replies="emailReplies" />
 
         <div v-if="showsTaskBoard || showsPipeline" class="grid gap-6 xl:grid-cols-3">
             <DashboardTaskBoard

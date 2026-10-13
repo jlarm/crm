@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Dealership;
+use App\Models\DealershipEmail;
 use App\Models\Task;
 use App\Models\User;
 
@@ -15,6 +16,24 @@ beforeEach(function () {
 });
 
 describe('Dashboard index', function () {
+    it('lists email replies waiting on the user', function () {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id]);
+        $thread = DealershipEmail::factory()->create(['dealership_id' => $dealership->id, 'user_id' => $this->user->id]);
+        DealershipEmail::factory()->inbound()->create([
+            'dealership_id' => $dealership->id,
+            'user_id' => $this->user->id,
+            'parent_id' => $thread->id,
+            'subject' => 'Re: Renewal options',
+        ]);
+
+        get(route('dashboard'))
+            ->assertInertia(fn ($page) => $page
+                ->where('emailReplies.total', 1)
+                ->where('emailReplies.items.0.subject', 'Re: Renewal options')
+                ->where('emailReplies.items.0.threadId', $thread->id)
+            );
+    });
+
     it('renders the Dashboard component with required props', function () {
         get(route('dashboard'))
             ->assertOk()

@@ -3,9 +3,9 @@ import ComposeEmailDialog from '@/components/dealership/show/ComposeEmailDialog.
 import { Button } from '@/components/ui/button';
 import type { Dealership, DealershipEmail, EmailStatusTone, EmailThread } from '@/pages/Dealership/types';
 import { read } from '@/routes/dealerships/emails';
-import { router, usePoll } from '@inertiajs/vue3';
+import { router, usePage, usePoll } from '@inertiajs/vue3';
 import { ChevronDown, CornerUpLeft, Inbox, Mail, Paperclip, Plus } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 const props = defineProps<{
     dealership: Dealership;
@@ -18,12 +18,16 @@ const props = defineProps<{
  * Only the email list is reloaded; polling stops when the tab closes, slows down in a
  * background browser tab, and waits for each request to finish before the next.
  */
-usePoll(10_000, { only: ['emailThreads', 'unreadReplyCount'] }, { mode: 'rest' });
+usePoll(10_000, { only: ['emailThreads'] }, { mode: 'rest' });
 
 const isComposeOpen = ref(false);
 const replyingTo = ref<DealershipEmail | null>(null);
 const replyContactId = ref<number | null>(null);
 const expandedThreadId = ref<number | null>(null);
+
+/** A thread named in ?thread= (e.g. from the dashboard's Replies to answer) opens once the emails load. */
+const page = usePage();
+let threadToOpen: number | null = Number(new URL(page.url, 'http://localhost').searchParams.get('thread')) || null;
 
 const toneClasses: Record<EmailStatusTone, string> = {
     success: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-950/40 dark:text-emerald-300',
@@ -112,6 +116,23 @@ function formatDateTime(value: string): string {
 function formatSize(bytes: number): string {
     return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
+
+watch(
+    () => props.threads,
+    (threads) => {
+        const thread = threadToOpen === null ? undefined : threads?.find((candidate) => candidate[0].id === threadToOpen);
+
+        if (!thread) {
+            return;
+        }
+
+        threadToOpen = null;
+        expandedThreadId.value = thread[0].id;
+        markRead(thread);
+        nextTick(() => document.getElementById(`email-thread-${thread[0].id}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
@@ -150,7 +171,7 @@ function formatSize(bytes: number): string {
         </div>
 
         <ul v-else class="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
-            <li v-for="thread in threads" :key="thread[0].id">
+            <li v-for="thread in threads" :id="`email-thread-${thread[0].id}`" :key="thread[0].id" class="scroll-mt-20">
                 <button
                     type="button"
                     class="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-900/50"
