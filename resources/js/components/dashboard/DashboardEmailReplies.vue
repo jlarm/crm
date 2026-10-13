@@ -3,7 +3,7 @@ import DashboardPanel from '@/components/dashboard/DashboardPanel.vue';
 import type { EmailRepliesAwaiting, EmailReplyAwaiting } from '@/components/dashboard/types';
 import { show } from '@/routes/dealerships';
 import { Link } from '@inertiajs/vue3';
-import { Mail } from 'lucide-vue-next';
+import { Mail, MailCheck } from 'lucide-vue-next';
 
 defineProps<{
     replies: EmailRepliesAwaiting;
@@ -38,12 +38,18 @@ function receivedLabel(iso: string): string {
     <DashboardPanel
         title="Replies to answer"
         :description="
-            replies.total === 1
-                ? 'A contact wrote back and is waiting on you'
-                : `${replies.total} contacts wrote back and are waiting on you`
+            replies.total === 0
+                ? 'Contacts who write back to your emails show up here'
+                : replies.total === 1
+                  ? 'A contact wrote back and is waiting on you'
+                  : `${replies.total} contacts wrote back and are waiting on you`
         "
     >
-        <ul class="divide-y divide-border">
+        <div v-if="replies.total === 0" class="flex items-center gap-3 px-5 py-6 text-sm text-muted-foreground">
+            <MailCheck class="size-5 shrink-0 text-emerald-500" aria-hidden="true" />
+            You're all caught up. No replies are waiting on you.
+        </div>
+        <ul v-else class="divide-y divide-border">
             <li v-for="reply in replies.items" :key="reply.id">
                 <Link
                     :href="threadUrl(reply)"

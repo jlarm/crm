@@ -271,6 +271,18 @@ describe('BuildActivitySummary', function (): void {
             ->and($recent[0]['author'])->toBe($this->user->name);
     });
 
+    it('shows the five most recent entries', function (): void {
+        $dealership = Dealership::factory()->create(['user_id' => $this->user->id, 'status' => 'active']);
+
+        foreach (range(1, 7) as $daysAgo) {
+            Progress::create(['user_id' => $this->user->id, 'dealership_id' => $dealership->id, 'details' => "Contact {$daysAgo}", 'date' => now()->subDays($daysAgo)->toDateString()]);
+        }
+
+        $recent = (new BuildActivitySummary)($this->user)['recent'];
+
+        expect(array_column($recent, 'details'))->toBe(['Contact 1', 'Contact 2', 'Contact 3', 'Contact 4', 'Contact 5']);
+    });
+
     it('ignores entries outside the user\'s book', function (): void {
         $someoneElses = Dealership::factory()->create(['user_id' => User::factory(), 'status' => 'active']);
 

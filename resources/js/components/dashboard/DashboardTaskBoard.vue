@@ -131,7 +131,7 @@ function dueClass(task: Task): string {
 
                 <button
                     type="button"
-                    class="grid min-w-0 flex-1 grid-cols-1 items-center gap-x-4 gap-y-0.5 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_9rem_7.5rem]"
+                    class="grid min-w-0 flex-1 grid-cols-1 items-center gap-x-4 gap-y-0.5 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none @xl:grid-cols-[minmax(0,1fr)_9rem_7.5rem]"
                     @click="emit('editTask', task)"
                 >
                     <span class="min-w-0">
@@ -152,7 +152,7 @@ function dueClass(task: Task): string {
                         />
                         {{ task.typeLabel }}
                     </span>
-                    <span class="text-xs font-medium sm:text-right" :class="dueClass(task)">
+                    <span class="text-xs font-medium @xl:text-right" :class="dueClass(task)">
                         {{ dueLabel(task) }}
                     </span>
                 </button>

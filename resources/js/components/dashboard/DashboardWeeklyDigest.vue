@@ -68,7 +68,7 @@ function quietLabel(days: number | null): string {
                 <span>{{ summary }}</span>
             </p>
 
-            <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <dl class="grid grid-cols-2 gap-3 @lg:grid-cols-3 @3xl:grid-cols-5">
                 <div v-for="stat in stats" :key="stat.label" class="rounded-lg border border-border px-3 py-2.5">
                     <dt class="text-xs text-muted-foreground">{{ stat.label }}</dt>
                     <dd class="mt-0.5 flex items-baseline gap-1.5">
@@ -88,7 +88,7 @@ function quietLabel(days: number | null): string {
                 No deal movement or logged activity this week.
             </p>
 
-            <div v-else class="grid gap-5 lg:grid-cols-2">
+            <div v-else class="grid gap-5 @3xl:grid-cols-2">
                 <div v-if="digest.moves.length > 0">
                     <h3 class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">What moved</h3>
                     <ul class="divide-y divide-border">
@@ -103,7 +103,7 @@ function quietLabel(days: number | null): string {
                                 </p>
                             </div>
                             <div class="flex shrink-0 items-center gap-2">
-                                <span v-if="move.from" class="hidden items-center gap-1 text-xs text-muted-foreground sm:inline-flex">
+                                <span v-if="move.from" class="hidden items-center gap-1 text-xs text-muted-foreground @md:inline-flex">
                                     {{ move.from.label }} <ArrowRight class="size-3" /> {{ move.to.label }}
                                 </span>
                                 <span class="rounded-md px-2 py-0.5 text-xs font-medium" :class="directionClass[move.direction]">
@@ -120,7 +120,7 @@ function quietLabel(days: number | null): string {
                         <li v-for="deal in digest.quietDeals" :key="deal.id">
                             <Link
                                 :href="show(deal.dealership.id)"
-                                class="flex items-center justify-between gap-3 py-2 transition-colors hover:text-foreground"
+                                class="flex flex-col gap-0.5 py-2 transition-colors hover:text-foreground @md:flex-row @md:items-center @md:justify-between @md:gap-3"
                             >
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-foreground">{{ deal.name }}</p>
@@ -128,7 +128,7 @@ function quietLabel(days: number | null): string {
                                         {{ deal.dealership.name }} · {{ deal.stageLabel }}
                                     </p>
                                 </div>
-                                <div class="shrink-0 text-right">
+                                <div class="flex shrink-0 items-baseline gap-2 @md:block @md:text-right">
                                     <p class="text-xs text-destructive">{{ quietLabel(deal.daysSinceActivity) }}</p>
                                     <p v-if="deal.estimatedValue > 0" class="text-xs text-muted-foreground tabular-nums">
                                         {{ formatCompactCurrency(deal.estimatedValue) }}

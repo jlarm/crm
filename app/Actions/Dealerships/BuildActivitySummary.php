@@ -20,7 +20,7 @@ final class BuildActivitySummary
      *
      * @return array{thisWeek: int, lastWeek: int, recent: list<array{id: int, details: string, date: string, category: string|null, author: string|null, dealership: array{id: int, name: string}|null}>}
      */
-    public function __invoke(User $user, int $limit = 8): array
+    public function __invoke(User $user, int $limit = 5): array
     {
         $today = now()->startOfDay();
         $weekStart = $today->copy()->subDays(6)->toDateString();

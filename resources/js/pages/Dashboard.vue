@@ -3,6 +3,7 @@ import { type Dealership, createColumns } from '@/components/companies/columns';
 import DataTable from '@/components/companies/DataTable.vue';
 import DashboardCardMenu from '@/components/dashboard/DashboardCardMenu.vue';
 import DashboardEmailReplies from '@/components/dashboard/DashboardEmailReplies.vue';
+import DashboardLayoutItem from '@/components/dashboard/DashboardLayoutItem.vue';
 import DashboardGoingQuiet from '@/components/dashboard/DashboardGoingQuiet.vue';
 import DashboardMetricRibbon from '@/components/dashboard/DashboardMetricRibbon.vue';
 import DashboardPagination from '@/components/dashboard/DashboardPagination.vue';
@@ -24,11 +25,12 @@ import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import TaskFormModal from '@/components/tasks/TaskFormModal.vue';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useDashboardCards } from '@/composables/useDashboardCards';
+import { dashboardCards, useDashboardCards } from '@/composables/useDashboardCards';
+import { allowedWidths, useDashboardLayout, type DashboardSectionKey } from '@/composables/useDashboardLayout';
 import { useTableFilters } from '@/composables/useTableFilters';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head, Link, usePage, usePoll } from '@inertiajs/vue3';
-import { ListPlus, Plus, Upload } from 'lucide-vue-next';
+import { Check, LayoutGrid, ListPlus, Plus, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -189,14 +191,30 @@ const currentSorting = computed(() => ({
 
 const { hidden: hiddenCards, isVisible } = useDashboardCards();
 
-const showsTaskBoard = computed(() => isVisible('taskBoard'));
-const showsPipeline = computed(() => isVisible('pipeline'));
 // Picks up new replies from contacts without reloading the dashboard.
 usePoll(10_000, { only: ['emailReplies'] }, { mode: 'rest' });
 
-const showsEmailReplies = computed(() => isVisible('emailReplies') && props.emailReplies.total > 0);
+const showsEmailReplies = computed(() => isVisible('emailReplies'));
 const showsGoingQuiet = computed(() => isVisible('goingQuiet') && props.goingQuiet.length > 0);
-const showsRecentActivity = computed(() => isVisible('recentActivity'));
+
+const { order, widthOf, setWidth, moveTo, moveBy, reset: resetLayout, isCustomised } = useDashboardLayout();
+const arranging = ref(false);
+
+/** Sections that are switched on and have something to show, in the user's order. */
+const visibleSections = computed<DashboardSectionKey[]>(() =>
+    order.value.filter((key) => {
+        switch (key) {
+            case 'emailReplies':
+                return showsEmailReplies.value;
+            case 'goingQuiet':
+                return showsGoingQuiet.value;
+            default:
+                return isVisible(key);
+        }
+    }),
+);
+
+const sectionLabels = Object.fromEntries(dashboardCards.map((card) => [card.key, card.label])) as Record<DashboardSectionKey, string>;
 
 const scopeOptions = [
     { value: 'mine', label: 'Mine' },
@@ -234,6 +252,19 @@ const columns = createColumns(handleSort, () => currentSorting.value);
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
+                <template v-if="arranging">
+                    <Button v-if="isCustomised()" type="button" variant="ghost" class="h-10" @click="resetLayout">
+                        Reset layout
+                    </Button>
+                    <Button type="button" class="h-10" @click="arranging = false">
+                        <Check class="size-4" />
+                        Done
+                    </Button>
+                </template>
+                <Button v-else type="button" variant="outline" class="h-10" @click="arranging = true">
+                    <LayoutGrid class="size-4" />
+                    Arrange
+                </Button>
                 <DashboardCardMenu />
                 <Button type="button" variant="outline" class="h-10" @click="openTaskCreate">
                     <ListPlus class="size-4" />
@@ -262,107 +293,104 @@ const columns = createColumns(handleSort, () => currentSorting.value);
             :activity="activity"
         />
 
-        <DashboardWeeklyDigest
-            v-if="isVisible('weeklyDigest')"
-            :digest="weeklyDigest"
-            :summary="weeklyDigestSummary"
-        />
+        <!-- Cards in a row stretch to the tallest one, so the grid has no holes. -->
+        <div class="grid gap-6 xl:grid-cols-3">
+            <DashboardLayoutItem
+                v-for="(key, index) in visibleSections"
+                :key="key"
+                :section-key="key"
+                :label="sectionLabels[key]"
+                :width="widthOf(key)"
+                :allowed-widths="allowedWidths[key]"
+                :arranging="arranging"
+                :is-first="index === 0"
+                :is-last="index === visibleSections.length - 1"
+                @set-width="(width) => setWidth(key, width)"
+                @move-by="(offset) => moveBy(key, offset, visibleSections)"
+                @drop="(dragged, place) => moveTo(dragged, key, place)"
+            >
+                <DashboardWeeklyDigest
+                    v-if="key === 'weeklyDigest'"
+                    :digest="weeklyDigest"
+                    :summary="weeklyDigestSummary"
+                />
+                <DashboardEmailReplies v-else-if="key === 'emailReplies'" :replies="emailReplies" />
+                <DashboardTaskBoard
+                    v-else-if="key === 'taskBoard'"
+                    :tasks="upcomingTasks"
+                    @create-task="openTaskCreate"
+                    @edit-task="openTaskEdit"
+                />
+                <DashboardPipeline v-else-if="key === 'pipeline'" :pipeline="pipeline" />
+                <DashboardGoingQuiet v-else-if="key === 'goingQuiet'" :dealerships="goingQuiet" />
+                <DashboardRecentActivity v-else-if="key === 'recentActivity'" :entries="activity.recent" />
+                <section v-else-if="key === 'dealerships'" id="dealerships" class="scroll-mt-20">
+                        <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold tracking-tight text-foreground">Dealerships</h2>
+                                <p class="text-sm text-muted-foreground">
+                                    {{ bookLine ?? 'Everything you are responsible for' }}
+                                </p>
+                            </div>
 
-        <DashboardEmailReplies v-if="showsEmailReplies" :replies="emailReplies" />
+                            <div
+                                role="radiogroup"
+                                aria-label="Dealership scope"
+                                class="inline-flex rounded-lg border border-border bg-card p-0.5"
+                            >
+                                <button
+                                    v-for="option in scopeOptions"
+                                    :key="option.value"
+                                    type="button"
+                                    role="radio"
+                                    :aria-checked="filters.scope === option.value"
+                                    class="h-8 rounded-md px-3.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                    :class="
+                                        filters.scope === option.value
+                                            ? 'bg-primary font-medium text-primary-foreground'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    "
+                                    @click="filters.scope = option.value"
+                                >
+                                    {{ option.label }}
+                                </button>
+                            </div>
+                        </div>
 
-        <div v-if="showsTaskBoard || showsPipeline" class="grid gap-6 xl:grid-cols-3">
-            <DashboardTaskBoard
-                v-if="showsTaskBoard"
-                :class="showsPipeline ? 'xl:col-span-2' : 'xl:col-span-3'"
-                :tasks="upcomingTasks"
-                @create-task="openTaskCreate"
-                @edit-task="openTaskEdit"
-            />
-            <DashboardPipeline
-                v-if="showsPipeline"
-                :class="showsTaskBoard ? '' : 'xl:col-span-3'"
-                :pipeline="pipeline"
-            />
+                        <div class="mb-3">
+                            <DealershipFilters
+                                v-model="filters"
+                                :statuses="filterOptions.statuses"
+                                :ratings="filterOptions.ratings"
+                                :types="filterOptions.types"
+                                @reset="resetFilters"
+                            />
+                        </div>
+
+                        <div v-if="isLoadingData" class="space-y-2">
+                            <Skeleton class="h-11 w-full rounded-xl" />
+                            <Skeleton v-for="i in 10" :key="i" class="h-12 w-full" />
+                        </div>
+
+                        <template v-else>
+                            <DataTable
+                                :columns="columns"
+                                :data="dealerships.data"
+                                :sorting="currentSorting"
+                                :row-href="(d) => `/dealerships/${d.id}`"
+                            />
+
+                            <DashboardPagination
+                                :current-page="dealerships.current_page"
+                                :last-page="dealerships.last_page"
+                                :from="dealerships.from"
+                                :to="dealerships.to"
+                                :total="dealerships.total"
+                                :links="dealerships.links"
+                            />
+                        </template>
+                </section>
+            </DashboardLayoutItem>
         </div>
-
-        <div v-if="showsGoingQuiet || showsRecentActivity" class="grid items-start gap-6 xl:grid-cols-3">
-            <DashboardGoingQuiet
-                v-if="showsGoingQuiet"
-                :class="showsRecentActivity ? 'xl:col-span-2' : 'xl:col-span-3'"
-                :dealerships="goingQuiet"
-            />
-            <DashboardRecentActivity
-                v-if="showsRecentActivity"
-                :class="showsGoingQuiet ? '' : 'xl:col-span-3'"
-                :entries="activity.recent"
-            />
-        </div>
-
-        <section v-if="isVisible('dealerships')" id="dealerships" class="scroll-mt-20 pt-2">
-            <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                    <h2 class="text-lg font-semibold tracking-tight text-foreground">Dealerships</h2>
-                    <p class="text-sm text-muted-foreground">
-                        {{ bookLine ?? 'Everything you are responsible for' }}
-                    </p>
-                </div>
-
-                <div
-                    role="radiogroup"
-                    aria-label="Dealership scope"
-                    class="inline-flex rounded-lg border border-border bg-card p-0.5"
-                >
-                    <button
-                        v-for="option in scopeOptions"
-                        :key="option.value"
-                        type="button"
-                        role="radio"
-                        :aria-checked="filters.scope === option.value"
-                        class="h-8 rounded-md px-3.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        :class="
-                            filters.scope === option.value
-                                ? 'bg-primary font-medium text-primary-foreground'
-                                : 'text-muted-foreground hover:text-foreground'
-                        "
-                        @click="filters.scope = option.value"
-                    >
-                        {{ option.label }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <DealershipFilters
-                    v-model="filters"
-                    :statuses="filterOptions.statuses"
-                    :ratings="filterOptions.ratings"
-                    :types="filterOptions.types"
-                    @reset="resetFilters"
-                />
-            </div>
-
-            <div v-if="isLoadingData" class="space-y-2">
-                <Skeleton class="h-11 w-full rounded-xl" />
-                <Skeleton v-for="i in 10" :key="i" class="h-12 w-full" />
-            </div>
-
-            <template v-else>
-                <DataTable
-                    :columns="columns"
-                    :data="dealerships.data"
-                    :sorting="currentSorting"
-                    :row-href="(d) => `/dealerships/${d.id}`"
-                />
-
-                <DashboardPagination
-                    :current-page="dealerships.current_page"
-                    :last-page="dealerships.last_page"
-                    :from="dealerships.from"
-                    :to="dealerships.to"
-                    :total="dealerships.total"
-                    :links="dealerships.links"
-                />
-            </template>
-        </section>
     </div>
 </template>

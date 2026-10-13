@@ -40,12 +40,12 @@ function placeLabel(dealership: QuietDealership): string {
         title="Going quiet"
         description="Hot and warm dealerships waiting the longest for a logged contact"
     >
-        <ul class="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0">
+        <ul class="grid divide-y divide-border @xl:grid-cols-2 @xl:divide-y-0">
             <li
                 v-for="(dealership, index) in dealerships"
                 :key="dealership.id"
-                class="border-border sm:border-b"
-                :class="index % 2 === 0 ? 'sm:border-r' : ''"
+                class="border-border @xl:border-b"
+                :class="index % 2 === 0 ? '@xl:border-r' : ''"
             >
                 <Link
                     :href="`/dealerships/${dealership.id}`"
