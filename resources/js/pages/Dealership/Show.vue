@@ -14,7 +14,7 @@ import { show } from '@/routes/dealerships';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
 import type { Dealership, DealershipShowTab, EmailThread, ProgressCategory, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { nextTick, ref, watch } from 'vue';
 
@@ -50,7 +50,17 @@ watch(
     { immediate: true },
 );
 
-const activeTab = ref<DealershipShowTab>('details');
+const TABS: DealershipShowTab[] = ['details', 'stores', 'contacts', 'tasks', 'opportunities', 'emails', 'activity'];
+
+/** The tab named in ?tab=, so a refresh, a shared link or a redirect back after saving lands on the same tab. */
+function tabFromUrl(url: string): DealershipShowTab {
+    const tab = new URL(url, 'http://localhost').searchParams.get('tab');
+
+    return TABS.includes(tab as DealershipShowTab) ? (tab as DealershipShowTab) : 'details';
+}
+
+const page = usePage();
+const activeTab = ref<DealershipShowTab>(tabFromUrl(page.url));
 const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     details: 0,
     stores: 0,
@@ -73,6 +83,14 @@ function setActiveTab(tab: DealershipShowTab): void {
     tabScrollPositions.value[activeTab.value] = window.scrollY;
     const targetScrollTop = tabScrollPositions.value[tab] ?? window.scrollY;
     activeTab.value = tab;
+
+    const url = new URL(page.url, window.location.origin);
+    if (tab === 'details') {
+        url.searchParams.delete('tab');
+    } else {
+        url.searchParams.set('tab', tab);
+    }
+    router.replace({ url: url.pathname + url.search, preserveScroll: true, preserveState: true });
 
     nextTick(() => {
         requestAnimationFrame(() => {
