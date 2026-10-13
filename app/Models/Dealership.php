@@ -181,6 +181,14 @@ class Dealership extends Model
     }
 
     /**
+     * @return HasMany<DealershipEmail, $this>
+     */
+    public function emails(): HasMany
+    {
+        return $this->hasMany(DealershipEmail::class);
+    }
+
+    /**
      * @return HasMany<SentEmail, $this>
      */
     public function sentEmails(): HasMany

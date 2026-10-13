@@ -22,6 +22,8 @@ return [
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
         'scheme' => 'https',
         'webhook_signing_key' => env('MAILGUN_WEBHOOK_SIGNING_KEY'),
+        // Replies to dealership emails go to reply+{token}@ this domain, which a Mailgun route posts back to the CRM.
+        'inbound_domain' => env('MAILGUN_INBOUND_DOMAIN'),
     ],
 
     'postmark' => [

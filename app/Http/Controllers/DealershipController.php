@@ -8,12 +8,16 @@ use App\Enum\TaskPriority;
 use App\Enum\TaskType;
 use App\Http\Requests\DealershipStoreRequest;
 use App\Http\Requests\DealershipUpdateRequest;
+use App\Http\Resources\DealershipEmailResource;
 use App\Http\Resources\DealershipShowResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Dealership;
+use App\Models\DealershipEmail;
 use App\Models\ProgressCategory;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,6 +80,7 @@ final class DealershipController extends Controller
                 'priorities' => TaskPriority::options(),
             ],
             'progressCategories' => ProgressCategory::query()->select('id', 'name')->orderBy('id')->get(),
+            'emailThreads' => Inertia::defer(fn (): array => $this->emailThreads($dealership)),
         ]);
     }
 
@@ -92,5 +97,34 @@ final class DealershipController extends Controller
         }
 
         return back()->with('success', 'Dealership updated successfully.');
+    }
+
+    /**
+     * Each thread is the email that started it plus the replies on both sides, oldest first.
+     *
+     * @return list<list<array<string, mixed>>>
+     */
+    private function emailThreads(Dealership $dealership): array
+    {
+        $emails = $dealership->emails()
+            ->with([
+                'contact:id,name',
+                'user:id,name',
+                'attachments',
+                'events' => fn (HasMany $query) => $query->orderBy('occurred_at'),
+            ])
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+
+        return $emails
+            ->groupBy(fn (DealershipEmail $email): int => $email->parent_id ?? $email->id)
+            ->sortByDesc(fn (Collection $thread): string => $thread->last()->created_at->toIso8601String())
+            ->map(fn (Collection $thread): array => $thread
+                ->map(fn (DealershipEmail $email): array => DealershipEmailResource::make($email)->resolve())
+                ->values()
+                ->all())
+            ->values()
+            ->all();
     }
 }

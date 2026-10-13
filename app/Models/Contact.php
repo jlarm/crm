@@ -59,6 +59,14 @@ class Contact extends Model
     }
 
     /**
+     * @return HasMany<DealershipEmail, $this>
+     */
+    public function emails(): HasMany
+    {
+        return $this->hasMany(DealershipEmail::class);
+    }
+
+    /**
      * @return BelongsToMany<Tag, $this>
      */
     public function tags(): BelongsToMany

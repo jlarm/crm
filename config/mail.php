@@ -59,6 +59,21 @@ return [
             // ],
         ],
 
+        // Emails reps send from a dealership, and contacts' replies forwarded to them.
+        // Kept apart from the default mailer so these go through the autorisknow.com
+        // Mailgun domain while everything else keeps sending as it does today.
+        'dealership' => [
+            'transport' => env('DEALERSHIP_MAIL_TRANSPORT') ?: (env('MAILGUN_SECRET') ? 'mailgun' : 'log'),
+            'domain' => env('MAILGUN_DOMAIN'),
+            'secret' => env('MAILGUN_SECRET'),
+            'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+            'scheme' => 'https',
+            'from' => [
+                'address' => env('DEALERSHIP_MAIL_FROM_ADDRESS', 'crm@m.autorisknow.com'),
+                'name' => env('DEALERSHIP_MAIL_FROM_NAME', 'ARMP CRM'),
+            ],
+        ],
+
         'postmark' => [
             'transport' => 'postmark',
             // 'client' => [

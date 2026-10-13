@@ -7,11 +7,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealershipActivityController;
 use App\Http\Controllers\DealershipContactController;
 use App\Http\Controllers\DealershipController;
+use App\Http\Controllers\DealershipEmailAttachmentController;
+use App\Http\Controllers\DealershipEmailController;
 use App\Http\Controllers\DealershipImportController;
 use App\Http\Controllers\DealershipLookupController;
 use App\Http\Controllers\DealershipOpportunityController;
 use App\Http\Controllers\DealershipProgressController;
 use App\Http\Controllers\DealershipStoreController;
+use App\Http\Controllers\MailgunInboundController;
 use App\Http\Controllers\MailgunWebhookController;
 use App\Http\Controllers\OpportunityActivityAnalysisController;
 use App\Http\Controllers\OpportunityActivityController;
@@ -37,6 +40,8 @@ Route::get('/admin/{any}', fn () => redirect('/dashboard'))->where('any', '.*');
 
 Route::post('/webhooks/mailgun', [MailgunWebhookController::class, 'handleEvent'])
     ->name('mailgun.webhook');
+Route::post('/webhooks/mailgun/inbound', MailgunInboundController::class)
+    ->name('mailgun.inbound');
 
 Route::get('/track/open/{message_id}', [MailgunWebhookController::class, 'trackOpen'])
     ->name('mailgun.open-track');
@@ -64,6 +69,11 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::get('dealerships/{dealership}/activities', [DealershipActivityController::class, 'index'])->name('dealerships.activities.index');
     Route::post('dealerships/{dealership}/progress', [DealershipProgressController::class, 'store'])->name('dealerships.progress.store');
     Route::delete('dealerships/{dealership}/progress/{progress}', [DealershipProgressController::class, 'destroy'])->name('dealerships.progress.destroy');
+
+    Route::post('dealerships/{dealership}/emails', [DealershipEmailController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('dealerships.emails.store');
+    Route::get('dealerships/{dealership}/email-attachments/{attachment}', [DealershipEmailAttachmentController::class, 'show'])->name('dealerships.emails.attachments.show');
 
     Route::post('dealerships/{dealership}/opportunities', [DealershipOpportunityController::class, 'store'])->name('dealerships.opportunities.store');
     Route::put('dealerships/{dealership}/opportunities/{opportunity}', [DealershipOpportunityController::class, 'update'])->name('dealerships.opportunities.update');

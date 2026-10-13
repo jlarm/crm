@@ -1,4 +1,4 @@
-export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks' | 'opportunities' | 'activity';
+export type DealershipShowTab = 'details' | 'stores' | 'contacts' | 'tasks' | 'opportunities' | 'emails' | 'activity';
 
 export interface ActivityFeedItem {
     id: string;
@@ -108,3 +108,49 @@ export interface CallNoteAnalysis {
     rating: { value: string; label: string; reason: string } | null;
     newContacts: { name: string; position: string; email: string; phone: string }[];
 }
+
+export type EmailStatusTone = 'success' | 'neutral' | 'warning' | 'danger';
+
+export interface EmailAttachment {
+    id: number;
+    filename: string;
+    size: number;
+    url: string;
+}
+
+export interface EmailEvent {
+    id: number;
+    event: string;
+    severity: string | null;
+    description: string | null;
+    occurredAt: string;
+}
+
+export interface DealershipEmail {
+    id: number;
+    parentId: number | null;
+    direction: 'outbound' | 'inbound';
+    from: { email: string; name: string | null };
+    to: string;
+    contact: { id: number; name: string } | null;
+    sentBy: { id: number; name: string } | null;
+    subject: string;
+    body: string;
+    /** Sanitized HTML of an email sent from the CRM; null for replies and older plain-text emails. */
+    bodyHtml: string | null;
+    status: string;
+    statusLabel: string;
+    statusTone: EmailStatusTone;
+    statusReason: string | null;
+    statusDetail: string | null;
+    sentAt: string | null;
+    deliveredAt: string | null;
+    openedAt: string | null;
+    failedAt: string | null;
+    createdAt: string;
+    attachments: EmailAttachment[];
+    events: EmailEvent[];
+}
+
+/** The email that started a conversation, then every reply on both sides, oldest first. */
+export type EmailThread = DealershipEmail[];

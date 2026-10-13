@@ -2,6 +2,7 @@
 import DealershipActivityTab from '@/components/dealership/show/DealershipActivityTab.vue';
 import DealershipContactsTab from '@/components/dealership/show/DealershipContactsTab.vue';
 import DealershipDetailsTab from '@/components/dealership/show/DealershipDetailsTab.vue';
+import DealershipEmailsTab from '@/components/dealership/show/DealershipEmailsTab.vue';
 import DealershipOpportunitiesTab from '@/components/dealership/show/DealershipOpportunitiesTab.vue';
 import DealershipShowTabs from '@/components/dealership/show/DealershipShowTabs.vue';
 import DealershipStoresTab from '@/components/dealership/show/DealershipStoresTab.vue';
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useRecentItems } from '@/composables/useRecentItems';
 import { show } from '@/routes/dealerships';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
-import type { Dealership, DealershipShowTab, ProgressCategory, User } from '@/pages/Dealership/types';
+import type { Dealership, DealershipShowTab, EmailThread, ProgressCategory, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
 import { Head } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
@@ -26,6 +27,8 @@ interface Props {
         priorities: FilterOption[];
     };
     progressCategories: ProgressCategory[];
+    /** Deferred: undefined until loaded. */
+    emailThreads?: EmailThread[];
 }
 
 const props = defineProps<Props>();
@@ -54,6 +57,7 @@ const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     contacts: 0,
     tasks: 0,
     opportunities: 0,
+    emails: 0,
     activity: 0,
 });
 
@@ -143,6 +147,12 @@ function setActiveTab(tab: DealershipShowTab): void {
         <DealershipOpportunitiesTab
             v-if="activeTab === 'opportunities'"
             :dealership="dealership"
+        />
+
+        <DealershipEmailsTab
+            v-if="activeTab === 'emails'"
+            :dealership="dealership"
+            :threads="emailThreads"
         />
 
         <DealershipActivityTab

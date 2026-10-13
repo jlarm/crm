@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enum\EmailDirection;
 use App\Models\Contact;
 use App\Models\Dealership;
+use App\Models\DealershipEmail;
 use App\Models\Opportunity;
 use App\Models\OpportunityActivity;
 use App\Models\Progress;
@@ -86,9 +88,28 @@ final class DealershipActivityController extends Controller
             ->get()
             ->map(fn (Progress $progress): array => $this->mapProgress($progress));
 
+        // Sent emails already show up through the Email touchpoint logged when they're sent.
+        $emailReplies = DealershipEmail::query()
+            ->with('contact:id,name')
+            ->where('dealership_id', $dealership->id)
+            ->where('direction', EmailDirection::Inbound)
+            ->latest()
+            ->limit(200)
+            ->get()
+            ->map(fn (DealershipEmail $reply): array => [
+                'id' => 'email_'.$reply->id,
+                'category' => 'email',
+                'icon' => 'email',
+                'title' => sprintf('%s replied: %s', $reply->contact->name ?? $reply->from_name ?? $reply->from_email, $reply->subject),
+                'description' => mb_strlen($reply->body_text) > 280 ? mb_substr($reply->body_text, 0, 280).'…' : $reply->body_text,
+                'actor' => null,
+                'occurredAt' => $reply->created_at->toIso8601String(),
+            ]);
+
         $items = $logged
             ->merge($opportunityActivities)
             ->merge($loggedTouchpoints)
+            ->merge($emailReplies)
             ->filter()
             ->sortByDesc('occurredAt')
             ->values();

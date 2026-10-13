@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Emails\RecordDealershipEmailEvent;
+use App\Models\DealershipEmail;
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
 use Carbon\Carbon;
@@ -15,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class MailgunWebhookController extends Controller
 {
-    public function handleEvent(Request $request): Response
+    public function handleEvent(Request $request, RecordDealershipEmailEvent $recordEvent): Response
     {
         try {
             // Verify webhook signature (optional but recommended)
@@ -34,6 +36,14 @@ class MailgunWebhookController extends Controller
             }
 
             /** @var array<string, mixed> $eventData */
+            $dealershipEmail = $this->findDealershipEmail($eventData);
+
+            if ($dealershipEmail !== null) {
+                $recordEvent($dealershipEmail, $eventData);
+
+                return response('OK', 200);
+            }
+
             $this->processEvent($eventData);
 
             return response('OK', 200);
@@ -148,6 +158,28 @@ class MailgunWebhookController extends Controller
 
             return response('Error', 500);
         }
+    }
+
+    /**
+     * Emails sent from a dealership's Emails tab carry their id in Mailgun's user
+     * variables and our own Message-ID; either one identifies them.
+     *
+     * @param  array<string, mixed>  $eventData
+     */
+    private function findDealershipEmail(array $eventData): ?DealershipEmail
+    {
+        $variables = is_array($eventData['user-variables'] ?? null) ? $eventData['user-variables'] : [];
+        $id = $variables['dealership_email_id'] ?? null;
+
+        if (is_numeric($id)) {
+            return DealershipEmail::find((int) $id);
+        }
+
+        $message = is_array($eventData['message'] ?? null) ? $eventData['message'] : [];
+        $headers = is_array($message['headers'] ?? null) ? $message['headers'] : [];
+        $messageId = is_string($headers['message-id'] ?? null) ? mb_trim($headers['message-id'], '<> ') : null;
+
+        return $messageId === null || $messageId === '' ? null : DealershipEmail::where('message_id', $messageId)->first();
     }
 
     /**
