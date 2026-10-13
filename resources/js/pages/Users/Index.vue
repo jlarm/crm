@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
+import PaginationNav from '@/components/PaginationNav.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -33,7 +34,8 @@ import type { UserListItem, UserRole } from './types';
 interface Props {
     users: {
         data: UserListItem[];
-        links: Array<{ url: string | null; label: string; active: boolean }>;
+        prev_page_url: string | null;
+        next_page_url: string | null;
         current_page: number;
         last_page: number;
         total: number;
@@ -130,7 +132,7 @@ function formatLastLogin(iso: string | null): string {
 <template>
     <Head title="Users" />
 
-    <div class="space-y-6 p-6">
+    <div class="space-y-6 p-6 pb-24">
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-900 dark:text-slate-100">Users</h1>
@@ -247,24 +249,7 @@ function formatLastLogin(iso: string | null): string {
             </Table>
         </div>
 
-        <div
-            v-if="users.last_page > 1"
-            class="flex items-center justify-between text-sm text-slate-500"
-        >
-            <span>{{ users.from }}–{{ users.to }} of {{ users.total }}</span>
-            <div class="flex gap-2">
-                <Button
-                    v-for="link in users.links"
-                    :key="link.label"
-                    variant="outline"
-                    size="sm"
-                    :disabled="!link.url"
-                    :class="{ 'font-semibold': link.active }"
-                    @click="link.url && router.get(link.url)"
-                    v-html="link.label"
-                />
-            </div>
-        </div>
+        <PaginationNav :paginator="users" />
     </div>
 
     <Dialog :open="userToDelete !== null" @update:open="(value) => !value && cancelDelete()">

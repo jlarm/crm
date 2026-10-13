@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TaskCard from '@/components/tasks/TaskCard.vue';
 import TaskFormModal from '@/components/tasks/TaskFormModal.vue';
+import PaginationNav from '@/components/PaginationNav.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -23,7 +24,8 @@ interface User {
 interface Props {
     tasks: {
         data: Task[];
-        links: Array<{ url: string | null; label: string; active: boolean }>;
+        prev_page_url: string | null;
+        next_page_url: string | null;
         current_page: number;
         last_page: number;
         total: number;
@@ -120,7 +122,7 @@ const hasActiveFilters = computed(
         :current-user-id="currentUserId"
     />
 
-    <div class="space-y-6 p-6">
+    <div class="space-y-6 p-6 pb-24">
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-black text-slate-900 dark:text-slate-100">Tasks</h1>
@@ -225,20 +227,6 @@ const hasActiveFilters = computed(
             />
         </div>
 
-        <div v-if="tasks.last_page > 1" class="flex items-center justify-between text-sm text-slate-500">
-            <span>{{ tasks.from }}–{{ tasks.to }} of {{ tasks.total }}</span>
-            <div class="flex gap-2">
-                <Button
-                    v-for="link in tasks.links"
-                    :key="link.label"
-                    variant="outline"
-                    size="sm"
-                    :disabled="!link.url"
-                    :class="{ 'font-semibold': link.active }"
-                    @click="link.url && router.get(link.url)"
-                    v-html="link.label"
-                />
-            </div>
-        </div>
+        <PaginationNav :paginator="tasks" />
     </div>
 </template>
