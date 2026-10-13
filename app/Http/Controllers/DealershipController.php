@@ -41,14 +41,10 @@ final class DealershipController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        // Consultants are exactly who was picked on the form. The creator is recorded as
+        // user_id, which already keeps the dealership in their "Mine" list.
         /** @var array<int, int> $userIds */
         $userIds = $request->validated('user_ids', []);
-        $authId = auth()->id();
-
-        if ($authId !== null && ! in_array($authId, $userIds, true)) {
-            $userIds[] = (int) $authId;
-        }
-
         $dealership->users()->sync($userIds);
 
         return redirect()->route('dealerships.show', $dealership)

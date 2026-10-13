@@ -45,6 +45,22 @@ describe('DealershipStoreRequest', function () {
         ]))->assertSessionHasNoErrors();
     });
 
+    it('assigns only the consultants picked on the form, not the creator', function () {
+        $consultant = User::factory()->create();
+
+        $this->post('/dealerships', validDealershipStorePayload(['user_ids' => [$consultant->id]]));
+
+        $dealership = Dealership::where('name', 'Prime Motors')->sole();
+        expect($dealership->users()->pluck('users.id')->all())->toBe([$consultant->id])
+            ->and($dealership->user_id)->toBe($this->user->id);
+    });
+
+    it('leaves a dealership without consultants when none are picked', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['user_ids' => []]));
+
+        expect(Dealership::where('name', 'Prime Motors')->sole()->users()->count())->toBe(0);
+    });
+
     it('requires name', function () {
         $this->post('/dealerships', validDealershipStorePayload(['name' => '']))
             ->assertSessionHasErrors('name');
