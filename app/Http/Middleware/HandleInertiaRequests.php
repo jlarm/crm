@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -44,9 +45,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'roles' => $request->user()?->getRoleNames() ?? [],
             ],
-            'flash' => [
+            // Always sent, even on partial reloads, so a message already shown is cleared
+            // instead of lingering in the page props and toasting again.
+            'flash' => Inertia::always(fn (): array => [
                 'success' => $request->session()->get('success'),
-            ],
+            ]),
         ];
     }
 }
