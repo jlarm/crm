@@ -283,7 +283,7 @@ function formatErrors(errors: Record<string, string[]>): string {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Default consultants</CardTitle>
+                            <CardTitle>Assign to</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div class="space-y-4">
@@ -297,7 +297,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger as-child>
                                         <Button variant="outline" class="w-full justify-between">
-                                            <span>Select consultants</span>
+                                            <span>Select users</span>
                                             <span class="text-xs text-slate-500">
                                                 {{ selectedConsultantIds.length }}
                                             </span>
@@ -307,7 +307,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                                         <div class="p-2">
                                             <Input
                                                 v-model="consultantSearch"
-                                                placeholder="Search consultants..."
+                                                placeholder="Search users..."
                                             />
                                         </div>
                                         <div class="max-h-60 overflow-auto py-1">
@@ -323,7 +323,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                                                 v-if="filteredConsultants.length === 0"
                                                 class="px-2 py-2 text-xs text-slate-500"
                                             >
-                                                No consultants match that search.
+                                                No users match that search.
                                             </div>
                                         </div>
                                     </DropdownMenuContent>
@@ -339,7 +339,7 @@ function formatErrors(errors: Record<string, string[]>): string {
                                         <button
                                             type="button"
                                             class="text-slate-500 hover:text-slate-700"
-                                            aria-label="Remove consultant"
+                                            aria-label="Remove user"
                                             @click="toggleConsultant(user.id, false)"
                                         >
                                             ×

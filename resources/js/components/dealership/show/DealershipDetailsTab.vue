@@ -235,7 +235,7 @@ function toggleConsultant(userId: number, add: boolean): void {
             <div class="self-start space-y-5">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Consultants</CardTitle>
+                        <CardTitle>Assigned to</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-4">
@@ -249,7 +249,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                             <DropdownMenu>
                                 <DropdownMenuTrigger as-child>
                                     <Button variant="outline" class="w-full justify-between">
-                                        <span>Select consultants</span>
+                                        <span>Select users</span>
                                         <span class="text-xs text-slate-500">
                                             {{ selectedConsultantIds.length }}
                                         </span>
@@ -259,7 +259,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                                     <div class="p-2">
                                         <Input
                                             v-model="consultantSearch"
-                                            placeholder="Search consultants..."
+                                            placeholder="Search users..."
                                         />
                                     </div>
                                     <div class="max-h-60 overflow-auto py-1">
@@ -275,13 +275,13 @@ function toggleConsultant(userId: number, add: boolean): void {
                                             v-if="filteredConsultants.length === 0"
                                             class="px-2 py-2 text-xs text-slate-500"
                                         >
-                                            No consultants match that search.
+                                            No users match that search.
                                         </div>
                                     </div>
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            <div class="text-xs text-slate-500">Selected consultants</div>
+                            <div class="text-xs text-slate-500">Assigned users</div>
                             <div class="flex flex-wrap gap-2">
                                 <span
                                     v-for="user in selectedConsultants"
@@ -292,7 +292,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                                     <button
                                         type="button"
                                         class="text-slate-500 hover:text-slate-700"
-                                        aria-label="Remove consultant"
+                                        aria-label="Remove user"
                                         @click="toggleConsultant(user.id, false)"
                                     >
                                         ×
