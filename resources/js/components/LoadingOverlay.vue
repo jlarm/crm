@@ -7,8 +7,10 @@ const isLoading = ref(false);
 let timeout: ReturnType<typeof setTimeout> | null = null;
 
 router.on('start', (event) => {
-    const only = event.detail.visit.only;
-    if (!only || only.length === 0) {
+    const { only, showProgress } = event.detail.visit;
+
+    // Background refreshes (polling) run silently and must not cover the page.
+    if (!only || only.length === 0 || !showProgress) {
         return;
     }
 

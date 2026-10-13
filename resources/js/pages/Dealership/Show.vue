@@ -63,7 +63,7 @@ function tabFromUrl(url: string): DealershipShowTab {
 const page = usePage();
 
 // Keeps the Emails tab's new-reply badge current while working on other tabs.
-usePoll(10_000, { only: ['unreadReplyCount'] }, { mode: 'rest' });
+usePoll(10_000, { only: ['unreadReplyCount'], showProgress: false }, { mode: 'rest' });
 const activeTab = ref<DealershipShowTab>(tabFromUrl(page.url));
 const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     details: 0,

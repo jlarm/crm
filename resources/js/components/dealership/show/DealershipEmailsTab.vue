@@ -18,7 +18,7 @@ const props = defineProps<{
  * Only the email list is reloaded; polling stops when the tab closes, slows down in a
  * background browser tab, and waits for each request to finish before the next.
  */
-usePoll(10_000, { only: ['emailThreads'] }, { mode: 'rest' });
+usePoll(10_000, { only: ['emailThreads'], showProgress: false }, { mode: 'rest' });
 
 const isComposeOpen = ref(false);
 const replyingTo = ref<DealershipEmail | null>(null);
@@ -78,6 +78,7 @@ function markRead(thread: EmailThread): void {
         preserveScroll: true,
         preserveState: true,
         only: ['emailThreads', 'unreadReplyCount'],
+        showProgress: false,
     });
 }
 

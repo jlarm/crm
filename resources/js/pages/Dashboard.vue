@@ -192,7 +192,7 @@ const currentSorting = computed(() => ({
 const { hidden: hiddenCards, isVisible } = useDashboardCards();
 
 // Picks up new replies from contacts without reloading the dashboard.
-usePoll(10_000, { only: ['emailReplies'] }, { mode: 'rest' });
+usePoll(10_000, { only: ['emailReplies'], showProgress: false }, { mode: 'rest' });
 
 const showsEmailReplies = computed(() => isVisible('emailReplies'));
 const showsGoingQuiet = computed(() => isVisible('goingQuiet') && props.goingQuiet.length > 0);
