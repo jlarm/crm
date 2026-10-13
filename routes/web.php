@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealershipActivityController;
@@ -109,6 +110,8 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
         Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::patch('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();
+
+        Route::get('activity-log', ActivityLogController::class)->name('activity-log.index');
     });
 
     Route::post('ai/chat', [AiChatController::class, 'send'])->name('ai.chat.send');

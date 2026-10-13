@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property int $id
@@ -40,6 +42,8 @@ class Opportunity extends Model
 {
     /** @use HasFactory<\Database\Factories\OpportunityFactory> */
     use HasFactory;
+
+    use LogsActivity;
 
     protected $fillable = [
         'dealership_id',
@@ -136,6 +140,13 @@ class Opportunity extends Model
      * Entering Won or Lost stamps closed_at; reopening a deal clears it. Values set
      * explicitly in the same save win, so imports and factories can backdate them.
      */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->setDescriptionForEvent(fn (string $eventName): string => 'Opportunity '.$eventName);
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Opportunity $opportunity): void {

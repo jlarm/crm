@@ -4,6 +4,7 @@ import { router, usePage } from '@inertiajs/vue3';
 import {
     Building2,
     CheckSquare,
+    History,
     LayoutDashboard,
     ListChecks,
     Plus,
@@ -25,6 +26,7 @@ import dealershipImport from '@/routes/dealerships/import';
 import sales from '@/routes/sales';
 import { edit as profileEdit } from '@/routes/settings/profile';
 import tasks from '@/routes/tasks';
+import activityLog from '@/routes/activity-log';
 import users from '@/routes/users';
 
 interface PaletteItem {
@@ -108,6 +110,7 @@ const groups = computed<PaletteGroup[]>(() => {
 
     if (page.props.auth?.roles?.includes('super_admin')) {
         goTo.push(shortcut('users', 'Users', toUrl(users.index()), Users));
+        goTo.push(shortcut('activity-log', 'Activity log', toUrl(activityLog.index()), History));
     }
 
     goTo.push(shortcut('settings', 'Settings', toUrl(profileEdit()), Settings2));

@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/vue3';
 import {
     Building2,
+    History,
     LayoutDashboard,
     ListChecks,
     Settings2,
@@ -18,6 +19,7 @@ import { edit as appearanceEdit } from '@/routes/settings/appearance';
 import { edit as profileEdit } from '@/routes/settings/profile';
 import { edit as securityEdit } from '@/routes/settings/security';
 import tasks from '@/routes/tasks';
+import activityLog from '@/routes/activity-log';
 import users from '@/routes/users';
 import type { BreadcrumbItem } from '@/types';
 
@@ -88,6 +90,7 @@ export function useShellNavigation(): {
 
         if (page.props.auth?.roles?.includes('super_admin')) {
             admin.push({ title: 'Users', icon: Users, href: toUrl(users.index()) });
+            admin.push({ title: 'Activity log', icon: History, href: toUrl(activityLog.index()) });
         }
 
         admin.push({
