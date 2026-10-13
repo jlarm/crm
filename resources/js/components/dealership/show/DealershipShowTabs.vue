@@ -3,6 +3,8 @@ import type { DealershipShowTab } from '@/pages/Dealership/types';
 
 defineProps<{
     activeTab: DealershipShowTab;
+    /** Counts shown next to a tab's label, e.g. unread email replies. */
+    badges?: Partial<Record<DealershipShowTab, number>>;
 }>();
 
 const emit = defineEmits<{
@@ -33,7 +35,16 @@ const emit = defineEmits<{
                 "
                 @click="emit('update:activeTab', tab)"
             >
-                {{ label }}
+                <span class="inline-flex items-center gap-1.5">
+                    {{ label }}
+                    <span
+                        v-if="badges?.[tab]"
+                        class="inline-flex min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[11px] leading-5 font-semibold text-white"
+                        :aria-label="`${badges[tab]} new`"
+                    >
+                        {{ badges[tab] }}
+                    </span>
+                </span>
             </button>
         </nav>
     </div>

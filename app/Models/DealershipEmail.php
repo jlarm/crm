@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enum\EmailDirection;
 use App\Enum\EmailFailureReason;
 use App\Enum\EmailStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $delivered_at
  * @property Carbon|null $opened_at
  * @property Carbon|null $failed_at
+ * @property Carbon|null $read_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Dealership $dealership
@@ -74,6 +76,7 @@ class DealershipEmail extends Model
         'delivered_at',
         'opened_at',
         'failed_at',
+        'read_at',
     ];
 
     protected $casts = [
@@ -84,6 +87,7 @@ class DealershipEmail extends Model
         'delivered_at' => 'datetime',
         'opened_at' => 'datetime',
         'failed_at' => 'datetime',
+        'read_at' => 'datetime',
     ];
 
     /**
@@ -140,6 +144,16 @@ class DealershipEmail extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(DealershipEmailAttachment::class);
+    }
+
+    /**
+     * Contacts' replies nobody has opened in the CRM yet.
+     *
+     * @param  Builder<DealershipEmail>  $query
+     */
+    public function scopeUnreadReplies(Builder $query): void
+    {
+        $query->where('direction', EmailDirection::Inbound)->whereNull('read_at');
     }
 
     public function isOutbound(): bool

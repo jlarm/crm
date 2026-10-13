@@ -85,6 +85,16 @@ final class MailgunInboundController extends Controller
             return $reply;
         });
 
+        // A reply proves the email arrived, even if Mailgun's delivery event hasn't come in.
+        if ($original->isOutbound() && $original->status->canBecome(EmailStatus::Delivered)) {
+            $original->update([
+                'status' => EmailStatus::Delivered,
+                'status_reason' => null,
+                'status_detail' => null,
+                'delivered_at' => $original->delivered_at ?? now(),
+            ]);
+        }
+
         $rep = $original->user;
 
         if ($rep?->email) {

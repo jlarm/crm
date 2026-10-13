@@ -78,6 +78,25 @@ it('saves the reply on the thread and forwards it to the rep', function () {
         && $mail->reply->is($reply));
 });
 
+it('treats a reply as proof the email was delivered', function () {
+    $this->sent->update(['status' => EmailStatus::Sent, 'delivered_at' => null]);
+
+    post(route('mailgun.inbound'), inboundReply())->assertOk();
+
+    $sent = $this->sent->fresh();
+    expect($sent->status)->toBe(EmailStatus::Delivered)
+        ->and($sent->delivered_at)->not->toBeNull()
+        ->and(DealershipEmail::where('direction', EmailDirection::Inbound)->sole()->read_at)->toBeNull();
+});
+
+it('keeps an opened status when a reply arrives', function () {
+    $this->sent->update(['status' => EmailStatus::Opened]);
+
+    post(route('mailgun.inbound'), inboundReply())->assertOk();
+
+    expect($this->sent->fresh()->status)->toBe(EmailStatus::Opened);
+});
+
 it('stores attachments sent with the reply', function () {
     post(route('mailgun.inbound'), inboundReply([
         'attachment-count' => 1,

@@ -74,6 +74,7 @@ Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {
     Route::post('dealerships/{dealership}/emails', [DealershipEmailController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('dealerships.emails.store');
+    Route::patch('dealerships/{dealership}/emails/{email}/read', [DealershipEmailController::class, 'markRead'])->name('dealerships.emails.read');
     Route::get('dealerships/{dealership}/email-attachments/{attachment}', [DealershipEmailAttachmentController::class, 'show'])->name('dealerships.emails.attachments.show');
 
     Route::post('dealerships/{dealership}/opportunities', [DealershipOpportunityController::class, 'store'])->name('dealerships.opportunities.store');

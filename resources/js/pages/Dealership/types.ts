@@ -147,6 +147,8 @@ export interface DealershipEmail {
     deliveredAt: string | null;
     openedAt: string | null;
     failedAt: string | null;
+    /** When a contact's reply was opened in the CRM; null while it's new. */
+    readAt: string | null;
     createdAt: string;
     attachments: EmailAttachment[];
     events: EmailEvent[];

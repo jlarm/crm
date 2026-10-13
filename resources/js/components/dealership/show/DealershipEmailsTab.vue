@@ -2,6 +2,8 @@
 import ComposeEmailDialog from '@/components/dealership/show/ComposeEmailDialog.vue';
 import { Button } from '@/components/ui/button';
 import type { Dealership, DealershipEmail, EmailStatusTone, EmailThread } from '@/pages/Dealership/types';
+import { read } from '@/routes/dealerships/emails';
+import { router, usePoll } from '@inertiajs/vue3';
 import { ChevronDown, CornerUpLeft, Inbox, Mail, Paperclip, Plus } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -10,6 +12,13 @@ const props = defineProps<{
     /** Deferred: undefined while loading. */
     threads?: EmailThread[];
 }>();
+
+/**
+ * Picks up delivery updates from Mailgun and contacts' replies while the tab is open.
+ * Only the email list is reloaded; polling stops when the tab closes, slows down in a
+ * background browser tab, and waits for each request to finish before the next.
+ */
+usePoll(10_000, { only: ['emailThreads', 'unreadReplyCount'] }, { mode: 'rest' });
 
 const isComposeOpen = ref(false);
 const replyingTo = ref<DealershipEmail | null>(null);
@@ -47,8 +56,34 @@ function threadContactName(thread: EmailThread): string {
     return thread.find((email) => email.contact)?.contact?.name ?? thread[0].to;
 }
 
+function unreadCount(thread: EmailThread): number {
+    return thread.filter((email) => email.direction === 'inbound' && email.readAt === null).length;
+}
+
+/** The contact wrote last, so the ball is in the rep's court. */
+function awaitsReply(thread: EmailThread): boolean {
+    return thread[thread.length - 1].direction === 'inbound';
+}
+
+function markRead(thread: EmailThread): void {
+    if (unreadCount(thread) === 0) {
+        return;
+    }
+
+    router.patch(read([props.dealership.id, thread[0].id]).url, {}, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['emailThreads', 'unreadReplyCount'],
+    });
+}
+
 function toggle(thread: EmailThread): void {
-    expandedThreadId.value = expandedThreadId.value === thread[0].id ? null : thread[0].id;
+    const opening = expandedThreadId.value !== thread[0].id;
+    expandedThreadId.value = opening ? thread[0].id : null;
+
+    if (opening) {
+        markRead(thread);
+    }
 }
 
 function compose(): void {
@@ -58,6 +93,7 @@ function compose(): void {
 }
 
 function reply(thread: EmailThread): void {
+    markRead(thread);
     replyingTo.value = thread[thread.length - 1];
     replyContactId.value = thread.find((email) => email.contact)?.contact?.id ?? null;
     isComposeOpen.value = true;
@@ -121,9 +157,30 @@ function formatSize(bytes: number): string {
                     :aria-expanded="expandedThreadId === thread[0].id"
                     @click="toggle(thread)"
                 >
-                    <Mail class="h-4 w-4 shrink-0 text-slate-400" />
+                    <span class="relative shrink-0">
+                        <Mail class="h-4 w-4" :class="unreadCount(thread) ? 'text-orange-500' : 'text-slate-400'" />
+                        <span
+                            v-if="unreadCount(thread)"
+                            class="absolute -top-1 -right-1 size-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-950"
+                            aria-hidden="true"
+                        />
+                    </span>
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{{ thread[0].subject }}</p>
+                        <p class="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100" :class="unreadCount(thread) ? 'font-semibold' : 'font-medium'">
+                            <span class="truncate">{{ thread[0].subject }}</span>
+                            <span
+                                v-if="unreadCount(thread)"
+                                class="shrink-0 rounded-full bg-orange-500 px-2 py-0.5 text-[11px] font-semibold text-white"
+                            >
+                                {{ unreadCount(thread) === 1 ? 'New reply' : `${unreadCount(thread)} new replies` }}
+                            </span>
+                            <span
+                                v-else-if="awaitsReply(thread)"
+                                class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-600/20 ring-inset dark:bg-amber-950/40 dark:text-amber-300"
+                            >
+                                Awaiting your reply
+                            </span>
+                        </p>
                         <p class="truncate text-xs text-muted-foreground">
                             {{ threadContactName(thread) }}
                             · {{ formatDateTime(thread[thread.length - 1].createdAt) }}

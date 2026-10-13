@@ -14,7 +14,7 @@ import { show } from '@/routes/dealerships';
 import { cn, ratingClass, statusClass } from '@/lib/utils';
 import type { Dealership, DealershipShowTab, EmailThread, ProgressCategory, User } from '@/pages/Dealership/types';
 import type { FilterOption, Task } from '@/pages/Tasks/types';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage, usePoll } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import { nextTick, ref, watch } from 'vue';
 
@@ -29,6 +29,7 @@ interface Props {
     progressCategories: ProgressCategory[];
     /** Deferred: undefined until loaded. */
     emailThreads?: EmailThread[];
+    unreadReplyCount: number;
 }
 
 const props = defineProps<Props>();
@@ -60,6 +61,9 @@ function tabFromUrl(url: string): DealershipShowTab {
 }
 
 const page = usePage();
+
+// Keeps the Emails tab's new-reply badge current while working on other tabs.
+usePoll(30_000, { only: ['unreadReplyCount'] }, { mode: 'rest' });
 const activeTab = ref<DealershipShowTab>(tabFromUrl(page.url));
 const tabScrollPositions = ref<Record<DealershipShowTab, number>>({
     details: 0,
@@ -135,6 +139,7 @@ function setActiveTab(tab: DealershipShowTab): void {
 
         <DealershipShowTabs
             :active-tab="activeTab"
+            :badges="{ emails: unreadReplyCount }"
             @update:active-tab="setActiveTab"
         />
 

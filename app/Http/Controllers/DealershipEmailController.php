@@ -10,6 +10,7 @@ use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\DealershipEmail;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 
@@ -41,5 +42,22 @@ final class DealershipEmailController extends Controller
         );
 
         return back()->with('success', 'Email is on its way.');
+    }
+
+    /**
+     * Marks the contact's replies in a thread as read, once a rep has opened it.
+     */
+    public function markRead(Dealership $dealership, DealershipEmail $email): RedirectResponse
+    {
+        abort_unless($email->dealership_id === $dealership->id, 404);
+
+        $threadId = $email->parent_id ?? $email->id;
+
+        $dealership->emails()
+            ->unreadReplies()
+            ->where(fn (Builder $query) => $query->whereKey($threadId)->orWhere('parent_id', $threadId))
+            ->update(['read_at' => now()]);
+
+        return back();
     }
 }

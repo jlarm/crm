@@ -252,3 +252,36 @@ describe('Dealership activity feed', function () {
             ]);
     });
 });
+
+describe('DealershipEmailController markRead', function () {
+    it('marks the replies in that thread as read, and only that thread', function () {
+        actingAs($this->rep);
+        $thread = DealershipEmail::factory()->create(['dealership_id' => $this->dealership->id]);
+        $reply = DealershipEmail::factory()->inbound()->create(['dealership_id' => $this->dealership->id, 'parent_id' => $thread->id]);
+        $otherThread = DealershipEmail::factory()->create(['dealership_id' => $this->dealership->id]);
+        $otherReply = DealershipEmail::factory()->inbound()->create(['dealership_id' => $this->dealership->id, 'parent_id' => $otherThread->id]);
+
+        $this->patch(route('dealerships.emails.read', [$this->dealership, $thread]))->assertRedirect();
+
+        expect($reply->fresh()->read_at)->not->toBeNull()
+            ->and($otherReply->fresh()->read_at)->toBeNull();
+    });
+
+    it('returns 404 for an email from another dealership', function () {
+        actingAs($this->rep);
+        $elsewhere = DealershipEmail::factory()->create();
+
+        $this->patch(route('dealerships.emails.read', [$this->dealership, $elsewhere]))->assertNotFound();
+    });
+
+    it('shares the number of unread replies with the dealership page', function () {
+        actingAs($this->rep);
+        $thread = DealershipEmail::factory()->create(['dealership_id' => $this->dealership->id]);
+        DealershipEmail::factory()->inbound()->count(2)->create(['dealership_id' => $this->dealership->id, 'parent_id' => $thread->id]);
+        DealershipEmail::factory()->inbound()->create(['dealership_id' => $this->dealership->id, 'parent_id' => $thread->id, 'read_at' => now()]);
+        DealershipEmail::factory()->inbound()->create(['parent_id' => null]);
+
+        get(route('dealerships.show', $this->dealership))
+            ->assertInertia(fn ($page) => $page->where('unreadReplyCount', 2));
+    });
+});

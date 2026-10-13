@@ -44,6 +44,7 @@ final class DealershipEmailResource extends JsonResource
             'deliveredAt' => $email->delivered_at?->toIso8601String(),
             'openedAt' => $email->opened_at?->toIso8601String(),
             'failedAt' => $email->failed_at?->toIso8601String(),
+            'readAt' => $email->read_at?->toIso8601String(),
             'createdAt' => $email->created_at->toIso8601String(),
             'attachments' => $email->attachments->map(fn (DealershipEmailAttachment $attachment): array => [
                 'id' => $attachment->id,
