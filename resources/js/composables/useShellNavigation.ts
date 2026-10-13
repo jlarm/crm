@@ -44,6 +44,13 @@ export type ShellNavSection = {
 
 export type ShellCrumb = BreadcrumbItem & { icon?: Component };
 
+/** The settings screens, reached from the menu under the user's name. */
+export const settingsPages: ShellNavChild[] = [
+    { title: 'Profile', href: toUrl(profileEdit()) },
+    { title: 'Security', href: toUrl(securityEdit()) },
+    { title: 'Appearance', href: toUrl(appearanceEdit()) },
+];
+
 type ShellPageProps = {
     auth: { roles?: string[] };
     dealership?: { id: number; name: string };
@@ -93,22 +100,11 @@ export function useShellNavigation(): {
             admin.push({ title: 'Activity log', icon: History, href: toUrl(activityLog.index()) });
         }
 
-        admin.push({
-            title: 'Settings',
-            icon: Settings2,
-            href: toUrl(profileEdit()),
-            match: '/settings',
-            children: [
-                { title: 'Profile', href: toUrl(profileEdit()) },
-                { title: 'Security', href: toUrl(securityEdit()) },
-                { title: 'Appearance', href: toUrl(appearanceEdit()) },
-            ],
-        });
-
+        // Settings live in the menu under the user's name, not in the sidebar.
         return [
             { label: 'Workspace', items: workspace },
             { label: 'Account', items: admin },
-        ];
+        ].filter((section) => section.items.length > 0);
     });
 
     function isActive(item: ShellNavItem | ShellNavChild): boolean {
@@ -126,6 +122,17 @@ export function useShellNavigation(): {
 
     const breadcrumbs = computed<ShellCrumb[]>(() => {
         const trail: ShellCrumb[] = [];
+
+        if (currentPath.value.startsWith('/settings/')) {
+            const current = settingsPages.find((settingsPage) => pathOf(settingsPage.href) === currentPath.value);
+            trail.push({ title: 'Settings', href: toUrl(profileEdit()), icon: Settings2 });
+
+            if (current) {
+                trail.push({ title: current.title, href: current.href });
+            }
+
+            return trail;
+        }
         const items = sections.value.flatMap((section) => section.items);
         const parent = items.find((item) => isActive(item));
 

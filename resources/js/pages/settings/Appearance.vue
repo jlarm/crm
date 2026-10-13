@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
 import Heading from '@/components/Heading.vue';
 import { edit } from '@/routes/settings/appearance';
+import SettingsPage from '@/components/SettingsPage.vue';
 
 defineOptions({
     layout: {
@@ -21,12 +22,14 @@ defineOptions({
 
     <h1 class="sr-only">Appearance settings</h1>
 
-    <div class="space-y-6">
-        <Heading
-            variant="small"
-            title="Appearance settings"
-            description="Update your account's appearance settings"
-        />
-        <AppearanceTabs />
-    </div>
+    <SettingsPage>
+        <div class="space-y-6">
+            <Heading
+                variant="small"
+                title="Appearance settings"
+                description="Update your account's appearance settings"
+            />
+            <AppearanceTabs />
+        </div>
+    </SettingsPage>
 </template>
