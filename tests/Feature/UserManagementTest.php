@@ -121,6 +121,20 @@ describe('User Store', function () {
 });
 
 describe('User Update', function () {
+    it('saves the job title', function () {
+        $target = User::factory()->create();
+
+        $this->actingAs(superAdmin())
+            ->put("/users/{$target->id}", [
+                'name' => $target->name,
+                'email' => $target->email,
+                'title' => 'Account Manager',
+            ])
+            ->assertRedirect('/users');
+
+        expect($target->refresh()->title)->toBe('Account Manager');
+    });
+
     it('updates a user and syncs roles', function () {
         $admin = superAdmin();
         $target = User::factory()->create(['name' => 'Original']);

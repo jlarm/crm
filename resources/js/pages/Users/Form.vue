@@ -22,6 +22,7 @@ const props = defineProps<Props>();
 const form = useForm({
     name: props.user?.name ?? '',
     email: props.user?.email ?? '',
+    title: props.user?.title ?? '',
     phone: props.user?.phone ?? '',
     timezone: props.user?.timezone ?? '',
     password: '',
@@ -66,6 +67,12 @@ function submit(): void {
                                 <FieldLabel for="email">Email</FieldLabel>
                                 <Input id="email" v-model="form.email" type="email" required />
                                 <InputError :message="form.errors.email" />
+                            </Field>
+
+                            <Field class="col-span-2">
+                                <FieldLabel for="title">Title</FieldLabel>
+                                <Input id="title" v-model="form.title" maxlength="100" placeholder="e.g. Account Manager" />
+                                <InputError :message="form.errors.title" />
                             </Field>
 
                             <Field class="col-span-1">

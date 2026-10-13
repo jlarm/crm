@@ -23,6 +23,7 @@ class UserStoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'title' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:32'],
             'timezone' => ['nullable', 'string', 'timezone'],
             'roles' => ['array'],

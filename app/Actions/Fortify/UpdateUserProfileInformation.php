@@ -22,6 +22,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'title' => ['nullable', 'string', 'max:100'],
         ])->validateWithBag('updateProfileInformation');
 
         if ($input['email'] !== $user->email &&
@@ -31,6 +32,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             $user->forceFill([
                 'name' => $input['name'],
                 'email' => $input['email'],
+                'title' => $this->title($input),
             ])->save();
         }
     }
@@ -45,9 +47,20 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         $user->forceFill([
             'name' => $input['name'],
             'email' => $input['email'],
+            'title' => $this->title($input),
             'email_verified_at' => null,
         ])->save();
 
         $user->sendEmailVerificationNotification();
+    }
+
+    /**
+     * @param  array<string, string>  $input
+     */
+    private function title(array $input): ?string
+    {
+        $title = mb_trim((string) ($input['title'] ?? ''));
+
+        return $title === '' ? null : $title;
     }
 }

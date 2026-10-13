@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
 it('renders the body escaped, in paragraphs, with links and the rep signature', function () {
-    $rep = User::factory()->create(['name' => 'Rita Rep', 'email' => 'rita@armp.test', 'phone' => '(555) 123-4567']);
+    $rep = User::factory()->create(['name' => 'Rita Rep', 'title' => 'Account Manager', 'email' => 'rita@armp.test', 'phone' => '(555) 123-4567']);
     $email = DealershipEmail::factory()->create([
         'user_id' => $rep->id,
         'from_email' => 'rita@armp.test',
@@ -24,6 +24,7 @@ it('renders the body escaped, in paragraphs, with links and the rep signature', 
         ->toContain('<a href="https://armp.test/plans"')
         ->toContain('</a>.')
         ->toContain('Rita Rep')
+        ->toContain('<div>Account Manager</div>')
         ->toContain('555-123-4567')
         ->toContain('Automotive Risk Management Partners')
         ->toContain('alt="ARMP - Automotive Risk Management Partners"');

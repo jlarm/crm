@@ -66,6 +66,21 @@ const user = computed(() => page.props.auth.user);
             </div>
 
             <div class="grid gap-2">
+                <Label for="title">Title</Label>
+                <Input
+                    id="title"
+                    class="mt-1 block w-full"
+                    name="title"
+                    :default-value="user.title ?? ''"
+                    maxlength="100"
+                    autocomplete="organization-title"
+                    placeholder="e.g. Account Manager"
+                />
+                <p class="text-xs text-muted-foreground">Shown under your name in the signature of emails you send from the CRM.</p>
+                <InputError class="mt-2" :message="errors.title" />
+            </div>
+
+            <div class="grid gap-2">
                 <Label for="email">Email address</Label>
                 <Input
                     id="email"

@@ -30,6 +30,32 @@ describe('Settings ProfileController edit', function () {
 });
 
 describe('Settings ProfileController update', function () {
+    it('saves the job title, and clears it when left blank', function () {
+        patch(route('settings.profile.update'), [
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            'title' => '  Account Manager ',
+        ])->assertSessionHasNoErrors();
+
+        expect($this->user->refresh()->title)->toBe('Account Manager');
+
+        patch(route('settings.profile.update'), [
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            'title' => '',
+        ]);
+
+        expect($this->user->refresh()->title)->toBeNull();
+    });
+
+    it('rejects a title over 100 characters', function () {
+        patch(route('settings.profile.update'), [
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            'title' => str_repeat('a', 101),
+        ])->assertSessionHasErrorsIn('updateProfileInformation', 'title');
+    });
+
     it('updates the user profile', function () {
         patch(route('settings.profile.update'), [
             'name' => 'Updated Name',

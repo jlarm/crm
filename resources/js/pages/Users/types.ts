@@ -7,6 +7,7 @@ export interface UserListItem {
     id: number;
     name: string;
     email: string;
+    title: string | null;
     phone: string | null;
     timezone: string | null;
     createdAt: string | null;

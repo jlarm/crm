@@ -41,6 +41,9 @@
                 <tr>
                     <td style="border-left:3px solid #f97316;padding:0 0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#555555;">
                         <div style="font-size:14px;font-weight:bold;color:#222222;">{{ $signature['name'] }}</div>
+                        @if (! empty($signature['title']))
+                            <div>{{ $signature['title'] }}</div>
+                        @endif
                         <div>{{ $signature['company'] }}</div>
                         @if ($signature['phone'])
                             <div>{{ $signature['phone'] }}</div>

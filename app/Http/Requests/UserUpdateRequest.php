@@ -28,6 +28,7 @@ class UserUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
+            'title' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:32'],
             'timezone' => ['nullable', 'string', 'timezone'],
             'roles' => ['array'],

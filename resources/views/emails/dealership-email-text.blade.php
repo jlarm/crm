@@ -7,6 +7,9 @@
 
 --
 {!! $signature['name'] !!}
+@if (! empty($signature['title']))
+{!! $signature['title'] !!}
+@endif
 {!! $signature['company'] !!}
 @if ($signature['phone'])
 {!! $signature['phone'] !!}
