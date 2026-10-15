@@ -8,6 +8,7 @@ use App\Models\SentEmail;
 use Exception;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -82,7 +83,8 @@ class EmailTrackingService
                 return $matches[0];
             }
 
-            $trackingUrl = route('mailgun.click-track', [
+            // Signed so the redirect target can't be swapped for someone else's site.
+            $trackingUrl = URL::signedRoute('mailgun.click-track', [
                 'message_id' => $messageId,
                 'url' => urlencode($originalUrl),
             ]);

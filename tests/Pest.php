@@ -48,3 +48,25 @@ function something()
 {
     // ..
 }
+
+/**
+ * Post to the Mailgun event webhook with a fresh, valid signature, unless the
+ * payload brings its own.
+ *
+ * @param  array<string, mixed>  $payload
+ */
+function postMailgunWebhook(array $payload): Illuminate\Testing\TestResponse
+{
+    $timestamp = (string) now()->timestamp;
+    $token = Illuminate\Support\Str::random(50);
+    $key = config('services.mailgun.webhook_signing_key');
+
+    return Pest\Laravel\postJson(route('mailgun.webhook'), [
+        'signature' => [
+            'timestamp' => $timestamp,
+            'token' => $token,
+            'signature' => hash_hmac('sha256', $timestamp.$token, is_string($key) ? $key : ''),
+        ],
+        ...$payload,
+    ]);
+}

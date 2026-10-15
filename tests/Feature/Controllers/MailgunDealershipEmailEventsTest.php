@@ -9,10 +9,8 @@ use App\Models\DealershipEmailEvent;
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
 
-use function Pest\Laravel\postJson;
-
 beforeEach(function () {
-    config()->set('services.mailgun.webhook_signing_key', null);
+    config()->set('services.mailgun.webhook_signing_key', 'webhook-key');
 
     $this->email = DealershipEmail::factory()->create(['message_id' => 'abc@armp.test', 'status' => EmailStatus::Sent]);
 });
@@ -34,7 +32,7 @@ function dealershipEmailEvent(DealershipEmail $email, string $event, array $over
 }
 
 it('marks the email delivered', function () {
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'delivered'))->assertOk();
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'delivered'))->assertOk();
 
     $email = $this->email->fresh();
     expect($email->status)->toBe(EmailStatus::Delivered)
@@ -43,7 +41,7 @@ it('marks the email delivered', function () {
 });
 
 it('records a permanent failure as a bounce with the reason', function () {
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'failed', [
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'failed', [
         'severity' => 'permanent',
         'reason' => 'generic',
         'delivery-status' => ['code' => 552, 'message' => 'Mailbox full'],
@@ -57,14 +55,14 @@ it('records a permanent failure as a bounce with the reason', function () {
 });
 
 it('records a temporary failure as delayed, then clears it once delivered', function () {
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'failed', [
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'failed', [
         'severity' => 'temporary',
         'delivery-status' => ['code' => 421, 'message' => 'Try again later'],
     ]));
 
     expect($this->email->fresh()->status)->toBe(EmailStatus::Deferred);
 
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'delivered'));
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'delivered'));
 
     $email = $this->email->fresh();
     expect($email->status)->toBe(EmailStatus::Delivered)
@@ -72,7 +70,7 @@ it('records a temporary failure as delayed, then clears it once delivered', func
 });
 
 it('records a spam complaint', function () {
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'complained'));
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'complained'));
 
     $email = $this->email->fresh();
     expect($email->status)->toBe(EmailStatus::Complained)
@@ -80,8 +78,8 @@ it('records a spam complaint', function () {
 });
 
 it('does not move the status backwards when events arrive out of order', function () {
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'opened'));
-    postJson(route('mailgun.webhook'), dealershipEmailEvent($this->email, 'delivered'));
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'opened'));
+    postMailgunWebhook(dealershipEmailEvent($this->email, 'delivered'));
 
     $email = $this->email->fresh();
     expect($email->status)->toBe(EmailStatus::Opened)
@@ -91,8 +89,8 @@ it('does not move the status backwards when events arrive out of order', functio
 it('ignores a webhook Mailgun sends twice', function () {
     $payload = dealershipEmailEvent($this->email, 'delivered');
 
-    postJson(route('mailgun.webhook'), $payload)->assertOk();
-    postJson(route('mailgun.webhook'), $payload)->assertOk();
+    postMailgunWebhook($payload)->assertOk();
+    postMailgunWebhook($payload)->assertOk();
 
     expect(DealershipEmailEvent::count())->toBe(1);
 });
@@ -102,7 +100,7 @@ it('matches by Message-ID when the user variables are missing', function () {
     unset($payload['event-data']['user-variables']);
     $payload['event-data']['message']['headers']['message-id'] = '<abc@armp.test>';
 
-    postJson(route('mailgun.webhook'), $payload)->assertOk();
+    postMailgunWebhook($payload)->assertOk();
 
     expect($this->email->fresh()->status)->toBe(EmailStatus::Delivered);
 });
@@ -110,7 +108,7 @@ it('matches by Message-ID when the user variables are missing', function () {
 it('leaves legacy dealer email events on the old path', function () {
     $sentEmail = SentEmail::factory()->create();
 
-    postJson(route('mailgun.webhook'), ['event-data' => [
+    postMailgunWebhook(['event-data' => [
         'event' => 'delivered',
         'recipient' => $sentEmail->recipient,
         'timestamp' => now()->timestamp,

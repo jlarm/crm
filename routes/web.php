@@ -50,6 +50,7 @@ Route::post('/webhooks/mailgun/inbound', MailgunInboundController::class)
 Route::get('/track/open/{message_id}', [MailgunWebhookController::class, 'trackOpen'])
     ->name('mailgun.open-track');
 Route::get('/track/click/{message_id}', [MailgunWebhookController::class, 'trackClick'])
+    ->middleware('signed')
     ->name('mailgun.click-track');
 
 Route::middleware(['auth', HandleInertiaRequests::class])->group(function () {

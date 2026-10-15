@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
+use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\get;
-use function Pest\Laravel\postJson;
 
 beforeEach(function () {
-    config()->set('services.mailgun.webhook_signing_key', null);
+    config()->set('services.mailgun.webhook_signing_key', 'webhook-key');
 });
 
 describe('MailgunWebhookController handleEvent', function () {
     it('records a tracking event for a known sent email', function () {
         $sentEmail = SentEmail::factory()->create();
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 'event' => 'delivered',
                 'recipient' => $sentEmail->recipient,
@@ -36,13 +36,13 @@ describe('MailgunWebhookController handleEvent', function () {
     });
 
     it('returns 400 when event-data is missing', function () {
-        postJson(route('mailgun.webhook'), [])->assertStatus(400);
+        postMailgunWebhook([])->assertStatus(400);
     });
 
     it('returns 401 when signature verification fails', function () {
         config()->set('services.mailgun.webhook_signing_key', 'secret-key');
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => ['event' => 'delivered'],
             'signature' => [
                 'timestamp' => '123',
@@ -52,10 +52,40 @@ describe('MailgunWebhookController handleEvent', function () {
         ])->assertStatus(401);
     });
 
+    it('returns 401 when no signing key is configured', function () {
+        config()->set('services.mailgun.webhook_signing_key', null);
+        $sentEmail = SentEmail::factory()->create();
+
+        postMailgunWebhook([
+            'event-data' => [
+                'event' => 'complained',
+                'recipient' => $sentEmail->recipient,
+                'timestamp' => now()->timestamp,
+                'message' => ['headers' => ['message-id' => $sentEmail->message_id]],
+            ],
+        ])->assertStatus(401);
+
+        expect(EmailTrackingEvent::count())->toBe(0);
+    });
+
+    it('returns 401 for a correctly signed but stale request', function () {
+        $timestamp = (string) now()->subHour()->timestamp;
+        $token = 'old-token';
+
+        postMailgunWebhook([
+            'signature' => [
+                'timestamp' => $timestamp,
+                'token' => $token,
+                'signature' => hash_hmac('sha256', $timestamp.$token, 'webhook-key'),
+            ],
+            'event-data' => ['event' => 'delivered'],
+        ])->assertStatus(401);
+    });
+
     it('returns 401 when signature is not an array', function () {
         config()->set('services.mailgun.webhook_signing_key', 'secret-key');
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => ['event' => 'delivered'],
             'signature' => 'not-an-array',
         ])->assertStatus(401);
@@ -68,7 +98,7 @@ describe('MailgunWebhookController handleEvent', function () {
         // exercising the outer catch in handleEvent.
         Illuminate\Support\Facades\Log::shouldReceive('error')->atLeast()->once();
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 'event' => 'delivered',
                 'recipient' => $sentEmail->recipient,
@@ -81,7 +111,7 @@ describe('MailgunWebhookController handleEvent', function () {
     it('logs and skips events missing required fields', function () {
         Illuminate\Support\Facades\Log::spy();
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 // missing event, recipient, message-id
                 'timestamp' => now()->timestamp,
@@ -99,7 +129,7 @@ describe('MailgunWebhookController handleEvent', function () {
             'tracking_data' => ['temporary_id' => true],
         ]);
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 'event' => 'delivered',
                 'recipient' => 'temp@example.com',
@@ -117,13 +147,13 @@ describe('MailgunWebhookController handleEvent', function () {
     it('accepts a valid signature', function () {
         config()->set('services.mailgun.webhook_signing_key', 'secret-key');
 
-        $timestamp = '123';
+        $timestamp = (string) now()->timestamp;
         $token = 'abc';
         $expected = hash_hmac('sha256', $timestamp.$token, 'secret-key');
 
         $sentEmail = SentEmail::factory()->create();
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'signature' => [
                 'timestamp' => $timestamp,
                 'token' => $token,
@@ -144,7 +174,7 @@ describe('MailgunWebhookController handleEvent', function () {
     });
 
     it('still returns 200 when no matching sent email is found', function () {
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 'event' => 'delivered',
                 'recipient' => 'nobody@example.com',
@@ -157,7 +187,7 @@ describe('MailgunWebhookController handleEvent', function () {
     it('ignores unmapped event types', function () {
         $sentEmail = SentEmail::factory()->create();
 
-        postJson(route('mailgun.webhook'), [
+        postMailgunWebhook([
             'event-data' => [
                 'event' => 'rejected',
                 'recipient' => $sentEmail->recipient,
@@ -182,7 +212,7 @@ describe('MailgunWebhookController handleEvent', function () {
         foreach ($cases as $mailgunEvent => $internal) {
             $sentEmail = SentEmail::factory()->create();
 
-            postJson(route('mailgun.webhook'), [
+            postMailgunWebhook([
                 'event-data' => [
                     'event' => $mailgunEvent,
                     'recipient' => $sentEmail->recipient,
@@ -245,7 +275,7 @@ describe('MailgunWebhookController trackClick', function () {
     it('redirects and records a click event', function () {
         $sentEmail = SentEmail::factory()->create();
 
-        get(route('mailgun.click-track', ['message_id' => $sentEmail->message_id]).'?url='.urlencode('https://example.com/path'))
+        get(clickTrackingUrl($sentEmail->message_id, 'https://example.com/path'))
             ->assertRedirect('https://example.com/path');
 
         $this->assertDatabaseHas('email_tracking_events', [
@@ -256,12 +286,24 @@ describe('MailgunWebhookController trackClick', function () {
     });
 
     it('returns 400 when no url is provided', function () {
-        get(route('mailgun.click-track', ['message_id' => 'whatever']))
+        get(URL::signedRoute('mailgun.click-track', ['message_id' => 'whatever']))
             ->assertStatus(400);
     });
 
+    it('refuses an unsigned link instead of redirecting', function () {
+        get(route('mailgun.click-track', ['message_id' => 'whatever']).'?url='.urlencode('https://evil.example/login'))
+            ->assertForbidden();
+    });
+
+    it('refuses a signed link whose url was swapped', function () {
+        $signed = clickTrackingUrl('msg-1', 'https://example.com/path');
+        $tampered = str_replace(urlencode(urlencode('https://example.com/path')), urlencode(urlencode('https://evil.example/login')), $signed);
+
+        get($tampered)->assertForbidden();
+    });
+
     it('redirects without recording when sent email is unknown', function () {
-        get(route('mailgun.click-track', ['message_id' => 'unknown']).'?url='.urlencode('https://example.com'))
+        get(clickTrackingUrl('unknown', 'https://example.com'))
             ->assertRedirect('https://example.com');
 
         expect(EmailTrackingEvent::count())->toBe(0);
@@ -277,8 +319,18 @@ describe('MailgunWebhookController trackClick', function () {
 
         Illuminate\Support\Facades\Log::shouldReceive('error')->atLeast()->once();
 
-        get(route('mailgun.click-track', ['message_id' => $sentEmail->message_id]).'?url='.urlencode('https://example.com/redirect'))
+        get(clickTrackingUrl($sentEmail->message_id, 'https://example.com/redirect'))
             ->assertRedirect('https://example.com/redirect');
     });
 
 });
+
+/**
+ * A click-tracking link as EmailTrackingService writes it into an email.
+ */
+function clickTrackingUrl(string $messageId, string $url): string
+{
+    $html = (new App\Services\EmailTrackingService)->wrapLinksWithTracking('<a href="'.$url.'">x</a>', $messageId);
+
+    return Illuminate\Support\Str::between($html, 'href="', '"');
+}

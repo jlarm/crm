@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Emails\RecordDealershipEmailEvent;
+use App\Actions\Emails\VerifyMailgunSignature;
 use App\Models\DealershipEmail;
 use App\Models\EmailTrackingEvent;
 use App\Models\SentEmail;
@@ -20,7 +21,6 @@ class MailgunWebhookController extends Controller
     public function handleEvent(Request $request, RecordDealershipEmailEvent $recordEvent): Response
     {
         try {
-            // Verify webhook signature (optional but recommended)
             if (! $this->verifySignature($request)) {
                 Log::warning('Invalid Mailgun webhook signature', ['data' => $request->all()]);
 
@@ -286,25 +286,16 @@ class MailgunWebhookController extends Controller
 
     private function verifySignature(Request $request): bool
     {
-        $signingKey = config('services.mailgun.webhook_signing_key');
-
-        if (! is_string($signingKey) || $signingKey === '') {
-            // If no signing key configured, skip verification
-            return true;
-        }
-
         $signature = $request->input('signature');
 
         if (! is_array($signature)) {
             return false;
         }
 
-        $timestamp = is_string($signature['timestamp'] ?? null) ? $signature['timestamp'] : '';
-        $token = is_string($signature['token'] ?? null) ? $signature['token'] : '';
-        $providedSignature = is_string($signature['signature'] ?? null) ? $signature['signature'] : '';
-
-        $expectedSignature = hash_hmac('sha256', $timestamp.$token, $signingKey);
-
-        return hash_equals($expectedSignature, $providedSignature);
+        return app(VerifyMailgunSignature::class)(
+            $signature['timestamp'] ?? null,
+            $signature['token'] ?? null,
+            $signature['signature'] ?? null,
+        );
     }
 }
