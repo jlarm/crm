@@ -16,10 +16,15 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Validate and create a newly registered user.
      *
+     * Self-registration only bootstraps the first account; everyone after
+     * that is created by a super admin.
+     *
      * @param  array<string, string>  $input
      */
     public function create(array $input): User
     {
+        abort_if(User::exists(), 403);
+
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
