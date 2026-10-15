@@ -29,6 +29,42 @@ test('reset password link can be requested', function () {
     return ! Features::enabled(Features::resetPasswords());
 }, 'Password updates are not enabled.');
 
+test('reset password link ignores a forwarded host header', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $this->withHeaders(['X-Forwarded-Host' => 'attacker.example'])
+        ->post('/forgot-password', ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user) {
+        $url = $notification->toMail($user)->actionUrl;
+
+        expect($url)->not->toContain('attacker.example');
+
+        return true;
+    });
+})->skip(function () {
+    return ! Features::enabled(Features::resetPasswords());
+}, 'Password updates are not enabled.');
+
+test('reset password link honours the forwarded protocol from the proxy', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $this->withHeaders(['X-Forwarded-Proto' => 'https'])
+        ->post('/forgot-password', ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $notification) use ($user) {
+        expect($notification->toMail($user)->actionUrl)->toStartWith('https://');
+
+        return true;
+    });
+})->skip(function () {
+    return ! Features::enabled(Features::resetPasswords());
+}, 'Password updates are not enabled.');
+
 test('reset password screen can be rendered', function () {
     Notification::fake();
 

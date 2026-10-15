@@ -9,6 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,8 +31,17 @@ return Application::configure(basePath: dirname(__DIR__))
          * That breaks every unsubscribe link and every tracked click with a 403
          * — silently, and in a way that pushes recipients to report spam rather
          * than opt out.
+         *
+         * Only the client IP and protocol are taken from the proxy. Trusting
+         * X-Forwarded-Host would let a caller choose the host that password
+         * reset links are built with, and send the token to their own domain.
+         * The Host header itself is held to APP_URL and its subdomains.
          */
-        $middleware->trustProxies(at: '*');
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO,
+        );
+        $middleware->trustHosts();
 
         $middleware->web(append: [
             HandleInertiaRequests::class,
