@@ -25,26 +25,24 @@ describe('Settings SecurityController edit', function () {
                 ->has('canManageTwoFactor')
                 ->has('requiresConfirmation')
                 ->has('twoFactorEnabled')
-                ->has('recoveryCodes')
                 ->has('status')
                 ->where('twoFactorEnabled', false)
             );
     });
 
-    it('decrypts and exposes recovery codes when two-factor is enabled', function () {
-        $codes = ['code-one', 'code-two'];
-
+    it('keeps recovery codes out of the page when two-factor is enabled', function () {
         $this->user->forceFill([
             'two_factor_secret' => encrypt('secret-value'),
-            'two_factor_recovery_codes' => encrypt(json_encode($codes)),
+            'two_factor_recovery_codes' => encrypt(json_encode(['code-one', 'code-two'])),
         ])->save();
 
         get(route('settings.security.edit'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('twoFactorEnabled', true)
-                ->where('recoveryCodes', $codes)
-            );
+                ->missing('recoveryCodes')
+            )
+            ->assertDontSee('code-one');
     });
 });
 

@@ -23,9 +23,6 @@ class SecurityController extends Controller
             'canManageTwoFactor' => true,
             'requiresConfirmation' => config('fortify.confirmPasswordBeforeEnabling2FA', false),
             'twoFactorEnabled' => ! is_null($user->two_factor_secret),
-            'recoveryCodes' => $user->two_factor_recovery_codes
-                ? json_decode(is_string($decrypted = decrypt($user->two_factor_recovery_codes)) ? $decrypted : '', true)
-                : [],
             'status' => session('status'),
         ]);
     }
