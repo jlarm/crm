@@ -116,6 +116,18 @@ describe('DealershipStoreRequest', function () {
             ->assertSessionHasErrors('phone');
     });
 
+    it('saves an optional phone extension', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['phone_extension' => '305']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('dealerships', ['phone_extension' => '305']);
+    });
+
+    it('rejects phone_extension exceeding 10 chars', function () {
+        $this->post('/dealerships', validDealershipStorePayload(['phone_extension' => str_repeat('1', 11)]))
+            ->assertSessionHasErrors('phone_extension');
+    });
+
     it('rejects city exceeding 100 chars', function () {
         $this->post('/dealerships', validDealershipStorePayload(['city' => str_repeat('a', 101)]))
             ->assertSessionHasErrors('city');

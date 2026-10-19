@@ -22,6 +22,7 @@ final class DealershipStoreController extends Controller
             'state' => ['nullable', 'string', 'max:255'],
             'zip_code' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'phone_extension' => ['nullable', 'string', 'max:10'],
             'current_solution_name' => ['nullable', 'string', 'max:255'],
             'current_solution_use' => ['nullable', 'string', 'max:255'],
         ]);
@@ -49,6 +50,7 @@ final class DealershipStoreController extends Controller
             'state' => ['nullable', 'string', 'max:255'],
             'zip_code' => ['nullable', 'string', 'max:20'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'phone_extension' => ['nullable', 'string', 'max:10'],
             'current_solution_name' => ['nullable', 'string', 'max:255'],
             'current_solution_use' => ['nullable', 'string', 'max:255'],
         ]);

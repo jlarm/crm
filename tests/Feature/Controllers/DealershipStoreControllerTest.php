@@ -26,11 +26,13 @@ describe('DealershipStoreController store', function () {
             'state' => 'TS',
             'zip_code' => '12345',
             'phone' => '555-0001',
+            'phone_extension' => '12',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('stores', [
             'dealership_id' => $this->dealership->id,
             'name' => 'Main Store',
+            'phone_extension' => '12',
             'user_id' => $this->user->id,
         ]);
     });

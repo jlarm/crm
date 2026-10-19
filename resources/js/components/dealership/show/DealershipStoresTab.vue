@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatPhone } from '@/lib/phone';
+import { formatPhoneWithExtension } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,7 +91,17 @@ function deleteStore(dealershipId: number, store: Store): void {
                         </Field>
                         <Field>
                             <FieldLabel for="store_phone">Phone</FieldLabel>
-                            <PhoneInput id="store_phone" name="phone" />
+                            <div class="flex gap-2">
+                                <PhoneInput class="flex-1" id="store_phone" name="phone" />
+                                <Input
+                                    id="store_phone_extension"
+                                    name="phone_extension"
+                                    placeholder="Ext."
+                                    aria-label="Phone extension"
+                                    maxlength="10"
+                                    class="w-20"
+                                />
+                            </div>
                         </Field>
                         <Field class="col-span-2">
                             <FieldLabel for="store_solution_name">Current Solution Name</FieldLabel>
@@ -148,7 +158,7 @@ function deleteStore(dealershipId: number, store: Store): void {
                             {{ store.city }}{{ store.state ? `, ${store.state}` : '' }}
                             {{ store.zipCode || '' }}
                         </p>
-                        <p class="text-xs text-slate-500">{{ formatPhone(store.phone) || '—' }}</p>
+                        <p class="text-xs text-slate-500">{{ formatPhoneWithExtension(store.phone, store.phoneExtension) || '—' }}</p>
                     </div>
                 </CardHeader>
             </Card>
@@ -216,11 +226,23 @@ function deleteStore(dealershipId: number, store: Store): void {
                     </Field>
                     <Field>
                         <FieldLabel for="store_edit_phone">Phone</FieldLabel>
-                        <PhoneInput
-                            id="store_edit_phone"
-                            name="phone"
-                            :default-value="editingStore.phone"
-                        />
+                        <div class="flex gap-2">
+                            <PhoneInput
+                                class="flex-1"
+                                id="store_edit_phone"
+                                name="phone"
+                                :default-value="editingStore.phone"
+                            />
+                            <Input
+                                id="store_edit_phone_extension"
+                                name="phone_extension"
+                                :default-value="editingStore.phoneExtension ?? undefined"
+                                placeholder="Ext."
+                                aria-label="Phone extension"
+                                maxlength="10"
+                                class="w-20"
+                            />
+                        </div>
                     </Field>
                     <Field class="col-span-2">
                         <FieldLabel for="store_edit_solution_name">Current Solution Name</FieldLabel>

@@ -44,6 +44,7 @@ class User extends Authenticatable
         'timezone',
         'title',
         'phone',
+        'phone_extension',
     ];
 
     /**

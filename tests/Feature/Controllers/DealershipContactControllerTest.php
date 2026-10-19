@@ -24,6 +24,7 @@ describe('DealershipContactController store', function () {
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'phone' => '555-1234',
+            'phone_extension' => '204',
             'position' => 'Owner',
             'primary_contact' => true,
         ])->assertRedirect();
@@ -32,6 +33,7 @@ describe('DealershipContactController store', function () {
             'dealership_id' => $this->dealership->id,
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
+            'phone_extension' => '204',
             'primary_contact' => true,
         ]);
     });
@@ -40,6 +42,13 @@ describe('DealershipContactController store', function () {
         post(route('dealerships.contacts.store', $this->dealership), [
             'email' => 'foo@bar.com',
         ])->assertSessionHasErrors('name');
+    });
+
+    it('rejects a phone extension longer than 10 characters', function () {
+        post(route('dealerships.contacts.store', $this->dealership), [
+            'name' => 'Jane Doe',
+            'phone_extension' => str_repeat('1', 11),
+        ])->assertSessionHasErrors('phone_extension');
     });
 
     it('validates email format', function () {

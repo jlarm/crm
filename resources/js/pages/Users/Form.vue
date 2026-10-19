@@ -24,6 +24,7 @@ const form = useForm({
     email: props.user?.email ?? '',
     title: props.user?.title ?? '',
     phone: props.user?.phone ?? '',
+    phone_extension: props.user?.phoneExtension ?? '',
     timezone: props.user?.timezone ?? '',
     password: '',
     password_confirmation: '',
@@ -77,8 +78,19 @@ function submit(): void {
 
                             <Field class="col-span-1">
                                 <FieldLabel for="phone">Phone</FieldLabel>
-                                <PhoneInput id="phone" v-model="form.phone" />
+                                <div class="flex gap-2">
+                                    <PhoneInput id="phone" v-model="form.phone" class="flex-1" />
+                                    <Input
+                                        id="phone_extension"
+                                        v-model="form.phone_extension"
+                                        placeholder="Ext."
+                                        aria-label="Phone extension"
+                                        maxlength="10"
+                                        class="w-20"
+                                    />
+                                </div>
                                 <InputError :message="form.errors.phone" />
+                                <InputError :message="form.errors.phone_extension" />
                             </Field>
 
                             <Field class="col-span-1">

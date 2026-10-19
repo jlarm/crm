@@ -128,6 +128,7 @@ describe('Store Fillable Fields', function () {
             'state',
             'zip_code',
             'phone',
+            'phone_extension',
             'current_solution_name',
             'current_solution_use',
         ];

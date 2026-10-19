@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatPhone } from '@/lib/phone';
+import { formatPhoneWithExtension } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,7 +87,17 @@ function togglePrimary(dealershipId: number, contact: Contact): void {
                         </Field>
                         <Field>
                             <FieldLabel for="contact_phone">Phone</FieldLabel>
-                            <PhoneInput id="contact_phone" name="phone" />
+                            <div class="flex gap-2">
+                                <PhoneInput class="flex-1" id="contact_phone" name="phone" />
+                                <Input
+                                    id="contact_phone_extension"
+                                    name="phone_extension"
+                                    placeholder="Ext."
+                                    aria-label="Phone extension"
+                                    maxlength="10"
+                                    class="w-20"
+                                />
+                            </div>
                         </Field>
                         <Field class="col-span-2">
                             <FieldLabel for="contact_position">Position</FieldLabel>
@@ -165,7 +175,7 @@ function togglePrimary(dealershipId: number, contact: Contact): void {
                     <div class="space-y-2">
                         <div v-if="contact.phone" class="flex items-center gap-3">
                             <Phone class="h-3 w-3 text-slate-500" />
-                            <span>{{ formatPhone(contact.phone) }}</span>
+                            <span>{{ formatPhoneWithExtension(contact.phone, contact.phoneExtension) }}</span>
                         </div>
                         <div v-if="contact.email" class="flex items-center gap-3">
                             <Mail class="h-3 w-3 text-slate-500" />
@@ -224,11 +234,23 @@ function togglePrimary(dealershipId: number, contact: Contact): void {
                     </Field>
                     <Field>
                         <FieldLabel for="contact_edit_phone">Phone</FieldLabel>
-                        <PhoneInput
-                            id="contact_edit_phone"
-                            name="phone"
-                            :default-value="editingContact.phone"
-                        />
+                        <div class="flex gap-2">
+                            <PhoneInput
+                                class="flex-1"
+                                id="contact_edit_phone"
+                                name="phone"
+                                :default-value="editingContact.phone"
+                            />
+                            <Input
+                                id="contact_edit_phone_extension"
+                                name="phone_extension"
+                                :default-value="editingContact.phoneExtension ?? undefined"
+                                placeholder="Ext."
+                                aria-label="Phone extension"
+                                maxlength="10"
+                                class="w-20"
+                            />
+                        </div>
                     </Field>
                     <Field class="col-span-2">
                         <FieldLabel for="contact_edit_position">Position</FieldLabel>

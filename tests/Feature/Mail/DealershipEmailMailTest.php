@@ -30,6 +30,13 @@ it('renders the body escaped, in paragraphs, with links and the rep signature', 
         ->toContain('alt="ARMP - Automotive Risk Management Partners"');
 });
 
+it('adds the rep phone extension to the signature', function () {
+    $rep = User::factory()->create(['email' => 'rita@armp.test', 'phone' => '5551234567', 'phone_extension' => '204']);
+    $email = DealershipEmail::factory()->create(['user_id' => $rep->id]);
+
+    expect((new DealershipEmailMail($email))->render())->toContain('555-123-4567 ext. 204');
+});
+
 it('embeds the logo in the sent email', function () {
     $email = DealershipEmail::factory()->create();
 

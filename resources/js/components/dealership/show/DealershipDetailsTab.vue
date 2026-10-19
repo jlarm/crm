@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatPhone } from '@/lib/phone';
+import { formatPhoneWithExtension } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,11 +177,23 @@ function toggleConsultant(userId: number, add: boolean): void {
 
                                 <Field class="col-span-3">
                                     <FieldLabel for="phone">Phone</FieldLabel>
-                                    <PhoneInput
-                                        id="phone"
-                                        name="phone"
-                                        :default-value="dealership.phone"
-                                    />
+                                    <div class="flex gap-2">
+                                        <PhoneInput
+                                            class="flex-1"
+                                            id="phone"
+                                            name="phone"
+                                            :default-value="dealership.phone"
+                                        />
+                                        <Input
+                                            id="phone_extension"
+                                            name="phone_extension"
+                                            :default-value="dealership.phoneExtension ?? undefined"
+                                            placeholder="Ext."
+                                            aria-label="Phone extension"
+                                            maxlength="10"
+                                            class="w-20"
+                                        />
+                                    </div>
                                 </Field>
 
                                 <Field class="col-span-3">
@@ -357,7 +369,7 @@ function toggleConsultant(userId: number, add: boolean): void {
                             <div class="space-y-2 text-xs text-slate-600">
                                 <div v-if="primaryContact.phone" class="flex items-center gap-3">
                                     <PhoneIcon class="h-3 w-3 text-slate-500" />
-                                    <span>{{ formatPhone(primaryContact.phone) }}</span>
+                                    <span>{{ formatPhoneWithExtension(primaryContact.phone, primaryContact.phoneExtension) }}</span>
                                 </div>
                                 <div v-if="primaryContact.email" class="flex items-center gap-3">
                                     <Mail class="h-3 w-3 text-slate-500" />

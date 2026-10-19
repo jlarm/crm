@@ -21,6 +21,19 @@ export function formatPhone(value: string | null | undefined): string {
 }
 
 /**
+ * Formats a phone number with its optional extension: 999-999-9999 ext. 123.
+ */
+export function formatPhoneWithExtension(value: string | null | undefined, extension: string | null | undefined): string {
+    const phone = formatPhone(value);
+
+    if (!phone || !extension?.trim()) {
+        return phone;
+    }
+
+    return `${phone} ext. ${extension.trim()}`;
+}
+
+/**
  * Formats a phone number while it's being typed: 999, 999-999, 999-999-9999.
  */
 export function formatPhoneAsTyped(value: string): string {

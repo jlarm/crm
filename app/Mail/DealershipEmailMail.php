@@ -81,7 +81,7 @@ final class DealershipEmailMail extends Mailable
                 'signature' => [
                     'name' => $this->email->from_name,
                     'title' => $rep?->title,
-                    'phone' => $rep?->phone ? format_phone($rep->phone) : null,
+                    'phone' => $rep?->phone ? format_phone($rep->phone).($rep->phone_extension ? ' ext. '.$rep->phone_extension : '') : null,
                     'email' => $this->email->from_email,
                     'company' => 'Automotive Risk Management Partners',
                 ],

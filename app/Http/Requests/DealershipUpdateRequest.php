@@ -20,6 +20,7 @@ final class DealershipUpdateRequest extends FormRequest
             'state' => ['nullable', 'string', 'max:2'],
             'zip_code' => ['nullable', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'phone_extension' => ['nullable', 'string', 'max:10'],
             'website' => ['nullable', 'url', 'max:255'],
             'current_solution_name' => ['nullable', 'string', 'max:255'],
             'current_solution_use' => ['nullable', 'string', 'max:255'],

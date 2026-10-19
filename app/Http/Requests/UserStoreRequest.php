@@ -25,6 +25,7 @@ class UserStoreRequest extends FormRequest
             'password' => ['required', 'confirmed', Password::defaults()],
             'title' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:32'],
+            'phone_extension' => ['nullable', 'string', 'max:10'],
             'timezone' => ['nullable', 'string', 'timezone'],
             'roles' => ['array'],
             'roles.*' => ['integer', 'exists:roles,id'],

@@ -42,6 +42,7 @@ class Contact extends Model
         'name',
         'email',
         'phone',
+        'phone_extension',
         'position',
         'primary_contact',
         'linkedin_link',

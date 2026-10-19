@@ -63,6 +63,7 @@ final class UserController extends Controller
             'password' => Hash::make(is_string($data['password']) ? $data['password'] : ''),
             'title' => $data['title'] ?? null,
             'phone' => $data['phone'] ?? null,
+            'phone_extension' => $data['phone_extension'] ?? null,
             'timezone' => $data['timezone'] ?? null,
             'email_verified_at' => now(),
         ]);
@@ -92,6 +93,7 @@ final class UserController extends Controller
             'email' => $data['email'],
             'title' => $data['title'] ?? null,
             'phone' => $data['phone'] ?? null,
+            'phone_extension' => $data['phone_extension'] ?? null,
             'timezone' => $data['timezone'] ?? null,
         ]);
 

@@ -196,7 +196,17 @@ function toggleConsultant(userId: number, add: boolean): void {
 
                                     <Field class="col-span-3">
                                         <FieldLabel for="phone">Phone</FieldLabel>
-                                        <PhoneInput id="phone" :key="phoneInputKey" name="phone" :default-value="phone" />
+                                        <div class="flex gap-2">
+                                            <PhoneInput class="flex-1" id="phone" :key="phoneInputKey" name="phone" :default-value="phone" />
+                                            <Input
+                                                id="phone_extension"
+                                                name="phone_extension"
+                                                placeholder="Ext."
+                                                aria-label="Phone extension"
+                                                maxlength="10"
+                                                class="w-20"
+                                            />
+                                        </div>
                                     </Field>
 
                                     <Field class="col-span-3">

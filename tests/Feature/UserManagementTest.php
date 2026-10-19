@@ -135,6 +135,21 @@ describe('User Update', function () {
         expect($target->refresh()->title)->toBe('Account Manager');
     });
 
+    it('saves the phone extension', function () {
+        $target = User::factory()->create();
+
+        $this->actingAs(superAdmin())
+            ->put("/users/{$target->id}", [
+                'name' => $target->name,
+                'email' => $target->email,
+                'phone' => '5551234567',
+                'phone_extension' => '42',
+            ])
+            ->assertRedirect('/users');
+
+        expect($target->refresh()->phone_extension)->toBe('42');
+    });
+
     it('updates a user and syncs roles', function () {
         $admin = superAdmin();
         $target = User::factory()->create(['name' => 'Original']);

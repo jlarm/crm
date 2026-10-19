@@ -25,6 +25,7 @@ final class UserResource extends JsonResource
             'email' => $this->email,
             'title' => $this->title,
             'phone' => $this->phone,
+            'phoneExtension' => $this->phone_extension,
             'timezone' => $this->timezone,
             'createdAt' => $this->created_at?->toIso8601String(),
             'deletedAt' => $this->deleted_at?->toIso8601String(),
