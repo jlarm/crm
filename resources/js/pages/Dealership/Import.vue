@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
+import TagInput from '@/components/TagInput.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -58,6 +59,7 @@ interface Preview {
     token: string;
     defaults: { status: string; rating: string; type: string };
     defaultUserIds: number[];
+    tags: string[];
     options: {
         update_existing: boolean;
         transactional: boolean;
@@ -76,6 +78,7 @@ interface Preview {
 
 interface Props {
     allUsers: User[];
+    tagOptions: string[];
     preview: Preview | null;
 }
 
@@ -87,6 +90,7 @@ const defaultType = ref('Automotive');
 const updateExisting = ref(false);
 const mergeDuplicates = ref(true);
 const transactional = ref(true);
+const importTags = ref<string[]>([]);
 
 const consultantSearch = ref('');
 const selectedConsultantIds = ref<number[]>([]);
@@ -223,6 +227,25 @@ function formatErrors(errors: Record<string, string[]>): string {
                 </div>
 
                 <div class="self-start space-y-5">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Tags</CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-2">
+                            <TagInput
+                                v-model="importTags"
+                                name="tags"
+                                :suggestions="tagOptions"
+                                placeholder="e.g. Trade Show 2026"
+                            />
+                            <p class="text-xs text-slate-500">
+                                Every dealership in this file gets these tags, including ones you already have,
+                                so you can find this list later. Press Enter to add.
+                            </p>
+                            <InputError :message="errors.tags ?? errors['tags.0']" />
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Defaults</CardTitle>
@@ -402,6 +425,16 @@ function formatErrors(errors: Record<string, string[]>): string {
                             <div class="text-xs text-slate-500">Will import</div>
                             <div class="text-xl font-bold text-green-600">{{ validRowCount }}</div>
                         </div>
+                    </div>
+                    <div v-if="preview.tags.length > 0" class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+                        <span>Tagged:</span>
+                        <span
+                            v-for="tag in preview.tags"
+                            :key="tag"
+                            class="rounded-md border border-border bg-muted px-2 py-0.5 font-medium text-foreground"
+                        >
+                            {{ tag }}
+                        </span>
                     </div>
                     <p
                         v-if="preview.summary.autoCreatedDealerships > 0"

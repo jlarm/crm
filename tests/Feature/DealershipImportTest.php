@@ -6,6 +6,7 @@ use App\Jobs\ProcessDealershipImport;
 use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -359,4 +360,38 @@ CSV;
 
         expect(Dealership::where('name', 'Smith Ford, Inc.')->exists())->toBeTrue();
     });
+});
+
+it('tags every dealership in the file, reusing existing tags by name', function () {
+    $tradeShow = Tag::create(['name' => 'Trade Show 2026']);
+    $existing = Dealership::factory()->create(['name' => 'Prime Motors']);
+    $csv = "name\nPrime Motors\nNorth Auto\n";
+
+    $response = $this->post('/dealerships/import/preview', defaultPreviewPayload([
+        'file' => csvFile($csv),
+        'tags' => ['trade show 2026', ' Purchased  List ', 'Purchased List'],
+    ]));
+    $response->assertInertia(fn ($page) => $page->where('preview.tags', ['trade show 2026', 'Purchased List']));
+
+    $token = $response->viewData('page')['props']['preview']['token'];
+    $this->post('/dealerships/import', ['token' => $token]);
+
+    $north = Dealership::where('name', 'North Auto')->sole();
+
+    expect(Tag::count())->toBe(2)
+        ->and($north->tags->pluck('name')->all())->toBe(['Purchased List', 'Trade Show 2026'])
+        ->and($existing->tags->pluck('id')->all())->toContain($tradeShow->id);
+});
+
+it('tags dealerships auto-created from contact rows', function () {
+    $csv = "First Name,Last Name,Email,companyName\nJane,Doe,jane@example.com,Prime Motors\n";
+
+    $response = $this->post('/dealerships/import/preview', defaultPreviewPayload([
+        'file' => csvFile($csv),
+        'tags' => ['LinkedIn Export'],
+    ]));
+    $token = $response->viewData('page')['props']['preview']['token'];
+    $this->post('/dealerships/import', ['token' => $token]);
+
+    expect(Dealership::first()->tags->pluck('name')->all())->toBe(['LinkedIn Export']);
 });

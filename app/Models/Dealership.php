@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
@@ -48,6 +49,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read Collection<int, DealerEmail> $dealerEmails
  * @property-read Collection<int, SentEmail> $sentEmails
  * @property-read Collection<int, User> $users
+ * @property-read Collection<int, Tag> $tags
  * @property-read int|null $open_tasks_count
  * @property-read int $total_store_count
  */
@@ -141,6 +143,14 @@ class Dealership extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class)->withTimestamps()->orderBy('tags.name');
     }
 
     /**
@@ -247,7 +257,8 @@ class Dealership extends Model
 
         $query->where(function (Builder $q) use ($search): void {
             $q->where('name', 'like', sprintf('%%%s%%', $search))
-                ->orWhere('city', 'like', sprintf('%%%s%%', $search));
+                ->orWhere('city', 'like', sprintf('%%%s%%', $search))
+                ->orWhereHas('tags', fn (Builder $tags) => $tags->where('tags.name', 'like', sprintf('%%%s%%', $search)));
         });
     }
 
@@ -273,6 +284,18 @@ class Dealership extends Model
         }
 
         $query->where('type', $type);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeWithTag(Builder $query, ?string $tag): void
+    {
+        if (! $tag) {
+            return;
+        }
+
+        $query->whereHas('tags', fn (Builder $q) => $q->where(DB::raw('LOWER(tags.name)'), mb_strtolower($tag)));
     }
 
     /**

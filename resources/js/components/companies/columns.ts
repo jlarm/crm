@@ -16,6 +16,7 @@ export interface Dealership {
     rating: string;
     ratingLabel: string;
     openTasksCount: number;
+    tags: string[];
 }
 
 type SortState = () => { column: string; direction: 'asc' | 'desc' };
@@ -73,6 +74,29 @@ export function createColumns(
                                 title: `${dealership.openTasksCount} open task${dealership.openTasksCount === 1 ? '' : 's'}`,
                             },
                             String(dealership.openTasksCount),
+                        ),
+                    );
+                }
+
+                for (const tag of dealership.tags.slice(0, 2)) {
+                    children.push(
+                        h(
+                            'span',
+                            {
+                                class: 'ml-2 inline-flex max-w-32 items-center truncate rounded-md border border-border bg-muted px-1.5 py-px text-[11px] font-normal text-muted-foreground',
+                                title: tag,
+                            },
+                            tag,
+                        ),
+                    );
+                }
+
+                if (dealership.tags.length > 2) {
+                    children.push(
+                        h(
+                            'span',
+                            { class: 'ml-1 text-[11px] font-normal text-muted-foreground', title: dealership.tags.slice(2).join(', ') },
+                            `+${dealership.tags.length - 2}`,
                         ),
                     );
                 }

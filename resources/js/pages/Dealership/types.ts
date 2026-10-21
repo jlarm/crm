@@ -92,6 +92,7 @@ export interface Dealership {
     currentSolutionUse: string | null;
     status: string;
     rating: string;
+    tags: string[];
     stores: Store[];
     contacts: Contact[];
     users: User[];

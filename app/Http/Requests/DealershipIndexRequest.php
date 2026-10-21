@@ -18,6 +18,7 @@ final class DealershipIndexRequest extends FormRequest
             'status' => ['nullable', 'string', 'in:active,inactive'],
             'rating' => ['nullable', 'string', 'in:hot,warm,cold'],
             'type' => ['nullable', 'string', 'max:255'],
+            'tag' => ['nullable', 'string', 'max:255'],
             'scope' => ['nullable', 'string', 'in:mine,all'],
             'include_imported' => ['nullable', 'boolean'],
             'sort' => ['nullable', 'string', 'in:name,city,state,status,rating'],
@@ -44,7 +45,7 @@ final class DealershipIndexRequest extends FormRequest
     /**
      * Normalised filter values, safe to pass to ListDealerships and echo back to the page.
      *
-     * @return array{search: string, status: string, rating: string, type: string, scope: string, include_imported: string, sort: string, direction: string}
+     * @return array{search: string, status: string, rating: string, type: string, tag: string, scope: string, include_imported: string, sort: string, direction: string}
      */
     public function filters(): array
     {
@@ -53,6 +54,7 @@ final class DealershipIndexRequest extends FormRequest
             'status' => $this->string('status')->toString(),
             'rating' => $this->string('rating')->toString(),
             'type' => $this->string('type')->toString(),
+            'tag' => $this->string('tag')->toString(),
             'scope' => $this->scope(),
             'include_imported' => $this->includeImported() ? '1' : '',
             'sort' => $this->string('sort')->toString(),

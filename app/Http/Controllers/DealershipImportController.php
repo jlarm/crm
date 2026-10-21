@@ -12,6 +12,7 @@ use App\Http\Requests\DealershipImportConfirmRequest;
 use App\Http\Requests\DealershipImportPreviewRequest;
 use App\Jobs\ProcessDealershipImport;
 use App\Models\Dealership;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
@@ -30,6 +31,7 @@ final class DealershipImportController extends Controller
     {
         return Inertia::render('Dealership/Import', [
             'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'tagOptions' => Tag::dealershipTagNames(),
             'preview' => null,
         ]);
     }
@@ -54,6 +56,16 @@ final class DealershipImportController extends Controller
             'update_existing' => (bool) $request->validated('update_existing', false),
             'transactional' => (bool) $request->validated('transactional', true),
         ];
+
+        /** @var array<int, mixed> $rawTags */
+        $rawTags = $request->validated('tags', []);
+        $tags = collect($rawTags)
+            ->filter(fn (mixed $tag): bool => is_string($tag))
+            ->map(fn (string $tag): string => Str::squish($tag))
+            ->filter()
+            ->unique(fn (string $tag): string => mb_strtolower($tag))
+            ->values()
+            ->all();
 
         $parsed = $parse($request->file('file'));
 
@@ -94,15 +106,18 @@ final class DealershipImportController extends Controller
                 'importer_id' => (int) auth()->id(),
                 'default_user_ids' => $defaultUserIds,
                 'defaults' => $defaults,
+                'tags' => $tags,
             ],
         ], now()->addMinutes(self::CACHE_TTL_MINUTES));
 
         return Inertia::render('Dealership/Import', [
             'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'tagOptions' => Tag::dealershipTagNames(),
             'preview' => [
                 'token' => $token,
                 'defaults' => $defaults,
                 'defaultUserIds' => $defaultUserIds,
+                'tags' => $tags,
                 'options' => $options,
                 'summary' => [
                     ...$summary,
@@ -129,7 +144,7 @@ final class DealershipImportController extends Controller
     ): RedirectResponse {
         $token = is_string($t = $request->validated('token')) ? $t : '';
         $cacheKey = 'dealership-import:'.$token;
-        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, likely_duplicates?: list<array{line: int, name: string, reason: string, match: array{id: int, name: string, city: string|null, state: string|null}}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}}|null $payload */
+        /** @var array{validated: array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>, likely_duplicates?: list<array{line: int, name: string, reason: string, match: array{id: int, name: string, city: string|null, state: string|null}}>, options: array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}}|null $payload */
         $payload = Cache::get($cacheKey);
 
         if (! $payload) {

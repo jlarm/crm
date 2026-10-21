@@ -51,6 +51,7 @@ interface Props {
         status?: string;
         rating?: string;
         type?: string;
+        tag?: string;
         scope?: string;
         include_imported?: string;
         sort?: string;
@@ -60,6 +61,7 @@ interface Props {
         statuses: FilterOption[];
         ratings: FilterOption[];
         types: FilterOption[];
+        tags: string[];
     };
     taskStats: TaskStats;
     upcomingTasks: Task[];
@@ -159,6 +161,7 @@ const { filters, isLoadingData, resetFilters } = useTableFilters({
         status: typeof props.filters.status === 'string' ? props.filters.status : '',
         rating: typeof props.filters.rating === 'string' ? props.filters.rating : '',
         type: typeof props.filters.type === 'string' ? props.filters.type : '',
+        tag: typeof props.filters.tag === 'string' ? props.filters.tag : '',
         scope:
             typeof props.filters.scope === 'string' &&
             ['mine', 'all'].includes(props.filters.scope)
@@ -367,6 +370,7 @@ const columns = createColumns(handleSort, () => currentSorting.value);
                                 :statuses="filterOptions.statuses"
                                 :ratings="filterOptions.ratings"
                                 :types="filterOptions.types"
+                                :tags="filterOptions.tags"
                                 @reset="resetFilters"
                             />
                         </div>

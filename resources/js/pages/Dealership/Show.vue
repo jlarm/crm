@@ -22,6 +22,7 @@ import { nextTick, ref, watch } from 'vue';
 interface Props {
     dealership: Dealership;
     allUsers: User[];
+    tagOptions: string[];
     tasks: Task[];
     taskFilterOptions: {
         types: FilterOption[];
@@ -184,6 +185,7 @@ function setActiveTab(tab: DealershipShowTab): void {
             v-if="activeTab === 'details'"
             :dealership="dealership"
             :all-users="props.allUsers"
+            :tag-options="tagOptions"
         />
 
         <DealershipStoresTab

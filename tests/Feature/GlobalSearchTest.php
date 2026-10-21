@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
 
@@ -69,4 +70,17 @@ it('returns an empty array for short queries', function () {
         ->getJson(route('search', ['q' => 'a']));
 
     $response->assertOk()->assertExactJson([]);
+});
+
+it('finds dealerships by tag', function () {
+    $user = User::factory()->create();
+    $tagged = Dealership::factory()->create(['name' => 'Smith Ford']);
+    $tagged->tags()->attach(Tag::factory()->create(['name' => 'Trade Show 2026']));
+    Dealership::factory()->create(['name' => 'Jones Chevy']);
+
+    $this->actingAs($user)
+        ->getJson(route('search', ['q' => 'trade show']))
+        ->assertOk()
+        ->assertJsonCount(1)
+        ->assertJsonPath('0.id', $tagged->id);
 });

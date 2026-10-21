@@ -13,7 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class ListDealerships
 {
     /**
-     * @param  array{search?: string, status?: string, rating?: string, type?: string, scope?: string, include_imported?: string, sort?: string, direction?: string}  $filters
+     * @param  array{search?: string, status?: string, rating?: string, type?: string, tag?: string, scope?: string, include_imported?: string, sort?: string, direction?: string}  $filters
      * @return LengthAwarePaginator<int, array<mixed, mixed>>
      */
     public function __invoke(User $user, array $filters, int $perPage = 15): LengthAwarePaginator
@@ -33,8 +33,10 @@ final class ListDealerships
             ->withStatus($this->value($filters, 'status'))
             ->withRating($this->value($filters, 'rating'))
             ->withType($this->value($filters, 'type'))
+            ->withTag($this->value($filters, 'tag'))
             ->sortBy($this->value($filters, 'sort'), $filters['direction'] ?? 'asc')
             ->select('id', 'name', 'city', 'state', 'type', 'status', 'rating')
+            ->with('tags:id,name')
             ->withCount(['tasks as open_tasks_count' => fn (Builder $q) => $q->whereNull('completed_at')])
             ->paginate($perPage)
             ->withQueryString()

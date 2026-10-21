@@ -18,6 +18,7 @@ use App\Actions\Tasks\BuildTaskStats;
 use App\Actions\Tasks\ListUpcomingTasks;
 use App\Http\Requests\DealershipIndexRequest;
 use App\Models\Dealership;
+use App\Models\Tag;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -51,6 +52,7 @@ final class DashboardController extends Controller
                 'statuses' => Dealership::statusOptions(),
                 'ratings' => Dealership::ratingOptions(),
                 'types' => Dealership::typeOptions(),
+                'tags' => Tag::dealershipTagNames(),
             ],
             'taskStats' => $buildTaskStats($user),
             'upcomingTasks' => $listUpcomingTasks($user),

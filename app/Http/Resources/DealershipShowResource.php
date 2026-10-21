@@ -60,6 +60,7 @@ final class DealershipShowResource extends JsonResource
                 'linkedinLink' => $contact->linkedin_link,
                 'primaryContact' => (bool) $contact->primary_contact,
             ])->all()),
+            'tags' => $this->whenLoaded('tags', fn (): array => $this->tags->pluck('name')->all()),
             'users' => $this->whenLoaded('users', fn () => $this->users->map(fn (User $user): array => [
                 'id' => $user->id,
                 'name' => $user->name,

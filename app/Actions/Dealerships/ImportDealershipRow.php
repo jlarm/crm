@@ -7,6 +7,7 @@ namespace App\Actions\Dealerships;
 use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -26,8 +27,15 @@ final class ImportDealershipRow
     private array $userIdByEmail = [];
 
     /**
+     * Tags put on every dealership the import touches, so a list can be traced back to its source.
+     *
+     * @var list<int>
+     */
+    private array $tagIds = [];
+
+    /**
      * @param  array<int, array{line: int, row_type: string, resolved: array<string, mixed>, errors: array<string, array<int, string>>, parent_ref: string|null, extra_user_emails: array<int, string>}>  $validatedRows
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      * @return array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>}
      */
     public function __invoke(array $validatedRows, array $options): array
@@ -44,6 +52,7 @@ final class ImportDealershipRow
 
         $this->prefetchDealerships($groups);
         $this->prefetchUsers($validatedRows);
+        $this->tagIds = Tag::idsForNames($options['tags'] ?? []);
 
         if ($options['transactional']) {
             DB::transaction(function () use ($groups, $options, &$stats): void {
@@ -206,7 +215,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -215,6 +224,10 @@ final class ImportDealershipRow
     private function processGroup(array $group, array $options, array &$stats): void
     {
         $dealership = $this->upsertDealership($group, $options, $stats);
+
+        if ($this->tagIds !== []) {
+            $dealership->tags()->syncWithoutDetaching($this->tagIds);
+        }
 
         foreach ($group['stores'] as $row) {
             $this->upsertStore($dealership, $row, $options, $stats);
@@ -227,7 +240,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array{parent: ?array<string, mixed>, parent_ref: ?string, stores: array<int, array<string, mixed>>, contacts: array<int, array<string, mixed>>}  $group
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -287,7 +300,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<int, string>  $extraEmails
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      */
     private function syncUsers(Dealership $dealership, array $extraEmails, array $options): void
     {
@@ -307,7 +320,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *
@@ -344,7 +357,7 @@ final class ImportDealershipRow
 
     /**
      * @param  array<string, mixed>  $row
-     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool}  $options
+     * @param  array{importer_id: int, default_user_ids: array<int, int>, defaults: array{status: string, rating: string, type: string}, update_existing: bool, transactional: bool, tags?: array<int, string>}  $options
      *
      * @param-out array{created: array{dealerships: int, stores: int, contacts: int}, updated: array{dealerships: int, stores: int, contacts: int}, skipped: int, errors: array<int, array{line: int, message: string}>} $stats
      *

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatPhoneWithExtension } from '@/lib/phone';
 import InputError from '@/components/InputError.vue';
+import TagInput from '@/components/TagInput.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -29,7 +30,23 @@ import { computed, ref, watch } from 'vue';
 const props = defineProps<{
     dealership: Dealership;
     allUsers: User[];
+    tagOptions: string[];
 }>();
+
+const selectedTags = ref<string[]>([]);
+const initialTags = ref<string[]>([]);
+
+function syncTagsFromDealership(): void {
+    selectedTags.value = [...(props.dealership.tags ?? [])];
+    initialTags.value = [...(props.dealership.tags ?? [])];
+}
+
+const tagsDirty = computed(
+    () => selectedTags.value.join('\u0000') !== initialTags.value.join('\u0000'),
+);
+
+// The dealership prop only changes after a save or a reload, so the server's tags win.
+watch(() => (props.dealership.tags ?? []).join('\u0000'), syncTagsFromDealership);
 
 const consultantSearch = ref('');
 const selectedConsultantIds = ref<number[]>([]);
@@ -71,6 +88,7 @@ watch(
         }
         lastDealershipId.value = id;
         syncConsultantsFromDealership();
+        syncTagsFromDealership();
     },
     { immediate: true },
 );
@@ -349,6 +367,21 @@ function toggleConsultant(userId: number, add: boolean): void {
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Tags</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <input v-if="selectedTags.length === 0" type="hidden" name="tags" value="" />
+                        <TagInput
+                            v-model="selectedTags"
+                            name="tags"
+                            :suggestions="tagOptions"
+                        />
+                        <InputError :message="errors.tags ?? errors['tags.0']" />
+                    </CardContent>
+                </Card>
+
                 <Card v-if="primaryContact">
                     <CardHeader>
                         <CardTitle>Primary Contact</CardTitle>
@@ -393,7 +426,7 @@ function toggleConsultant(userId: number, add: boolean): void {
             <div class="col-span-full flex justify-end">
                 <Button
                     type="submit"
-                    :disabled="processing || (!isDirty && !consultantsDirty)"
+                    :disabled="processing || (!isDirty && !consultantsDirty && !tagsDirty)"
                 >
                     <Save />
                     Save Changes

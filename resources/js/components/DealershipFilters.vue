@@ -21,12 +21,14 @@ interface Props {
         status: string;
         rating: string;
         type: string;
+        tag: string;
         scope: string;
         include_imported: string;
     };
     statuses: FilterOption[];
     ratings: FilterOption[];
     types: FilterOption[];
+    tags: string[];
 }
 
 interface Emits {
@@ -34,7 +36,7 @@ interface Emits {
     (e: 'reset'): void;
 }
 
-type FilterSection = 'status' | 'rating' | 'type' | 'imported';
+type FilterSection = 'status' | 'rating' | 'type' | 'tag' | 'imported';
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
@@ -80,6 +82,10 @@ const activeChips = computed(() => {
         chips.push({ key: 'type', label: `Type: ${typeLabel}` });
     }
 
+    if (props.modelValue.tag) {
+        chips.push({ key: 'tag', label: `Tag: ${props.modelValue.tag}` });
+    }
+
     if (props.modelValue.include_imported === '1') {
         chips.push({ key: 'include_imported', label: 'Show imported' });
     }
@@ -103,6 +109,7 @@ function clearFilters(): void {
         status: '',
         rating: '',
         type: '',
+        tag: '',
         include_imported: '',
     };
     emit('reset');
@@ -150,7 +157,7 @@ function clearChip(key: keyof Props['modelValue']): void {
 
                         <div class="mt-4 space-y-1">
                             <button
-                                v-for="section in ['status', 'rating', 'type', 'imported'] as FilterSection[]"
+                                v-for="section in ['status', 'rating', 'type', 'tag', 'imported'] as FilterSection[]"
                                 :key="section"
                                 type="button"
                                 class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition capitalize"
@@ -240,6 +247,32 @@ function clearChip(key: keyof Props['modelValue']): void {
                                     <span class="text-sm">{{ type.label }}</span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div v-else-if="activeSection === 'tag'" class="space-y-3">
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
+                                @click="updateDraft('tag', '')"
+                            >
+                                <Checkbox :model-value="draftFilters.tag === ''" />
+                                <span class="text-sm">All tags</span>
+                            </button>
+                            <div v-if="tags.length" class="grid max-h-64 grid-cols-2 gap-3 overflow-y-auto">
+                                <button
+                                    v-for="tag in tags"
+                                    :key="tag"
+                                    type="button"
+                                    class="flex items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
+                                    @click="updateDraft('tag', tag)"
+                                >
+                                    <Checkbox :model-value="draftFilters.tag === tag" />
+                                    <span class="truncate text-sm">{{ tag }}</span>
+                                </button>
+                            </div>
+                            <p v-else class="text-sm text-muted-foreground">
+                                No dealerships are tagged yet.
+                            </p>
                         </div>
 
                         <div v-else class="space-y-3">

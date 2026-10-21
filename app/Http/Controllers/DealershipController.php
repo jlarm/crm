@@ -14,6 +14,7 @@ use App\Http\Resources\TaskResource;
 use App\Models\Dealership;
 use App\Models\DealershipEmail;
 use App\Models\ProgressCategory;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -55,6 +56,7 @@ final class DealershipController extends Controller
     {
         $dealership->load([
             'users' => fn (\Illuminate\Database\Eloquent\Relations\Relation $query) => $query->select('id', 'name'),
+            'tags:id,name',
             'stores',
             'contacts',
             'opportunities' => fn (\Illuminate\Database\Eloquent\Relations\Relation $query) => $query->with(['activities.user'])->orderBy('created_at', 'desc'),
@@ -70,6 +72,7 @@ final class DealershipController extends Controller
         return Inertia::render('Dealership/Show', [
             'dealership' => DealershipShowResource::make($dealership)->resolve(),
             'allUsers' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'tagOptions' => fn (): array => Tag::dealershipTagNames(),
             'tasks' => $tasks,
             'taskFilterOptions' => [
                 'types' => TaskType::options(),
@@ -85,13 +88,20 @@ final class DealershipController extends Controller
     public function update(DealershipUpdateRequest $request, Dealership $dealership): RedirectResponse
     {
         /** @var array<string, mixed> $data */
-        $data = $request->safe()->except(['user_ids']);
+        $data = $request->safe()->except(['user_ids', 'tags']);
         $dealership->update($data);
 
         if ($request->has('user_ids')) {
             /** @var array<int, int> $userIds */
             $userIds = $request->validated('user_ids', []);
             $dealership->users()->sync($userIds);
+        }
+
+        // The form posts an empty "tags" field when every tag was removed, so presence means "sync".
+        if ($request->has('tags')) {
+            /** @var array<int, string> $tags */
+            $tags = $request->validated('tags') ?? [];
+            $dealership->tags()->sync(Tag::idsForNames($tags));
         }
 
         return back()->with('success', 'Dealership updated successfully.');

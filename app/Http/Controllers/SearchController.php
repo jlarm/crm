@@ -8,6 +8,7 @@ use App\Models\Contact;
 use App\Models\Dealership;
 use App\Models\Store;
 use App\Models\Task;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,9 +22,19 @@ final class SearchController extends Controller
             return response()->json([]);
         }
 
+        // Scout only searches the dealership's own columns, so tag matches are looked up separately.
+        $taggedDealerships = Dealership::query()
+            ->whereHas('tags', fn (Builder $tags) => $tags->where('tags.name', 'like', sprintf('%%%s%%', $query)))
+            ->orderBy('name')
+            ->take(5)
+            ->get();
+
         $dealerships = Dealership::search($query)
             ->take(5)
             ->get()
+            ->concat($taggedDealerships)
+            ->unique('id')
+            ->take(5)
             ->map(fn (Dealership $d): array => [
                 'type' => 'dealership',
                 'id' => $d->id,

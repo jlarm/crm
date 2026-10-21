@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Dealerships\ListDealerships;
 use App\Models\Dealership;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
 
@@ -54,4 +55,27 @@ it('includes an open task count', function () {
     $result = ($this->action)($this->user, []);
 
     expect($result->items()[0]['openTasksCount'])->toBe(1);
+});
+
+it('filters by tag name, ignoring case, and returns each row\'s tags', function () {
+    $tagged = Dealership::factory()->create(['user_id' => $this->user->id, 'status' => 'active']);
+    Dealership::factory()->create(['user_id' => $this->user->id, 'status' => 'active']);
+    $tagged->tags()->attach(Tag::factory()->create(['name' => 'Trade Show']));
+
+    $result = ($this->action)($this->user, ['tag' => 'trade show']);
+
+    expect($result->total())->toBe(1)
+        ->and($result->items()[0]['id'])->toBe($tagged->id)
+        ->and($result->items()[0]['tags'])->toBe(['Trade Show']);
+});
+
+it('matches tags in the search box', function () {
+    $tagged = Dealership::factory()->create(['user_id' => $this->user->id, 'status' => 'active', 'name' => 'Smith Ford']);
+    Dealership::factory()->create(['user_id' => $this->user->id, 'status' => 'active', 'name' => 'Jones Chevy']);
+    $tagged->tags()->attach(Tag::factory()->create(['name' => 'Trade Show 2026']));
+
+    $result = ($this->action)($this->user, ['search' => 'trade show']);
+
+    expect($result->total())->toBe(1)
+        ->and($result->items()[0]['id'])->toBe($tagged->id);
 });

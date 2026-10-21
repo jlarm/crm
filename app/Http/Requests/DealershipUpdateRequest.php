@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class DealershipUpdateRequest extends FormRequest
@@ -29,6 +30,8 @@ final class DealershipUpdateRequest extends FormRequest
             'rating' => ['required', 'string', 'in:hot,warm,cold'],
             'user_ids' => ['array'],
             'user_ids.*' => ['integer', 'exists:users,id'],
+            'tags' => ['nullable', 'array', 'max:50'],
+            'tags.*' => ['string', 'max:'.Tag::MAX_NAME_LENGTH],
         ];
     }
 

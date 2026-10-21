@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class DealershipImportPreviewRequest extends FormRequest
@@ -22,6 +23,8 @@ final class DealershipImportPreviewRequest extends FormRequest
             'default_user_ids.*' => ['integer', 'exists:users,id'],
             'update_existing' => ['boolean'],
             'transactional' => ['boolean'],
+            'tags' => ['array', 'max:20'],
+            'tags.*' => ['string', 'max:'.Tag::MAX_NAME_LENGTH],
         ];
     }
 
