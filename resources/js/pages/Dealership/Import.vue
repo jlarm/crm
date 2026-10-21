@@ -11,6 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -173,12 +174,13 @@ function formatErrors(errors: Record<string, string[]>): string {
                             <FieldGroup>
                                 <Field>
                                     <FieldLabel for="file">CSV file</FieldLabel>
-                                    <Input
+                                    <FileUpload
                                         id="file"
                                         name="file"
-                                        type="file"
                                         accept=".csv,text/csv"
+                                        hint="CSV up to 10 MB"
                                         required
+                                        :invalid="!!errors.file"
                                     />
                                     <InputError :message="errors.file" />
                                     <p class="mt-2 text-xs text-slate-500">
