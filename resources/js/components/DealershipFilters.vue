@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { ChevronDown, ListFilter, Search, X } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Search, X } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 interface FilterOption {
     value: string;
@@ -33,292 +35,97 @@ interface Props {
 
 interface Emits {
     (e: 'update:modelValue', value: Props['modelValue']): void;
-    (e: 'reset'): void;
 }
 
-type FilterSection = 'status' | 'rating' | 'type' | 'tag' | 'imported';
+type FilterKey = keyof Props['modelValue'];
+
+/** Select items can't hold an empty string, so "no filter" travels as this and maps back to ''. */
+const ALL = '__all__';
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const open = ref(false);
-const activeSection = ref<FilterSection>('status');
-const draftFilters = ref({ ...props.modelValue });
+const tagOptions = computed<FilterOption[]>(() => props.tags.map((tag) => ({ value: tag, label: tag })));
 
-watch(
-    () => props.modelValue,
-    (value) => {
-        draftFilters.value = { ...value };
-    },
-    { deep: true },
+const selects = computed(() => [
+    { key: 'status' as const, label: 'Status', allLabel: 'All statuses', options: props.statuses },
+    { key: 'rating' as const, label: 'Rating', allLabel: 'All ratings', options: props.ratings },
+    { key: 'type' as const, label: 'Type', allLabel: 'All types', options: props.types },
+    { key: 'tag' as const, label: 'Tag', allLabel: 'All tags', options: tagOptions.value },
+]);
+
+const hasActiveFilters = computed(() =>
+    FILTER_KEYS.some((key) => Boolean(props.modelValue[key])),
 );
 
-const activeChips = computed(() => {
-    const chips: Array<{ key: keyof Props['modelValue']; label: string }> = [];
+const FILTER_KEYS: FilterKey[] = ['search', 'status', 'rating', 'type', 'tag', 'include_imported'];
 
-    const statusLabel = props.statuses.find(
-        (s) => s.value === props.modelValue.status,
-    )?.label;
-    const ratingLabel = props.ratings.find(
-        (r) => r.value === props.modelValue.rating,
-    )?.label;
-    const typeLabel = props.types.find(
-        (t) => t.value === props.modelValue.type,
-    )?.label;
-
-    if (props.modelValue.search) {
-        chips.push({ key: 'search', label: `Search: ${props.modelValue.search}` });
-    }
-
-    if (props.modelValue.status && statusLabel) {
-        chips.push({ key: 'status', label: `Status: ${statusLabel}` });
-    }
-
-    if (props.modelValue.rating && ratingLabel) {
-        chips.push({ key: 'rating', label: `Rating: ${ratingLabel}` });
-    }
-
-    if (props.modelValue.type && typeLabel) {
-        chips.push({ key: 'type', label: `Type: ${typeLabel}` });
-    }
-
-    if (props.modelValue.tag) {
-        chips.push({ key: 'tag', label: `Tag: ${props.modelValue.tag}` });
-    }
-
-    if (props.modelValue.include_imported === '1') {
-        chips.push({ key: 'include_imported', label: 'Show imported' });
-    }
-
-    return chips;
-});
-
-function updateDraft(key: keyof Props['modelValue'], value: string): void {
-    draftFilters.value = { ...draftFilters.value, [key]: value };
-}
-
-function applyFilters(): void {
-    emit('update:modelValue', { ...draftFilters.value });
-    open.value = false;
-}
-
+/** Blanks the filters themselves; scope and sort stay as they are. */
 function clearFilters(): void {
-    draftFilters.value = {
-        ...draftFilters.value,
-        search: '',
-        status: '',
-        rating: '',
-        type: '',
-        tag: '',
-        include_imported: '',
-    };
-    emit('reset');
-    open.value = false;
+    emit('update:modelValue', {
+        ...props.modelValue,
+        ...Object.fromEntries(FILTER_KEYS.map((key) => [key, ''])),
+    });
 }
 
-function clearChip(key: keyof Props['modelValue']): void {
-    emit('update:modelValue', { ...props.modelValue, [key]: '' });
+function update(key: FilterKey, value: string): void {
+    emit('update:modelValue', { ...props.modelValue, [key]: value === ALL ? '' : value });
 }
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center gap-3">
-        <DropdownMenu v-model:open="open">
-            <DropdownMenuTrigger as-child>
-                <button
-                    type="button"
-                    class="inline-flex h-10 items-center gap-2.5 rounded-lg border border-border bg-card pr-2.5 pl-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none data-[state=open]:bg-accent"
-                >
-                    <ListFilter class="size-4 text-muted-foreground" />
-                    Filters
-                    <span
-                        v-if="activeChips.length"
-                        class="inline-flex size-5 items-center justify-center rounded-full bg-muted text-[11px] font-medium tabular-nums"
-                    >
-                        {{ activeChips.length }}
-                    </span>
-                    <ChevronDown class="size-4 text-muted-foreground" />
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" class="w-[640px] max-w-[calc(100vw-2rem)] p-0 shadow-xl">
-                <div class="grid sm:grid-cols-[200px_1fr]">
-                    <div class="border-b border-border p-4 sm:border-r sm:border-b-0">
-                        <div class="relative">
-                            <Search
-                                class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                            />
-                            <Input
-                                v-model="draftFilters.search"
-                                type="text"
-                                placeholder="Search..."
-                                class="pl-9"
-                            />
-                        </div>
-
-                        <div class="mt-4 space-y-1">
-                            <button
-                                v-for="section in ['status', 'rating', 'type', 'tag', 'imported'] as FilterSection[]"
-                                :key="section"
-                                type="button"
-                                class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition capitalize"
-                                :class="
-                                    activeSection === section
-                                        ? 'bg-muted font-medium'
-                                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-                                "
-                                @click="activeSection = section"
-                            >
-                                {{ section }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="p-4">
-                        <div v-if="activeSection === 'status'" class="space-y-3">
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                @click="updateDraft('status', '')"
-                            >
-                                <Checkbox :model-value="draftFilters.status === ''" />
-                                <span class="text-sm">All statuses</span>
-                            </button>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button
-                                    v-for="status in statuses"
-                                    :key="status.value"
-                                    type="button"
-                                    class="flex items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                    @click="updateDraft('status', status.value)"
-                                >
-                                    <Checkbox
-                                        :model-value="draftFilters.status === status.value"
-                                    />
-                                    <span class="text-sm">{{ status.label }}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-else-if="activeSection === 'rating'" class="space-y-3">
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                @click="updateDraft('rating', '')"
-                            >
-                                <Checkbox :model-value="draftFilters.rating === ''" />
-                                <span class="text-sm">All ratings</span>
-                            </button>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button
-                                    v-for="rating in ratings"
-                                    :key="rating.value"
-                                    type="button"
-                                    class="flex items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                    @click="updateDraft('rating', rating.value)"
-                                >
-                                    <Checkbox
-                                        :model-value="draftFilters.rating === rating.value"
-                                    />
-                                    <span class="text-sm">{{ rating.label }}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-else-if="activeSection === 'type'" class="space-y-3">
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                @click="updateDraft('type', '')"
-                            >
-                                <Checkbox :model-value="draftFilters.type === ''" />
-                                <span class="text-sm">All types</span>
-                            </button>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button
-                                    v-for="type in types"
-                                    :key="type.value"
-                                    type="button"
-                                    class="flex items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                    @click="updateDraft('type', type.value)"
-                                >
-                                    <Checkbox
-                                        :model-value="draftFilters.type === type.value"
-                                    />
-                                    <span class="text-sm">{{ type.label }}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-else-if="activeSection === 'tag'" class="space-y-3">
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                @click="updateDraft('tag', '')"
-                            >
-                                <Checkbox :model-value="draftFilters.tag === ''" />
-                                <span class="text-sm">All tags</span>
-                            </button>
-                            <div v-if="tags.length" class="grid max-h-64 grid-cols-2 gap-3 overflow-y-auto">
-                                <button
-                                    v-for="tag in tags"
-                                    :key="tag"
-                                    type="button"
-                                    class="flex items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                    @click="updateDraft('tag', tag)"
-                                >
-                                    <Checkbox :model-value="draftFilters.tag === tag" />
-                                    <span class="truncate text-sm">{{ tag }}</span>
-                                </button>
-                            </div>
-                            <p v-else class="text-sm text-muted-foreground">
-                                No dealerships are tagged yet.
-                            </p>
-                        </div>
-
-                        <div v-else class="space-y-3">
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-3 rounded-lg border border-border px-3 py-2 text-left"
-                                @click="updateDraft('include_imported', draftFilters.include_imported === '1' ? '' : '1')"
-                            >
-                                <Checkbox :model-value="draftFilters.include_imported === '1'" />
-                                <span class="text-sm">Show imported dealerships</span>
-                            </button>
-                        </div>
-
-                        <div
-                            class="mt-6 flex items-center justify-between border-t border-border pt-4"
-                        >
-                            <button
-                                type="button"
-                                class="text-sm font-medium text-muted-foreground transition hover:text-foreground"
-                                @click="clearFilters"
-                            >
-                                Clear
-                            </button>
-                            <Button type="button" @click="applyFilters">Apply</Button>
-                        </div>
-                    </div>
-                </div>
-            </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div class="flex flex-wrap items-center gap-2">
-            <span
-                v-for="chip in activeChips"
-                :key="chip.label"
-                class="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card pr-1.5 pl-3 text-sm text-foreground"
-            >
-                {{ chip.label }}
-                <button
-                    type="button"
-                    class="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                    :aria-label="`Remove ${chip.label}`"
-                    @click="clearChip(chip.key)"
-                >
-                    <X class="size-3.5" />
-                </button>
-            </span>
+    <div class="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1">
+        <div class="relative min-w-48 flex-1 lg:max-w-72">
+            <Search class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+                :model-value="modelValue.search"
+                type="search"
+                placeholder="Search name, city or tag…"
+                aria-label="Search dealerships"
+                class="h-10 bg-card pl-9"
+                @update:model-value="(value) => update('search', String(value))"
+            />
         </div>
+
+        <Select
+            v-for="select in selects"
+            :key="select.key"
+            :model-value="modelValue[select.key] || ALL"
+            @update:model-value="(value) => update(select.key, String(value))"
+        >
+            <SelectTrigger
+                class="h-10 shrink-0 bg-card data-[size=default]:h-10"
+                :class="modelValue[select.key] ? 'border-foreground/30 text-foreground' : ''"
+                :aria-label="`Filter by ${select.label.toLowerCase()}`"
+            >
+                <span class="text-muted-foreground">{{ select.label }}:</span>
+                <SelectValue :placeholder="select.allLabel" />
+            </SelectTrigger>
+            <SelectContent class="max-h-72">
+                <SelectItem :value="ALL">{{ select.allLabel }}</SelectItem>
+                <SelectItem v-for="option in select.options" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
+
+        <label class="inline-flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-input bg-card px-3 text-sm whitespace-nowrap">
+            <Checkbox
+                :model-value="modelValue.include_imported === '1'"
+                @update:model-value="(checked) => update('include_imported', checked === true ? '1' : '')"
+            />
+            Show imported
+        </label>
+
+        <Button
+            v-if="hasActiveFilters"
+            type="button"
+            variant="ghost"
+            class="h-10 shrink-0 text-muted-foreground"
+            @click="clearFilters"
+        >
+            <X class="size-4" />
+            Clear
+        </Button>
     </div>
 </template>

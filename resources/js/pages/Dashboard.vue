@@ -154,7 +154,7 @@ const bookLine = computed(() => {
     return `${hot} hot and ${warm} warm in your book`;
 });
 
-const { filters, isLoadingData, resetFilters } = useTableFilters({
+const { filters, isLoadingData } = useTableFilters({
     routeUrl: '/dashboard',
     initialFilters: {
         search: typeof props.filters.search === 'string' ? props.filters.search : '',
@@ -371,7 +371,6 @@ const columns = createColumns(handleSort, () => currentSorting.value);
                                 :ratings="filterOptions.ratings"
                                 :types="filterOptions.types"
                                 :tags="filterOptions.tags"
-                                @reset="resetFilters"
                             />
                         </div>
 
