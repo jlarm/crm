@@ -395,3 +395,21 @@ it('tags dealerships auto-created from contact rows', function () {
 
     expect(Dealership::first()->tags->pluck('name')->all())->toBe(['LinkedIn Export']);
 });
+
+it('tags dealerships when a large import runs on the queue', function () {
+    $lines = ['name'];
+    for ($i = 1; $i <= 105; $i++) {
+        $lines[] = "Dealer {$i}";
+    }
+
+    $response = $this->post('/dealerships/import/preview', defaultPreviewPayload([
+        'file' => csvFile(implode("\n", $lines)."\n"),
+        'tags' => ['Trade Show 2026'],
+    ]));
+    $token = $response->viewData('page')['props']['preview']['token'];
+
+    $this->post('/dealerships/import', ['token' => $token]);
+
+    expect(Dealership::count())->toBe(105)
+        ->and(Tag::sole()->dealerships()->count())->toBe(105);
+});
